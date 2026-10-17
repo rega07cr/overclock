@@ -18,12 +18,16 @@ check('desktop/preload.js', 'overclock')
 check('desktop/modules/system-booster.js', 'fullBuff')
 check('desktop/modules/game-boost.js', 'applyGameBoost')
 check('desktop/modules/ai-overclock.js', 'localhost:11434')
+check('desktop/modules/tuning.js', 'osOverclock')
+check('desktop/modules/tuning.js', 'gpuBoost')
+check('desktop/main.js', 'tuning:run')
+check('desktop/renderer/index.html', 'Overclock Sistema')
 check('desktop/renderer/index.html', 'APPLY FREE BUFF')
 check('desktop/renderer/renderer.js', 'monaco')
 check('desktop/modules/games-presets.json')
 games = json.load(open('desktop/modules/games-presets.json', encoding='utf-8'))
-if len(games) < 19:
-    fails.append(f"GAMES only {len(games)}, want >=19")
+if len(games) < 30:
+    fails.append(f"GAMES only {len(games)}, want >=30")
 ids = {g['id'] for g in games}
 for want in ['valorant','cs2','cyberpunk','lol','eldenring','bg3']:
     if want not in ids: fails.append(f"GAME preset missing: {want}")
