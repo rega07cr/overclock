@@ -1,0 +1,427 @@
+[
+ {
+  "id": "valorant",
+  "name": "Valorant",
+  "genre": "Shooter Competitivo",
+  "process": "VALORANT-Win64-Shipping",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Priorità Alta via Task Manager + Fullscreen Exclusive",
+   "win32": "Priorità Alta via Task Manager + Fullscreen Exclusive"
+  }
+ },
+ {
+  "id": "cs2",
+  "name": "Counter-Strike 2 (CS2)",
+  "genre": "Shooter Competitivo",
+  "process": "cs2",
+  "proton": true,
+  "gptk": true,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "gamemoderun DXVK_ASYNC=1 %command% -high -novid",
+   "linux": "gamemoderun DXVK_ASYNC=1 %command% -high -novid",
+   "win32": "-high -novid +fps_max 400"
+  }
+ },
+ {
+  "id": "apex",
+  "name": "Apex Legends",
+  "genre": "Battle Royale",
+  "process": "R5Apex",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "+fps_max 190, DXVK_ASYNC=1"
+  }
+ },
+ {
+  "id": "warzone",
+  "name": "Call of Duty: Warzone",
+  "genre": "Battle Royale",
+  "process": "ModernWarfare",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Fullscreen Exclusive + priorità Alta"
+  }
+ },
+ {
+  "id": "overwatch2",
+  "name": "Overwatch 2",
+  "genre": "Shooter",
+  "process": "Overwatch",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "--tank_WorkerThreadCount 8 su CPU 8-core"
+  }
+ },
+ {
+  "id": "fortnite",
+  "name": "Fortnite",
+  "genre": "Battle Royale",
+  "process": "FortniteClient-Win64-Shipping",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Performance Mode + priorità Alta"
+  }
+ },
+ {
+  "id": "r6siege",
+  "name": "Rainbow Six Siege",
+  "genre": "Shooter Tattico",
+  "process": "RainbowSix",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Vulkan + DXVK_ASYNC=1"
+  }
+ },
+ {
+  "id": "lol",
+  "name": "League of Legends (LoL)",
+  "genre": "MOBA",
+  "process": "LeagueClient",
+  "proton": false,
+  "gptk": true,
+  "affinityAllCores": false,
+  "launchHint": {
+   "default": "Chiudi client in-game (ingame hide client)"
+  }
+ },
+ {
+  "id": "dota2",
+  "name": "Dota 2",
+  "genre": "MOBA",
+  "process": "dota2",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "-high -map dota +fps_max 240",
+   "linux": "gamemoderun %command% -high"
+  }
+ },
+ {
+  "id": "wow",
+  "name": "World of Warcraft",
+  "genre": "MMO",
+  "process": "Wow",
+  "proton": true,
+  "gptk": true,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DX11 Legacy + foreground FPS max"
+  }
+ },
+ {
+  "id": "genshin",
+  "name": "Genshin Impact / Honkai: Star Rail",
+  "genre": "MMO/Gacha",
+  "process": "GenshinImpact",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Proton GE + fps unlock (120)"
+  }
+ },
+ {
+  "id": "poe",
+  "name": "Path of Exile 1 & 2",
+  "genre": "ARPG",
+  "process": "PathOfExile",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "--nologo --nosound-engine-parallelload + Vulkan"
+  }
+ },
+ {
+  "id": "cyberpunk",
+  "name": "Cyberpunk 2077",
+  "genre": "RPG Open-World",
+  "process": "Cyberpunk2077",
+  "proton": true,
+  "gptk": true,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DLSS/FSR Performance + SMT on",
+   "linux": "gamemoderun DXVK_ASYNC=1 PROTON_HIDE_NVIDIA_GPU=0 %command%"
+  }
+ },
+ {
+  "id": "witcher3",
+  "name": "The Witcher 3: Wild Hunt",
+  "genre": "RPG",
+  "process": "witcher3",
+  "proton": true,
+  "gptk": true,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DX11 mode per stabilità max FPS"
+  }
+ },
+ {
+  "id": "eldenring",
+  "name": "Elden Ring",
+  "genre": "Soulslike",
+  "process": "eldenring",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Borderless + sblocca 60fps via mod dedicata"
+  }
+ },
+ {
+  "id": "gta",
+  "name": "GTA V / GTA VI",
+  "genre": "Open-World",
+  "process": "GTA5",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "-high + DirectX 11, pop density down online"
+  }
+ },
+ {
+  "id": "wukong",
+  "name": "Black Myth: Wukong",
+  "genre": "Action RPG",
+  "process": "b1-Win64-Shipping",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DLSS Performance + ray tracing OFF per comp"
+  }
+ },
+ {
+  "id": "bg3",
+  "name": "Baldur's Gate 3",
+  "genre": "RPG",
+  "process": "bg3",
+  "proton": true,
+  "gptk": true,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Vulkan + gamemoderun"
+  }
+ },
+ {
+  "id": "rdr2",
+  "name": "Red Dead Redemption 2",
+  "genre": "Open-World",
+  "process": "RDR2",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Vulkan + DLSS Balanced"
+  }
+ },
+ {
+  "id": "minecraft",
+  "name": "Minecraft (bonus)",
+  "genre": "Sandbox",
+  "process": "javaw",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "JVM flags: -Xmx4G -XX:+UseG1GC + Sodium"
+  }
+ },
+ {
+  "id": "roblox",
+  "name": "Roblox",
+  "genre": "Sandbox/UCG",
+  "process": "RobloxPlayerBeta",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": false,
+  "launchHint": {
+   "default": "FPS Unlocker (RBXFpsUnlocker) + priorita Alta"
+  }
+ },
+ {
+  "id": "rocket-league",
+  "name": "Rocket League",
+  "genre": "Sportivo",
+  "process": "RocketLeague",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "-high, DX11 mode"
+  }
+ },
+ {
+  "id": "pubg",
+  "name": "PUBG: Battlegrounds",
+  "genre": "Battle Royale",
+  "process": "TslGame",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "gamemoderun DXVK_ASYNC=1, priorita Alta"
+  }
+ },
+ {
+  "id": "destiny2",
+  "name": "Destiny 2",
+  "genre": "FPS/MMO",
+  "process": "destiny2",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Fullscreen + priorita Alta (anti-cheat: solo Windows)"
+  }
+ },
+ {
+  "id": "diablo4",
+  "name": "Diablo IV",
+  "genre": "ARPG",
+  "process": "Diablo IV",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DLSS Quality + priorita Alta"
+  }
+ },
+ {
+  "id": "ffxiv",
+  "name": "Final Fantasy XIV",
+  "genre": "MMO",
+  "process": "ffxiv_dx11",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": false,
+  "launchHint": {
+   "default": "Proton GE + FPS cap 90 in citta"
+  }
+ },
+ {
+  "id": "eso",
+  "name": "The Elder Scrolls Online",
+  "genre": "MMO",
+  "process": "eso64",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Proton + addon-light, priorita Alta"
+  }
+ },
+ {
+  "id": "lost-ark",
+  "name": "Lost Ark",
+  "genre": "MMO/ARPG",
+  "process": "LOSTARK",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Proton GE + fullscreen"
+  }
+ },
+ {
+  "id": "tf2",
+  "name": "Team Fortress 2",
+  "genre": "Shooter",
+  "process": "tf_win64",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "-high -novid + config fps (mastercomfig)"
+  }
+ },
+ {
+  "id": "rust",
+  "name": "Rust",
+  "genre": "Survival",
+  "process": "RustClient",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "-high -maxMem=16000 + gc.buffer 4096"
+  }
+ },
+ {
+  "id": "tarkov",
+  "name": "Escape from Tarkov",
+  "genre": "Shooter HC",
+  "process": "EscapeFromTarkov",
+  "proton": false,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Priorita Alta + RAM cleaner in-game off"
+  }
+ },
+ {
+  "id": "starfield",
+  "name": "Starfield",
+  "genre": "RPG",
+  "process": "Starfield",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DLSS/FSR + priorita Alta"
+  }
+ },
+ {
+  "id": "helldivers2",
+  "name": "Helldivers 2",
+  "genre": "Co-op Shooter",
+  "process": "helldivers2",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "Priorita Alta (anti-cheat nProtect: gioca su Windows)"
+  }
+ },
+ {
+  "id": "marvel-rivals",
+  "name": "Marvel Rivals",
+  "genre": "Hero Shooter",
+  "process": "Marvel-Win64-Shipping",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DLSS Performance + priorita Alta"
+  }
+ },
+ {
+  "id": "mh-wilds",
+  "name": "Monster Hunter Wilds",
+  "genre": "Action RPG",
+  "process": "MonsterHunterWilds",
+  "proton": true,
+  "gptk": false,
+  "affinityAllCores": true,
+  "launchHint": {
+   "default": "DLSS Frame Gen + priorita Alta"
+  }
+ }
+]

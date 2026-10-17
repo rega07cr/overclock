@@ -1,0 +1,43 @@
+*{box-sizing:border-box}body{margin:0;background:#07070f;color:#eef2ff;font-family:"Space Grotesk",system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.titlebar{display:flex;gap:14px;align-items:center;padding:10px 16px;background:#0d0d1d;border-bottom:1px solid #ffffff1c;font-family:"JetBrains Mono",monospace;font-size:13px}
+.status{color:#39ff88;text-shadow:0 0 10px #39ff88}.wins{margin-left:auto;display:flex;gap:10px;opacity:.6}
+.layout{flex:1;display:flex;min-height:0}
+.sidebar{width:130px;background:#0b0b18;border-right:1px solid #ffffff1c;display:flex;flex-direction:column;padding:12px 8px;gap:8px}
+.side{background:transparent;border:1px solid transparent;color:#eef2ff;border-radius:12px;padding:12px 6px;cursor:pointer;font-size:20px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.side small{font-size:11px}.side.active{background:#00f0ff14;border-color:#00f0ff66;box-shadow:0 0 16px #00f0ff33}
+.side-foot{margin-top:auto;font-size:11px;font-family:"JetBrains Mono",monospace;color:#9aa3c0;text-align:center}
+.panel{flex:1;padding:18px;overflow:auto}
+.view{display:none}.view.active{display:block}
+.mode-row{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.spacer{flex:1}.chip{background:#ffffff0d;border:1px solid #ffffff22;color:#eef2ff;border-radius:10px;padding:8px 14px;cursor:pointer}
+.chip.active,.chip.on{background:#00f0ff22;border-color:#00f0ff;box-shadow:0 0 12px #00f0ff55}
+select,input{background:#000;border:1px solid #ffffff22;color:#eef2ff;border-radius:10px;padding:9px 12px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.editor-box,.out-box{background:#0e0e1a;border:1px solid #ffffff1c;border-radius:14px;overflow:hidden}
+.box-head{padding:10px 14px;background:#141427;font-family:"JetBrains Mono",monospace;font-size:12px;color:#9aa3c0}
+#fallbackEdit{display:none;width:100%;height:340px;background:#000;color:#eef2ff;border:0;font-family:"JetBrains Mono",monospace;padding:12px;resize:none}
+.out-tabs{display:flex;gap:8px;padding:10px;border-bottom:1px solid #ffffff1c}
+#output{margin:0;padding:14px;height:300px;overflow:auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;white-space:pre-wrap}
+.out-meta{padding:8px 14px;font-size:11px;color:#9aa3c0;border-top:1px solid #ffffff1c}
+.apply{margin-top:14px;width:100%;background:linear-gradient(90deg,#00f0ff,#ff2fb3);border:0;border-radius:12px;padding:15px;font-weight:800;font-size:16px;cursor:pointer;color:#001318}
+.apply.sm{width:auto;padding:12px 22px}.apply.cyber{animation:cy .5s 3}@keyframes cy{50%{box-shadow:0 0 50px #00f0ff;transform:scale(1.02)}}
+.ghost{background:transparent;border:1px solid #ffffff2a;color:#eef2ff;border-radius:12px;padding:12px 18px;cursor:pointer}
+.quick{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:12px;color:#9aa3c0;border:1px dashed #ffffff22;border-radius:10px;padding:10px;text-align:center}
+h2 small{color:#9aa3c0;font-weight:400}.mut{color:#9aa3c0}
+.sys-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.sys-card{background:#0e0e1a;border:1px solid #ffffff1c;border-radius:14px;padding:16px}
+.sys-card button{background:#39ff8822;border:1px solid #39ff88;color:#39ff88;border-radius:10px;padding:9px 16px;cursor:pointer}
+.sys-card.wide{grid-column:1/-1}
+.st-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#00000060;border:1px solid #ffffff1c;border-radius:8px;padding:7px 12px;margin:6px 0;font-family:"JetBrains Mono",monospace;font-size:12px}
+.ghost.sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.sys-card pre,.fulllog,#gameLog{background:#000;border:1px solid #ffffff1c;border-radius:10px;padding:10px;font-size:11px;min-height:34px;white-space:pre-wrap;font-family:"JetBrains Mono",monospace}
+.fulllog{margin-top:12px}
+.game-layout{display:grid;grid-template-columns:300px 1fr;gap:14px}
+.game-list input{width:100%;margin-bottom:10px}#games{display:grid;gap:6px;max-height:480px;overflow:auto}
+.g-item{text-align:left;background:#ffffff08;border:1px solid #ffffff1c;color:#eef2ff;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:13px}
+.g-item.active{border-color:#39ff88}.g-item small{color:#9aa3c0;display:block;font-size:11px}
+.game-detail{background:#0e0e1a;border:1px solid #ffffff1c;border-radius:14px;padding:18px}
+.tgl{display:block;margin:8px 0;font-size:14px}.row{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.set-card{background:#0e0e1a;border:1px solid #ffffff1c;border-radius:14px;padding:18px;margin-bottom:12px}
+pre{font-family:"JetBrains Mono",monospace}code{background:#000;border:1px solid #ffffff22;border-radius:6px;padding:1px 6px}
+@media(max-width:900px){.split,.sys-grid,.game-layout{grid-template-columns:1fr}.sidebar{width:86px}}

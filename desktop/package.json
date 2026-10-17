@@ -1,0 +1,50 @@
+{
+  "name": "overclock-desktop-engine",
+  "version": "1.0.0",
+  "description": "Overclock Your PC, Code & Gaming. One App, Total Power.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis msi portable",
+    "dist:mac": "electron-builder --mac dmg",
+    "dist:linux": "electron-builder --linux AppImage deb tar.gz"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "gg.overclock.engine",
+    "productName": "Overclock",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "modules/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "msi",
+        "portable"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "Utility"
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

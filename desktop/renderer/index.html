@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OVERCLOCK DESKTOP ENGINE v1.0</title>
+<link rel="stylesheet" href="app.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+<div class="titlebar">
+  <span>🟰 OVERCLOCK DESKTOP ENGINE v1.0</span>
+  <span class="status" id="boostStatus">[Status: BOOSTED ⚡]</span>
+  <span class="wins"><i>—</i><i>▢</i><i>✕</i></span>
+</div>
+<div class="layout">
+  <aside class="sidebar">
+    <button class="side active" data-view="code">💻<small>Code/AI</small></button>
+    <button class="side" data-view="system">🚀<small>System Booster</small></button>
+    <button class="side" data-view="game">🎮<small>Game Boost</small></button>
+    <button class="side" data-view="settings">⚙️<small>Settings</small></button>
+    <div class="side-foot" id="ollamaBadge">● OLLAMA …</div>
+  </aside>
+
+  <main class="panel">
+    <!-- CODE / AI -->
+    <section class="view active" id="view-code">
+      <div class="mode-row">
+        <span>MODE:</span>
+        <button class="chip active" id="mCode">💻 Code</button>
+        <button class="chip" id="mPrompt">📝 Prompt</button>
+        <span class="spacer"></span>
+        <select id="modelSel" title="Modello Ollama">
+          <option value="codellama">codellama</option>
+          <option value="llama3">llama3</option>
+          <option value="mistral">mistral</option>
+          <option value="deepseek-coder">deepseek-coder</option>
+        </select>
+      </div>
+      <div class="split">
+        <div class="editor-box">
+          <div class="box-head">// Input Code / Prompt</div>
+          <div id="monaco" style="height:340px"></div>
+          <textarea id="fallbackEdit" placeholder="Incolla qui codice o prompt…"></textarea>
+        </div>
+        <div class="out-box">
+          <div class="out-tabs">
+            <button class="chip on" data-buff="speed">⚡ SPEED</button>
+            <button class="chip" data-buff="sec">🛡️ SEC</button>
+            <button class="chip" data-buff="pro">🧠 PRO</button>
+          </div>
+          <pre id="output">// L'output AI apparirà qui.
+Seleziona un buff e premi APPLY FREE BUFF.</pre>
+          <div class="out-meta" id="engineMeta">engine: —</div>
+        </div>
+      </div>
+      <button class="apply" id="applyBtn">⚡ APPLY FREE BUFF (AI) ⚡</button>
+      <div class="quick">QUICK SYSTEM STATS: <span id="qStats">[RAM: …] [CPU Temp: …] [FPS Boost: …]</span></div>
+    </section>
+
+    <!-- SYSTEM -->
+    <section class="view" id="view-system">
+      <h2>🚀 System Booster <small>— Global PC Speed Up</small></h2>
+      <p class="mut">Adattato all'OS rilevato: <b id="platLabel">…</b>. Ogni azione è reversibile.</p>
+      <div class="sys-grid">
+        <div class="sys-card"><h3>🧠 RAM Flush</h3><p>Svuota cache e memoria inattiva.</p><button data-sys="ram">Purge RAM</button><pre data-log="ram"></pre></div>
+        <div class="sys-card"><h3>🧊 Process Priority</h3><p>Deep-freeze dei processi background.</p><button data-sys="processes">Freeze background</button><pre data-log="processes"></pre></div>
+        <div class="sys-card"><h3>🧹 Disk &amp; Junk</h3><p>Temp + cache di build orfane.</p><button data-sys="disk">Clean disk</button><pre data-log="disk"></pre></div>
+        <div class="sys-card"><h3>🌐 Network Optimizer</h3><p>Flush DNS + tuning TCP/IP.</p><button data-sys="network">Optimize ping</button><pre data-log="network"></pre></div>
+        <div class="sys-card"><h3>🎨 GPU Driver Boost</h3><p id="gpuName">Rilevamento GPU…</p><div class="row"><button data-sys="gpu">Boost GPU</button><button class="ghost" data-sys="gpu-panel">Pannello vendor</button><button class="ghost" data-sys="gpu-restore">↩ Ripristina</button></div><pre data-log="gpu"></pre></div>
+        <div class="sys-card"><h3>⚡ Overclock Sistema</h3><p>PC vecchi: piano Alte prestazioni, effetti off, GameDVR off. Reversibile.</p><div class="row"><button data-sys="os-oc">Overclock OS</button><button class="ghost" data-sys="os-restore">↩ Ripristina</button></div><pre data-log="os"></pre></div>
+      </div>
+      <div class="sys-card wide"><h3>🚀 Programmi in avvio</h3><p class="mut">Disabilita ciò che rallenta l'accensione (solo HKCU, reversibile).</p><div id="startupList" class="mut">Caricamento…</div></div>
+      <button class="apply" id="fullBuff">⚡ 1-CLICK FULL SYSTEM BUFF ⚡</button>
+      <pre id="fullLog" class="fulllog"></pre>
+    </section>
+
+    <!-- GAME -->
+    <section class="view" id="view-game">
+      <h2>🎮 Game-Specific Ultra Boost</h2>
+      <div class="game-layout">
+        <div class="game-list"><input id="gameSearch" placeholder="🔍 Cerca gioco… (es. cyberpunk)"><div id="games"></div></div>
+        <div class="game-detail">
+          <h3 id="gName">Seleziona un gioco</h3>
+          <div id="gMeta" class="mut"></div>
+          <label class="tgl"><input type="checkbox" id="optPriority" checked> GPU/CPU Priority max</label>
+          <label class="tgl"><input type="checkbox" id="optAffinity" checked> Core Affinity (tutti i core)</label>
+          <label class="tgl"><input type="checkbox" id="optBloat" checked> Disable OS bloat (notifiche/servizi)</label>
+          <div class="mut" id="gHint"></div>
+          <div class="row"><button class="apply sm" id="boostGame">⚡ BOOST GAME ⚡</button>
+          <button class="ghost" id="stopGame">■ Stop / Ripristina</button></div>
+          <pre id="gameLog"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings">
+      <h2>⚙️ Settings</h2>
+      <div class="set-card">
+        <h3>Ollama (offline, privacy 100%)</h3>
+        <p class="mut">Overclock parla con <code>http://localhost:11434</code>. Installa Ollama e scarica un modello:</p>
+        <pre>ollama pull llama3 && ollama pull codellama</pre>
+        <div>Stato: <b id="ollamaState">controllo…</b></div>
+      </div>
+      <div class="set-card">
+        <h3>Provider cloud (opzionale)</h3>
+        <div class="row"><input id="openaiKey" type="password" placeholder="OpenAI API key (opzionale)"><input id="anthropicKey" type="password" placeholder="Anthropic API key (opzionale)"></div>
+        <p class="mut">Le chiavi restano in memoria locale, mai inviate altrove dalla demo.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="renderer.js"></script>
+</body>
+</html>

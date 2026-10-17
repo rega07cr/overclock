@@ -1,0 +1,19 @@
+node_modules/
+desktop/dist/
+desktop/node_modules/
+*.log
+server.log
+win-sha.txt
+.DS_Store
+# Binari: stanno nelle GitHub Releases (CI), non nel repo
+releases/*.exe
+releases/*.msi
+releases/*.dmg
+releases/*.AppImage
+releases/*.deb
+releases/*.tar.gz
+releases/*.zip
+build.log
+build-nsis.log
+build-portable.log
+__pycache__/
