@@ -22,7 +22,23 @@ jobs:
       - run: npx electron-builder --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Nomi prevedibili (niente spazi) = link stabili dal sito:
+      # Overclock.Setup.1.0.0.exe / Overclock.1.0.0.exe / Overclock.1.0.0.dmg ...
+      - name: Rename artifacts (spaces to dots)
+        shell: python
+        run: |
+          import glob, os
+          for f in glob.glob('dist/*.*'):
+            d, n = os.path.split(f)
+            nn = n.replace(' ', '.')
+            if nn != n:
+              os.rename(f, os.path.join(d, nn))
+              print(n, '->', nn)
       - uses: actions/upload-artifact@v4
         with:
           name: overclock-${{ matrix.os }}
           path: desktop/dist/*
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: desktop/dist/*
