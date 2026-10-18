@@ -2,7 +2,10 @@
   "name": "overclock-desktop-engine",
   "version": "1.0.0",
   "description": "Overclock Your PC, Code & Gaming. One App, Total Power.",
-  "author": "REGA",
+  "author": {
+    "name": "REGA",
+    "email": "rega07cr@users.noreply.github.com"
+  },
   "repository": "https://github.com/rega07cr/overclock",
   "main": "main.js",
   "scripts": {
