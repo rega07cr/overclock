@@ -258,6 +258,41 @@
     refreshStats();
   });
 
+  // ---------- Finestra Aspetto: testo + animazioni + GPU MAX ----------
+  async function lookRun(logKey, fn, demoMsg){
+    const log = document.querySelector(`[data-log="${logKey}"]`);
+    log.textContent = '⏳ esecuzione…';
+    if (isElectron) {
+      try { log.textContent = mark(await fn()); }
+      catch(e){ log.textContent = '✕ ' + e.message; }
+    } else { await new Promise(r => setTimeout(r, 500)); log.textContent = demoMsg; }
+    enforceHeaders();
+    refreshStats();
+  }
+  $$('[data-lookprev]').forEach(b => b.addEventListener('click', () => {
+    const a = b.dataset.lookprev;
+    const map = { font: ['font', () => window.overclock.previewTune('font', sysMode), '👁 Demo: anteprima testo.'], appearance: ['appearance', () => window.overclock.tune('appearance-preview'), '👁 Demo: anteprima aspetto.'], gpumax: ['gpumax', () => window.overclock.tune('gpumax-preview', { process: $('#gpuMaxProc').value.trim() }), '👁 Demo: anteprima GPU MAX.'] };
+    lookRun(map[a][0], map[a][1], map[a][2]);
+  }));
+  $('#fontClear').addEventListener('click', () => lookRun('font', () => window.overclock.tune('font-mode', 'cleartype'), '✨ Demo: ClearType simulato.'));
+  $('#fontStd').addEventListener('click', () => lookRun('font', () => window.overclock.tune('font-mode', 'standard'), '📝 Demo: Standard simulato.'));
+  $('#appearanceBtn').addEventListener('click', () => {
+    if (isElectron && !window.confirm('Rimettere trasparenza, animazioni, effetti e testo come Windows standard?')) return;
+    lookRun('appearance', () => window.overclock.tune('appearance-restore'), '↩ Demo: aspetto standard simulato.');
+  });
+  $('#gpuMaxBtn').addEventListener('click', () => {
+    if (isElectron && !window.confirm('Applicare i massimi tweak GPU? Le chiavi di sistema (HAGS/MPO/throttling) richiedono admin e RIAVVIO del PC.')) return;
+    lookRun('gpumax', () => window.overclock.tune('gpu-max', { process: $('#gpuMaxProc').value.trim() }), '🎨 Demo: GPU MAX simulato.');
+  });
+  $('#gpuMaxRestore').addEventListener('click', () => lookRun('gpumax', () => window.overclock.tune('gpu-max-restore', null), '↩ Demo: GPU ripristinata.'));
+  async function loadLook(){
+    if (!isElectron) return;
+    try {
+      const info = await window.overclock.tune('gpu-info');
+      $('#gpuMaxVendor').textContent = '· scheda ' + String(info.vendor || '?').toUpperCase();
+    } catch {}
+  }
+
   // ---------- Game boost ----------
   async function loadGames(){
     try {
@@ -365,6 +400,6 @@
   const bootEl = $('#boot');
   const hideBoot = () => { if (bootEl) bootEl.classList.add('hide'); };
   if (bootEl) { bootEl.addEventListener('click', hideBoot); setTimeout(hideBoot, 1600); setTimeout(() => bootEl.remove(), 2300); }
-  initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); syncModeChips(); freezeHeaders(); loadHw();
+  initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); loadLook(); syncModeChips(); freezeHeaders(); loadHw();
   setInterval(refreshStats, 5000); setInterval(ollamaPing, 10000);
 })();

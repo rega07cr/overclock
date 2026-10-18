@@ -20,6 +20,7 @@
     <button class="side active" data-view="code">💻<small>Code/AI</small></button>
     <button class="side" data-view="system">🚀<small>System Booster</small></button>
     <button class="side" data-view="game">🎮<small>Game Boost</small></button>
+    <button class="side" data-view="look">🔤<small>Aspetto</small></button>
     <button class="side" data-view="settings">⚙️<small>Settings</small></button>
     <div class="side-foot" id="ollamaBadge">● OLLAMA …</div>
     <div class="side-foot mut">© 2026 REGA</div>
@@ -105,6 +106,30 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
           <button class="ghost" id="stopGame">■ Stop / Ripristina</button></div>
           <pre id="gameLog"></pre>
         </div>
+      </div>
+    </section>
+
+    <!-- ASPETTO (testo + animazioni + GPU MAX) -->
+    <section class="view" id="view-look">
+      <h2>🔤 Aspetto Windows <small>— testo a tua scelta + animazioni standard</small></h2>
+      <p class="mut">Tutto reversibile: ogni scelta salva uno snapshot e si ripristina.</p>
+      <div class="set-card">
+        <h3>🔤 Testo di Windows</h3>
+        <p class="mut">Scegli come vengono disegnati i caratteri (effetto immediato, anche dopo il riavvio).</p>
+        <div class="row"><button class="ghost" data-lookprev="font">👁 Anteprima</button><button class="apply sm" id="fontClear">✨ ClearType nitido</button><button class="apply sm" id="fontStd">📝 Standard classico</button></div>
+        <pre data-log="font"></pre>
+      </div>
+      <div class="set-card">
+        <h3>✨ Animazioni standard</h3>
+        <p class="mut">Rimette Windows come appena installato: effetti gestiti dal sistema, trasparenza e animazioni ON, menu normali, testo nitido.</p>
+        <div class="row"><button class="ghost" data-lookprev="appearance">👁 Anteprima</button><button class="apply sm" id="appearanceBtn">↩ Torna tutto normale</button></div>
+        <pre data-log="appearance"></pre>
+      </div>
+      <div class="set-card">
+        <h3>🎨 GPU MAX <small class="mut" id="gpuMaxVendor">rilevamento…</small></h3>
+        <p class="mut">Massimi tweak per la tua scheda: HAGS + MPO off anti-stutter + power-throttling off (serve avvio come amministratore + riavvio) e preferenza “alte prestazioni” per il tuo gioco (avvia prima il gioco).</p>
+        <div class="row"><input id="gpuMaxProc" placeholder="processo gioco (es. cs2)"><button class="ghost" data-lookprev="gpumax">👁 Anteprima</button><button class="apply sm" id="gpuMaxBtn">🎨 APPLICA GPU MAX 🎨</button><button class="ghost" id="gpuMaxRestore">↩ Ripristina GPU</button></div>
+        <pre data-log="gpumax"></pre>
       </div>
     </section>
 

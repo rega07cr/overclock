@@ -176,7 +176,7 @@ const PERF_GUID = '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c'; // Prestazioni elevate
 
 async function readReg(path, name) {
   for (let attempt = 0; attempt < 3; attempt++) {
-    const get = await sh(ps(`$v=(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}; $k=try{(Get-Item -Path '${path}' -ErrorAction Stop).GetValueKind('${name}')}catch{'NONE'}; 'VAL='+$v+'|KIND='+$k`));
+    const get = await sh(ps(`$v=Get-ItemPropertyValue -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue; $k=try{(Get-Item -Path '${path}' -ErrorAction Stop).GetValueKind('${name}')}catch{'NONE'}; 'VAL='+$v+'|KIND='+$k`));
     const raw = get.ok ? get.out : '';
     const via = raw.indexOf('VAL='), ki = raw.indexOf('|KIND=');
     if (via >= 0 && ki > via) {
@@ -313,4 +313,143 @@ async function toggleStartup(name, enable) {
   return r;
 }
 
-module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive };
+// ---------- Helper snapshot: scrive una chiave salvando il valore precedente ----------
+async function snapWrite(snap, log, p, name, val, kind) {
+  const prev = await readReg(p, name);
+  snap.regs.push({ path: p, name, prev: prev.prev, prevKind: prev.kind, val });
+  const r = await sh(ps(`if (-not (Test-Path '${p}')) { New-Item -Path '${p}' -Force | Out-Null }; Set-ItemProperty -Path '${p}' -Name ${name} -Value ${val} -Type ${kind}; 'ok'`));
+  const verify = await readReg(p, name);
+  const ok = r.ok && verify.prev !== null && String(verify.prev) === String(val);
+  log.push(`${ok ? '✓' : '✕'} ${name} → ${val}${ok ? '' : ' (verifica fallita)'}`);
+  return ok;
+}
+async function snapDelete(snap, log, p, name) {
+  const prev = await readReg(p, name);
+  snap.regs.push({ path: p, name, prev: prev.prev, prevKind: prev.kind });
+  if (prev.prev === null) { log.push(`ℹ ${name} già assente (default)`); return true; }
+  await sh(ps(`Remove-ItemProperty -Path '${p}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+  const verify = await readReg(p, name);
+  const ok = verify.prev === null;
+  log.push(`${ok ? '↩' : '✕'} ${name} rimosso (default Windows)${ok ? '' : ' (verifica fallita)'}`);
+  return ok;
+}
+
+// ---------- Finestra Aspetto: testo a scelta (Standard / ClearType) ----------
+const FONT_MODES = {
+  cleartype: { label: 'ClearType nitido (consigliato)', smoothing: '2', type: 2 },
+  standard: { label: 'Standard classico', smoothing: '2', type: 1 },
+  off: { label: 'Smoothing disattivato', smoothing: '0', type: 1 }
+};
+async function setFontMode(mode) {
+  if (os.platform() !== 'win32') return { ok: false, out: 'Solo Windows.' };
+  if (!FONT_MODES[mode]) mode = 'cleartype';
+  const m = FONT_MODES[mode];
+  const snap = { regs: [] };
+  const log = [`🔤 Testo Windows → ${m.label}`];
+  const DP = 'HKCU:\\Control Panel\\Desktop';
+  await snapWrite(snap, log, DP, 'FontSmoothing', m.smoothing, 'String');
+  await snapWrite(snap, log, DP, 'FontSmoothingType', m.type, 'DWord');
+  if (mode !== 'off') {
+    await snapWrite(snap, log, DP, 'FontSmoothingGamma', 1400, 'DWord');
+    await snapWrite(snap, log, DP, 'FontSmoothingOrientation', 1, 'DWord');
+  }
+  const live = mode === 'off' ? await applyFontSmoothingLive(false) : await applyFontSmoothingLive(true, m.type, 1400, 1);
+  log.push(`${live.ok ? '✓' : 'ℹ'} Effetto immediato${live.ok ? '' : ' (vedrai il cambio al riavvio)'}`);
+  putSnap('font', snap);
+  return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: "↩ Ripristina" rimette il testo di prima.', snap };
+}
+
+// ---------- Finestra Aspetto: animazioni standard Windows ("torna normale") ----------
+async function restoreAppearance() {
+  if (os.platform() !== 'win32') return { ok: false, out: 'Solo Windows.' };
+  const snap = { regs: [] };
+  const log = ['↩ Aspetto Windows standard (come appena installato)'];
+  const VE = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects';
+  await snapDelete(snap, log, VE, 'VisualFXSetting'); // default = "Decide Windows"
+  await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 1, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 1, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '400', 'String');
+  const DP = 'HKCU:\\Control Panel\\Desktop';
+  await snapWrite(snap, log, DP, 'FontSmoothing', '2', 'String');
+  await snapWrite(snap, log, DP, 'FontSmoothingType', 2, 'DWord');
+  await snapWrite(snap, log, DP, 'FontSmoothingGamma', 1400, 'DWord');
+  await snapWrite(snap, log, DP, 'FontSmoothingOrientation', 1, 'DWord');
+  const live = await applyFontSmoothingLive(true, 2, 1400, 1);
+  log.push(`${live.ok ? '✓' : 'ℹ'} Testo nitido riattivato subito`);
+  log.push('ℹ Chiudi e riapri le app (o riavvia) per vedere ogni animazione come prima.');
+  putSnap('appearance', snap);
+  return { ok: true, out: log.join('\n'), snap };
+}
+async function previewAppearance() {
+  if (os.platform() !== 'win32') return { ok: true, preview: true, out: 'Solo Windows.' };
+  const keys = [
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects', 'VisualFXSetting'],
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency'],
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations'],
+    ['HKCU:\\Control Panel\\Desktop', 'MenuShowDelay'],
+    ['HKCU:\\Control Panel\\Desktop', 'FontSmoothing'],
+    ['HKCU:\\Control Panel\\Desktop', 'FontSmoothingType']
+  ];
+  const rows = [];
+  for (const [p, n] of keys) { const r = await readReg(p, n); rows.push(`• ${n} = ${r.prev === null ? '(assente/default)' : r.prev}`); }
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — Aspetto standard (nessuna modifica ancora):\n${rows.join('\n')}\n\u2022 Verranno rimessi: VisualFX default, trasparenza ON, animazioni ON, MenuShowDelay 400, ClearType` };
+}
+
+// ---------- GPU MAX: massimi tweak in base alla scheda rilevata ----------
+async function resolveExePath(proc) {
+  if (!proc) return null;
+  const r = await sh(ps(`(Get-Process -Name '${proc}' -ErrorAction SilentlyContinue | Select-Object -First 1).Path`));
+  const line = (r.ok ? r.out.split('\n')[0] : '').trim();
+  return /\.exe$/i.test(line) ? line : null;
+}
+async function previewGpuMax(arg) {
+  const info = await gpuInfo();
+  const admin = os.platform() === 'win32' ? await require('./system-booster').isAdmin() : false;
+  const proc = arg && (arg.process || arg);
+  return { ok: true, preview: true, out:
+    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] (nessuna modifica ancora):\n` +
+    `\u2022 HAGS (HwSchMode=2): ${admin ? 'VERRÀ assicurato (sei admin, serve riavvio)' : 'SALTATO (serve admin)'}\n` +
+    `\u2022 MPO off anti-stutter (OverlayTestMode=5, HKLM): ${admin ? 'VERRÀ applicato (serve riavvio)' : 'SALTATO (serve admin)'}\n` +
+    `\u2022 Power Throttling off (HKLM): ${admin ? 'VERRÀ applicato (serve riavvio)' : 'SALTATO (serve admin)'}\n` +
+    `\u2022 Preferenza GPU "alte prestazioni" per ${proc || '(nessun processo indicato — avvia il gioco)'}: VERRÀ applicata (HKCU, immediata)\n` +
+    `\u2022 Ripristino: snapshot dedicato, "■ Stop / Ripristina" rimette tutto` };
+}
+async function gpuMax(arg) {
+  if (os.platform() !== 'win32') return { ok: false, out: 'GPU MAX supportato solo su Windows in questa versione.' };
+  const proc = arg && (arg.process || (typeof arg === 'string' ? arg : null));
+  const info = await gpuInfo();
+  const admin = await require('./system-booster').isAdmin();
+  const snap = { vendor: info.vendor, regs: [] };
+  const log = [`🎨 GPU MAX ATTIVO [${info.vendor.toUpperCase()}]${admin ? '' : ' (senza admin: solo tweak HKCU)'}`];
+  if (admin) {
+    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'HwSchMode', 2, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm', 'OverlayTestMode', 5, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
+    log.push('ℹ MPO off + HAGS + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
+  } else log.push('ℹ HKLM saltato (HAGS/MPO/throttling richiedono avvio come amministratore).');
+  const exe = await resolveExePath(proc);
+  if (exe) {
+    await snapWrite(snap, log, 'HKCU:\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences', exe, 'GpuPreference=2;', 'String');
+    log.push(`✓ ${exe.split('\\').pop()} → GPU alte prestazioni dedicata`);
+  } else log.push(`ℹ Preferenza GPU saltata: avvia il gioco${proc ? ` (${proc})` : ''} e ripremi GPU MAX.`);
+  global.__fpsBoost = true;
+  putSnap('gpumax', snap);
+  return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: ripristino dedicato rimette tutto come prima.', snap };
+}
+async function gpuMaxRestore(snapArg) {
+  const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpumax') || snapArg);
+  const log = [];
+  for (const { path, name, prev, prevKind } of (snap && snap.regs) || []) {
+    if (prev === null) {
+      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+      log.push(`↩ ${name} rimosso (default)`);
+    } else {
+      const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      log.push(`↩ ${name} → ${prev}`);
+    }
+  }
+  return { ok: true, out: log.join('\n') || 'Niente da ripristinare (GPU MAX mai applicato).' };
+}
+
+module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewGpuMax, gpuMax, gpuMaxRestore };

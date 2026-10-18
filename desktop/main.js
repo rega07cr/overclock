@@ -58,6 +58,12 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
     'os-restore': () => tuning.osRestore(arg),
     'gpu-preview': () => tuning.previewGpu(typeof arg === 'string' ? arg : undefined),
     'os-preview': () => tuning.previewOs(typeof arg === 'string' ? arg : undefined),
+    'font-mode': () => tuning.setFontMode(typeof arg === 'string' ? arg : 'cleartype'),
+    'appearance-restore': () => tuning.restoreAppearance(),
+    'appearance-preview': () => tuning.previewAppearance(),
+    'gpu-max': () => tuning.gpuMax(arg),
+    'gpu-max-restore': () => tuning.gpuMaxRestore(arg),
+    'gpumax-preview': () => tuning.previewGpuMax(arg),
     'startup-list': () => tuning.listStartup(),
     'startup-toggle': () => tuning.toggleStartup(arg.name, arg.enable),
     'is-admin': () => require('./modules/system-booster').isAdmin().then(v => ({ admin: v }))
