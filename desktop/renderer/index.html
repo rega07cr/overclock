@@ -21,6 +21,7 @@
     <button class="side" data-view="game">🎮<small>Game Boost</small></button>
     <button class="side" data-view="settings">⚙️<small>Settings</small></button>
     <div class="side-foot" id="ollamaBadge">● OLLAMA …</div>
+    <div class="side-foot mut">© 2026 REGA</div>
   </aside>
 
   <main class="panel">
@@ -86,6 +87,7 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
     <!-- GAME -->
     <section class="view" id="view-game">
       <h2>🎮 Game-Specific Ultra Boost</h2>
+      <p class="mut" id="pcBanner">🖥️ Rilevamento PC in corso…</p>
       <div class="game-layout">
         <div class="game-list"><input id="gameSearch" placeholder="🔍 Cerca gioco… (es. cyberpunk)"><div id="games"></div></div>
         <div class="game-detail">
@@ -95,6 +97,8 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
           <label class="tgl"><input type="checkbox" id="optAffinity" checked> Core Affinity (tutti i core)</label>
           <label class="tgl"><input type="checkbox" id="optBloat" checked> Disable OS bloat (notifiche/servizi)</label>
           <div class="mut" id="gHint"></div>
+          <div class="mut" id="gEstimate"></div>
+          <div class="mut" id="gWhy"></div>
           <div class="row"><button class="apply sm" id="boostGame">⚡ BOOST GAME ⚡</button>
           <button class="ghost" id="stopGame">■ Stop / Ripristina</button></div>
           <pre id="gameLog"></pre>
@@ -110,6 +114,10 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
         <p class="mut">Overclock parla con <code>http://localhost:11434</code>. Installa Ollama e scarica un modello:</p>
         <pre>ollama pull llama3 && ollama pull codellama</pre>
         <div>Stato: <b id="ollamaState">controllo…</b></div>
+      </div>
+      <div class="set-card">
+        <h3>© Crediti</h3>
+        <p class="mut">OVERCLOCK Desktop Engine v1.0 — creato da <b>REGA</b> © 2026, tutti i diritti riservati.</p>
       </div>
       <div class="set-card">
         <h3>Provider cloud (opzionale)</h3>

@@ -2,6 +2,8 @@
 
 Il Free Buff definitivo per sviluppatori, gamer e power user. macOS · Windows · Linux.
 
+**Creato da REGA · © 2026 REGA — Tutti i diritti riservati.**
+
 ## Cosa fa
 
 - **💻 Code/AI Overclock** — Ollama locale (privacy 100%) + fallback euristico: Speed / Security / Pro + Prompt mode.

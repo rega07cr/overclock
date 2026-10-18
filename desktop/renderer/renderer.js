@@ -273,12 +273,24 @@
     PRESETS.filter(g => (g.name + g.genre).toLowerCase().includes(q.toLowerCase())).forEach(g => {
       const b = document.createElement('button');
       b.className = 'g-item' + (selectedGame === g.id ? ' active' : '');
-      b.innerHTML = `${g.name}<small>${g.genre} · ${g.process}</small>`;
+      b.innerHTML = `${g.icon || '🎮'} ${g.name}<small>${g.genre} · ${g.process}</small>`;
       b.addEventListener('click', () => {
         selectedGame = g.id;
-        $('#gName').textContent = '🎮 ' + g.name;
+        $('#gName').textContent = (g.icon || '🎮') + ' ' + g.name;
         $('#gMeta').textContent = `${g.genre} · processo ${g.process}`;
         $('#gHint').textContent = 'Launch hint: ' + ((g.launchHint && (g.launchHint.default)) || 'priorità alta');
+        $('#gEstimate').textContent = '📈 calcolo stima sul tuo PC…';
+        $('#gWhy').textContent = '';
+        if (isElectron) {
+          window.overclock.gameEstimate(g.id).then(est => {
+            if (selectedGame !== g.id) return; // hai già selezionato un altro gioco
+            $('#gEstimate').textContent = est.title;
+            $('#gWhy').textContent = est.tierWhy + '\n' + est.why.map(w => '• ' + w).join('\n') + '\n(' + est.note + ')';
+          }).catch(() => { $('#gEstimate').textContent = ''; });
+        } else {
+          $('#gEstimate').textContent = "📈 Boost stimato: +15–25% FPS (demo — nell'app reale è calibrato sul tuo PC)";
+          $('#gWhy').textContent = '• Priorità massima al processo di gioco\n• Affinity su tutti i core\n• Bloat OS disattivato durante il play';
+        }
         renderGames($('#gameSearch').value);
       });
       box.appendChild(b);
@@ -322,6 +334,16 @@
     }
   }
 
-  initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); syncModeChips(); freezeHeaders();
+  async function loadHw(){
+    const el = $('#pcBanner');
+    if (!isElectron) { el.textContent = "🖥️ Demo browser: nell'app reale qui vedi il tuo PC e le stime FPS sono calibrate su di esso."; return; }
+    try {
+      const h = await window.overclock.hwProfile();
+      const cpu = String(h.cpu || '').replace(/\(R\)|\(TM\)|@.*/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+      const gpu = String((h.gpus && h.gpus[0]) || 'GPU n/d').slice(0, 38);
+      el.textContent = `🖥️ ${cpu} · ${h.cores}C/${h.threads}T · ${h.ramGB}GB RAM · ${gpu} — fascia ${String(h.tier).toUpperCase()} → stime FPS calibrate su questo PC`;
+    } catch { el.textContent = '🖥️ PC non rilevato: stime FPS generiche.'; }
+  }
+  initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); syncModeChips(); freezeHeaders(); loadHw();
   setInterval(refreshStats, 5000); setInterval(ollamaPing, 10000);
 })();

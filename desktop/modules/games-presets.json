@@ -1,5 +1,6 @@
 [
  {
+  "icon": "🔫",
   "id": "valorant",
   "name": "Valorant",
   "genre": "Shooter Competitivo",
@@ -13,6 +14,7 @@
   }
  },
  {
+  "icon": "🎯",
   "id": "cs2",
   "name": "Counter-Strike 2 (CS2)",
   "genre": "Shooter Competitivo",
@@ -27,6 +29,7 @@
   }
  },
  {
+  "icon": "🪂",
   "id": "apex",
   "name": "Apex Legends",
   "genre": "Battle Royale",
@@ -39,6 +42,7 @@
   }
  },
  {
+  "icon": "💥",
   "id": "warzone",
   "name": "Call of Duty: Warzone",
   "genre": "Battle Royale",
@@ -51,6 +55,7 @@
   }
  },
  {
+  "icon": "🦸",
   "id": "overwatch2",
   "name": "Overwatch 2",
   "genre": "Shooter",
@@ -63,6 +68,7 @@
   }
  },
  {
+  "icon": "🏝️",
   "id": "fortnite",
   "name": "Fortnite",
   "genre": "Battle Royale",
@@ -75,6 +81,7 @@
   }
  },
  {
+  "icon": "🛡️",
   "id": "r6siege",
   "name": "Rainbow Six Siege",
   "genre": "Shooter Tattico",
@@ -87,6 +94,7 @@
   }
  },
  {
+  "icon": "🐉",
   "id": "lol",
   "name": "League of Legends (LoL)",
   "genre": "MOBA",
@@ -99,6 +107,7 @@
   }
  },
  {
+  "icon": "⚔️",
   "id": "dota2",
   "name": "Dota 2",
   "genre": "MOBA",
@@ -112,6 +121,7 @@
   }
  },
  {
+  "icon": "🧙",
   "id": "wow",
   "name": "World of Warcraft",
   "genre": "MMO",
@@ -124,6 +134,7 @@
   }
  },
  {
+  "icon": "✨",
   "id": "genshin",
   "name": "Genshin Impact / Honkai: Star Rail",
   "genre": "MMO/Gacha",
@@ -136,6 +147,7 @@
   }
  },
  {
+  "icon": "💀",
   "id": "poe",
   "name": "Path of Exile 1 & 2",
   "genre": "ARPG",
@@ -148,6 +160,7 @@
   }
  },
  {
+  "icon": "🌃",
   "id": "cyberpunk",
   "name": "Cyberpunk 2077",
   "genre": "RPG Open-World",
@@ -161,6 +174,7 @@
   }
  },
  {
+  "icon": "🐺",
   "id": "witcher3",
   "name": "The Witcher 3: Wild Hunt",
   "genre": "RPG",
@@ -173,6 +187,7 @@
   }
  },
  {
+  "icon": "💍",
   "id": "eldenring",
   "name": "Elden Ring",
   "genre": "Soulslike",
@@ -185,6 +200,7 @@
   }
  },
  {
+  "icon": "🚗",
   "id": "gta",
   "name": "GTA V / GTA VI",
   "genre": "Open-World",
@@ -197,6 +213,7 @@
   }
  },
  {
+  "icon": "🐒",
   "id": "wukong",
   "name": "Black Myth: Wukong",
   "genre": "Action RPG",
@@ -209,6 +226,7 @@
   }
  },
  {
+  "icon": "🎲",
   "id": "bg3",
   "name": "Baldur's Gate 3",
   "genre": "RPG",
@@ -221,6 +239,7 @@
   }
  },
  {
+  "icon": "🤠",
   "id": "rdr2",
   "name": "Red Dead Redemption 2",
   "genre": "Open-World",
@@ -233,6 +252,7 @@
   }
  },
  {
+  "icon": "⛏️",
   "id": "minecraft",
   "name": "Minecraft (bonus)",
   "genre": "Sandbox",
@@ -245,6 +265,7 @@
   }
  },
  {
+  "icon": "🧱",
   "id": "roblox",
   "name": "Roblox",
   "genre": "Sandbox/UCG",
@@ -257,6 +278,7 @@
   }
  },
  {
+  "icon": "⚽",
   "id": "rocket-league",
   "name": "Rocket League",
   "genre": "Sportivo",
@@ -269,6 +291,7 @@
   }
  },
  {
+  "icon": "🪖",
   "id": "pubg",
   "name": "PUBG: Battlegrounds",
   "genre": "Battle Royale",
@@ -281,6 +304,7 @@
   }
  },
  {
+  "icon": "🌌",
   "id": "destiny2",
   "name": "Destiny 2",
   "genre": "FPS/MMO",
@@ -293,6 +317,7 @@
   }
  },
  {
+  "icon": "😈",
   "id": "diablo4",
   "name": "Diablo IV",
   "genre": "ARPG",
@@ -305,6 +330,7 @@
   }
  },
  {
+  "icon": "🌸",
   "id": "ffxiv",
   "name": "Final Fantasy XIV",
   "genre": "MMO",
@@ -317,6 +343,7 @@
   }
  },
  {
+  "icon": "🏰",
   "id": "eso",
   "name": "The Elder Scrolls Online",
   "genre": "MMO",
@@ -329,6 +356,7 @@
   }
  },
  {
+  "icon": "⛵",
   "id": "lost-ark",
   "name": "Lost Ark",
   "genre": "MMO/ARPG",
@@ -341,6 +369,7 @@
   }
  },
  {
+  "icon": "🎩",
   "id": "tf2",
   "name": "Team Fortress 2",
   "genre": "Shooter",
@@ -353,6 +382,7 @@
   }
  },
  {
+  "icon": "🦀",
   "id": "rust",
   "name": "Rust",
   "genre": "Survival",
@@ -365,6 +395,7 @@
   }
  },
  {
+  "icon": "🎖️",
   "id": "tarkov",
   "name": "Escape from Tarkov",
   "genre": "Shooter HC",
@@ -377,6 +408,7 @@
   }
  },
  {
+  "icon": "🪐",
   "id": "starfield",
   "name": "Starfield",
   "genre": "RPG",
@@ -389,6 +421,7 @@
   }
  },
  {
+  "icon": "⭐",
   "id": "helldivers2",
   "name": "Helldivers 2",
   "genre": "Co-op Shooter",
@@ -401,6 +434,7 @@
   }
  },
  {
+  "icon": "❤️",
   "id": "marvel-rivals",
   "name": "Marvel Rivals",
   "genre": "Hero Shooter",
@@ -413,6 +447,7 @@
   }
  },
  {
+  "icon": "🦖",
   "id": "mh-wilds",
   "name": "Monster Hunter Wilds",
   "genre": "Action RPG",

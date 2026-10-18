@@ -67,4 +67,9 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
 });
 ipcMain.handle('game:boost', async (_e, gameId) => applyGameBoost(gameId));
 ipcMain.handle('game:stop', async (_e, gameId) => stopGameBoost(gameId));
+ipcMain.handle('hw:profile', async () => require('./modules/hardware').hardwareProfile());
+ipcMain.handle('game:estimate', async (_e, gameId) => {
+  const h = require('./modules/hardware');
+  return h.estimateFps(gameId, await h.hardwareProfile());
+});
 ipcMain.handle('shell:open', async (_e, url) => shell.openExternal(url));
