@@ -2,10 +2,12 @@
   "name": "overclock-desktop-engine",
   "version": "1.0.0",
   "description": "Overclock Your PC, Code & Gaming. One App, Total Power.",
+  "author": "REGA",
+  "repository": "https://github.com/rega07cr/overclock",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist:win": "electron-builder --win nsis msi portable",
+    "dist:win": "electron-builder --win nsis portable",
     "dist:mac": "electron-builder --mac dmg",
     "dist:linux": "electron-builder --linux AppImage deb tar.gz"
   },
@@ -25,7 +27,6 @@
     "win": {
       "target": [
         "nsis",
-        "msi",
         "portable"
       ]
     },
