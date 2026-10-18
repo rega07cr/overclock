@@ -10,8 +10,10 @@
   else if (/Linux|X11/i.test(platform + ua)) { os = 'linux'; label = 'Download for Linux (.AppImage)'; file = 'releases/overclock-1.0.0-linux.AppImage'; }
   const releasePage = GITHUB_REPO && !/TUO-NOME|USERNAME|ESEMPIO/i.test(GITHUB_REPO)
     ? 'https://github.com/' + GITHUB_REPO + '/releases/latest' : null;
+  // Asset reali pubblicati dalla CI (nomi esatti della Release v1.0.0)
+  const ASSET = { win: 'Overclock.Setup.1.0.0.exe', mac: 'Overclock-1.0.0-arm64.dmg', linux: 'Overclock-1.0.0.AppImage' };
   if (releasePage) {
-    file = releasePage; // pagina release: non si rompe mai, nomi asset sempre giusti
+    file = releasePage + '/download/' + ASSET[os]; // download diretto dell'installer giusto
     document.querySelectorAll('a[href^="releases/"]').forEach(a => { a.href = releasePage; a.removeAttribute('download'); });
   }
   const names = { win: 'Windows 🪟', mac: 'macOS 🍎', linux: 'Linux 🐧' };
