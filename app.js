@@ -2,7 +2,7 @@
 (function(){
   // Dopo il push su GitHub: scrivi qui 'tuo-nome/overclock' e i download
   // punteranno alla pagina Releases (exe compilati dalla CI). Vuoto = file locali.
-  const GITHUB_REPO = '';
+  const GITHUB_REPO = 'rega07cr/overclock';
   const ua = navigator.userAgent;
   const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
   let os = 'win', label = 'Download for Windows (x64)', file = 'releases/overclock-1.0.0-win-setup.exe';
