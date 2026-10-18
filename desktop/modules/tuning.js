@@ -57,7 +57,7 @@ async function previewOs(mode) {
   const plan = mode !== 'potente' ? 'NON toccato (solo livello Potente)' : (os.platform() === 'win32' ? 'ora "' + cur.out.split('\n')[0] + '" \u2192 Prestazioni elevate (' + PERF_GUID + ')' : 'solo Windows');
   const regs = mode === 'base'
     ? 'GameDVR_Enabled=0, GameDVR_AppCaptureEnabled=0, AllowAutoGameMode=1'
-    : 'GameDVR off + GameMode on + EnableTransparency=0, TaskbarAnimations=0, MenuShowDelay=0' + (mode === 'potente' ? ', VisualFXSetting=2' : '');
+    : 'GameDVR off + GameMode on + EnableTransparency=0, TaskbarAnimations=0, MenuShowDelay=0' + (mode === 'potente' ? ', VisualFXSetting=3 (Custom) + ClearType preservato (FontSmoothing=2, Type=2, Gamma=1400)' : '');
   return {
     ok: true, preview: true,
     out: `👁 ANTEPRIMA — Overclock OS [${MODE_LABEL[mode]}] (nessuna modifica ancora):\n\u2022 Piano energia: ${plan}\n\u2022 Registro HKCU: ${regs}\n\u2022 Explorer/riavvio consigliato per effetto pieno\n\u2022 Ripristino: piano energia + valori precedenti salvati, "\u21a9 Ripristina" li rimette`
@@ -93,7 +93,7 @@ async function gpuBoost(mode) {
     const get = await sh(ps(`(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}`));
     const prev = get.ok && get.out !== '(nessun output)' ? get.out.split('\n')[0] : null;
     snap.regs.push({ path, name, prev });
-    const r = await sh(ps(`New-Item -Path '${path}' -Force | Out-Null; Set-ItemProperty -Path '${path}' -Name ${name} -Value ${value} -Type ${kind}; '${name}=${value}'`));
+    const r = await sh(ps(`if (-not (Test-Path '${path}')) { New-Item -Path '${path}' -Force | Out-Null }; Set-ItemProperty -Path '${path}' -Name ${name} -Value ${value} -Type ${kind}; '${name}=${value}'`));
     log.push(`${r.ok ? '✓' : '✕'} ${name} → ${value}`);
     return r.ok;
   };
@@ -128,7 +128,7 @@ async function gpuBoost(mode) {
 async function gpuRestore(snapArg) {
   const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpu') || snapArg);
   const log = [];
-  for (const { path, name, prev } of (snap && snap.regs) || []) {
+  for (const { path, name, prev, prevKind } of (snap && snap.regs) || []) {
     if (prev === null) {
       await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
       log.push(`↩ ${name} rimosso (default)`);
@@ -164,9 +164,69 @@ const OC_MEDIA = [
   ['HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '0']
 ];
 const OC_POWER = [
-  ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects', 'VisualFXSetting', 2]
+  // VisualFXSetting=3 (Custom): NON 2 (Best performance) che al riavvio spegne lo smoothing font.
+  ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects', 'VisualFXSetting', 3],
+  // ClearType completo: FontSmoothing="2" (REG_SZ) + Type=2 (DWORD) + Gamma default 1400 + orientamento RGB=1.
+  ['HKCU:\\Control Panel\\Desktop', 'FontSmoothing', '2'],
+  ['HKCU:\\Control Panel\\Desktop', 'FontSmoothingType', 2],
+  ['HKCU:\\Control Panel\\Desktop', 'FontSmoothingGamma', 1400],
+  ['HKCU:\\Control Panel\\Desktop', 'FontSmoothingOrientation', 1]
 ];
 const PERF_GUID = '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c'; // Prestazioni elevate
+
+async function readReg(path, name) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const get = await sh(ps(`$v=(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}; $k=try{(Get-Item -Path '${path}' -ErrorAction Stop).GetValueKind('${name}')}catch{'NONE'}; 'VAL='+$v+'|KIND='+$k`));
+    const raw = get.ok ? get.out : '';
+    const via = raw.indexOf('VAL='), ki = raw.indexOf('|KIND=');
+    if (via >= 0 && ki > via) {
+      const kind = raw.slice(ki + 6).trim().split(' ')[0];
+      if (kind === 'NONE') {
+        if (attempt < 2) { await new Promise(r => setTimeout(r, 600 * (attempt + 1))); continue; }
+        return { prev: null, kind: null };
+      }
+      return { prev: raw.slice(via + 4, ki), kind };
+    }
+    if (attempt < 2) { await new Promise(r => setTimeout(r, 600 * (attempt + 1))); continue; }
+    return { prev: null, kind: null };
+  }
+  return { prev: null, kind: null };
+}
+
+// Riattiva i font nitidi (ClearType) subito e in modo persistente tramite
+// l'API documentata SystemParametersInfo (è lei a scrivere UserPreferencesMask:
+// niente flip manuali del bitmask). Così VisualFXSetting=3 (Custom) non
+// spegne lo smoothing al riavvio.
+async function applyFontSmoothingLive(enable = true, type = 2, contrast = 1400, orientation = 1) {
+  if (os.platform() !== 'win32') return { ok: true, out: 'Solo Windows.' };
+  const on = !!enable;
+  const ps1 = [
+    'Add-Type @"',
+    'using System;',
+    'using System.Runtime.InteropServices;',
+    'public static class OcWin32 {',
+    '  [DllImport("user32.dll", SetLastError = true)]',
+    '  public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);',
+    '}',
+    '"@',
+    '$SPIF = 0x03',
+    on
+      ? '[OcWin32]::SystemParametersInfo(0x004B, 1, [IntPtr]::Zero, $SPIF) | Out-Null'
+      : '[OcWin32]::SystemParametersInfo(0x004B, 0, [IntPtr]::Zero, $SPIF) | Out-Null',
+    ...(on ? [
+      `[OcWin32]::SystemParametersInfo(0x200B, ${type}, [IntPtr]::Zero, $SPIF) | Out-Null`,
+      `[OcWin32]::SystemParametersInfo(0x200D, ${contrast}, [IntPtr]::Zero, $SPIF) | Out-Null`,
+      `[OcWin32]::SystemParametersInfo(0x2013, ${orientation}, [IntPtr]::Zero, $SPIF) | Out-Null`,
+    ] : []),
+    `'fontsmooth-live-ok'`,
+  ].join('\r\n');
+  const tmp = path.join(os.tmpdir(), 'oc-fontsmooth.ps1');
+  try { fs.writeFileSync(tmp, ps1, 'utf8'); }
+  catch (e) { return { ok: false, out: 'tmp write fail: ' + e.message }; }
+  const r = await sh(`powershell -NoProfile -ExecutionPolicy Bypass -File "${tmp}"`);
+  try { fs.unlinkSync(tmp); } catch {}
+  return r;
+}
 
 async function osOverclock(mode) {
   mode = normMode(mode);
@@ -181,12 +241,18 @@ async function osOverclock(mode) {
     log.push(`${p.ok ? '✓' : '✕'} Piano energia → Prestazioni elevate`);
   } else log.push('ℹ Piano energia invariato (solo livello Potente lo cambia).');
   for (const [path, name, val] of keys) {
-    const get = await sh(ps(`(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}`));
-    const prev = get.ok && get.out !== '(nessun output)' ? get.out.split('\n')[0] : null;
-    snap.regs.push({ path, name, prev });
+    const snapRd = await readReg(path, name);
+    let prev = snapRd.prev, prevKind = snapRd.kind;
+    snap.regs.push({ path, name, prev, prevKind, val });
     const type = typeof val === 'number' ? 'DWord' : 'String';
-    const r = await sh(ps(`New-Item -Path '${path}' -Force | Out-Null; Set-ItemProperty -Path '${path}' -Name ${name} -Value ${val} -Type ${type}; 'ok'`));
-    log.push(`${r.ok ? '✓' : '✕'} ${name} → ${val}`);
+    const r = await sh(ps(`if (-not (Test-Path '${path}')) { New-Item -Path '${path}' -Force | Out-Null }; Set-ItemProperty -Path '${path}' -Name ${name} -Value ${val} -Type ${type}; 'ok'`));
+    const verify = await readReg(path, name);
+    const realOk = r.ok && verify.prev !== null && String(verify.prev) === String(val);
+    log.push(`${realOk ? '✓' : '✕'} ${name} → ${val}${realOk ? '' : ' (verifica fallita: valore non confermato)'}`);
+  }
+  if (mode === 'potente') {
+    const fs1 = await applyFontSmoothingLive(true, 2, 1400, 1);
+    log.push(`${fs1.ok ? '✓' : 'ℹ'} Font nitidi preservati (ClearType attivo subito${fs1.ok ? '' : ', verifica al riavvio'})`);
   }
   log.push('ℹ Trasparenza/animazioni/GameDVR off. Riavvia Explorer o il PC per l\u2019effetto pieno.');
   global.__fpsBoost = true;
@@ -201,14 +267,31 @@ async function osRestore(snapArg) {
     const m = snap.power.match(/[0-9a-f-]{36}/i);
     if (m) { await sh(`powercfg /setactive ${m[0]}`); log.push(`↩ Piano energia ripristinato`); }
   }
-  for (const { path, name, prev } of (snap && snap.regs) || []) {
-    if (prev === null) await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+  for (const { path, name, prev, prevKind, val } of (snap && snap.regs) || []) {
+    if (prev === null) {
+      const cur = await readReg(path, name);
+      if (cur.prev === null) log.push(`↩ ${name} già assente`);
+      else if (val !== undefined && String(cur.prev) !== String(val)) log.push(`↩ ${name} mantenuto (modificato dopo il buff)`);
+      else { await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`)); log.push(`↩ ${name} rimosso (default ripristinato)`); }
+    }
     else {
-      const type = /^\d+$/.test(prev) ? 'DWord' : 'String';
+      const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
       await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
     }
     log.push(`↩ ${name} ripristinato`);
   }
+  try {
+    const curS = await readReg('HKCU:\\Control Panel\\Desktop', 'FontSmoothing');
+    const curT = await readReg('HKCU:\\Control Panel\\Desktop', 'FontSmoothingType');
+    if (curS.prev === '2') {
+      const t = parseInt(curT.prev, 10);
+      await applyFontSmoothingLive(true, t === 1 ? 1 : 2, 1400, 1);
+      log.push('↩ ClearType riattivato subito');
+    } else if (curS.prev === '0') {
+      await applyFontSmoothingLive(false);
+      log.push('↩ Smoothing ripristinato (off, come prima)');
+    }
+  } catch {}
   global.__fpsBoost = false;
   return { ok: true, out: log.join('\n') || 'Niente da ripristinare.' };
 }
@@ -230,4 +313,4 @@ async function toggleStartup(name, enable) {
   return r;
 }
 
-module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs };
+module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive };
