@@ -73,6 +73,6 @@ ollama serve
    git push -u origin master
    ```
 3. In `app.js` scrivi `const GITHUB_REPO = 'TUO-NOME/overclock'` → i pulsanti Download punteranno alle Releases.
-4. Crea una release: `git tag v1.0.0 && git push origin v1.0.0` → la CI compila Windows/macOS/Linux e allega gli exe.
+4. Crea una release: `git tag v1.0.1 && git push origin v1.0.1` → la CI compila Windows/macOS/Linux e allega gli exe.
 5. **Sito online**: Settings → Pages → Deploy from branch → `master` → Save. Il sito sarà su `https://TUO-NOME.github.io/overclock/`.
 6. `.exe` e build pesanti **non** vanno nel repo (già in `.gitignore`): vivono solo nelle Releases.
