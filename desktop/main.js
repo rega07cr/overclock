@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const { getSystemStats } = require('./modules/system-booster');
-const { applyGameBoost, stopGameBoost } = require('./modules/game-boost');
+const { applyGameBoost, applyFpsMod, stopGameBoost } = require('./modules/game-boost');
 
 let win = null;
 function createWindow() {
@@ -66,6 +66,7 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
   return map[action]();
 });
 ipcMain.handle('game:boost', async (_e, gameId) => applyGameBoost(gameId));
+ipcMain.handle('game:mod', async (_e, gameId) => applyFpsMod(gameId));
 ipcMain.handle('game:stop', async (_e, gameId) => stopGameBoost(gameId));
 ipcMain.handle('hw:profile', async () => require('./modules/hardware').hardwareProfile());
 ipcMain.handle('game:estimate', async (_e, gameId) => {

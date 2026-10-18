@@ -1,4 +1,16 @@
 *{box-sizing:border-box}body{margin:0;background:#07070f;color:#eef2ff;font-family:"Space Grotesk",system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#boot{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#1a1033 0%,#07070f 70%);transition:opacity .5s;cursor:pointer}
+#boot.hide{opacity:0;pointer-events:none}
+.boot-inner{text-align:center}
+.boot-bolt{font-size:64px;animation:bootpulse 1s ease-in-out infinite;filter:drop-shadow(0 0 24px #00f0ff)}
+@keyframes bootpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.75}}
+.boot-name{font-size:34px;font-weight:700;letter-spacing:12px;margin:8px 0 0 12px;background:linear-gradient(90deg,#00f0ff,#a855f7,#f43f5e);-webkit-background-clip:text;background-clip:text;color:transparent;animation:bootin .8s ease-out}
+@keyframes bootin{from{letter-spacing:30px;opacity:0}to{letter-spacing:12px;opacity:1}}
+.boot-tag{font-family:"JetBrains Mono",monospace;font-size:12px;color:#9aa3c0;letter-spacing:4px;margin-top:4px}
+.boot-bar{width:240px;height:6px;margin:18px auto 10px;background:#ffffff14;border-radius:4px;overflow:hidden}
+.boot-bar i{display:block;height:100%;width:40%;border-radius:4px;background:linear-gradient(90deg,#00f0ff,#a855f7);animation:bootbar 1.1s ease-in-out infinite}
+@keyframes bootbar{0%{margin-left:-40%}100%{margin-left:100%}}
+.boot-sub{font-size:11px;color:#9aa3c0}
 .titlebar{display:flex;gap:14px;align-items:center;padding:10px 16px;background:#0d0d1d;border-bottom:1px solid #ffffff1c;font-family:"JetBrains Mono",monospace;font-size:13px}
 .status{color:#39ff88;text-shadow:0 0 10px #39ff88}.wins{margin-left:auto;display:flex;gap:10px;opacity:.6}
 .layout{flex:1;display:flex;min-height:0}

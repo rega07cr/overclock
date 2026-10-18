@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('overclock', {
   restoreSys: (action) => ipcRenderer.invoke('sys:run', action + '-restore'),
   previewTune: (action, mode) => ipcRenderer.invoke('tuning:run', action + '-preview', mode),
   gameBoost: (id) => ipcRenderer.invoke('game:boost', id),
+  gameMod: (id) => ipcRenderer.invoke('game:mod', id),
   gameStop: (id) => ipcRenderer.invoke('game:stop', id),
   hwProfile: () => ipcRenderer.invoke('hw:profile'),
   gameEstimate: (id) => ipcRenderer.invoke('game:estimate', id),

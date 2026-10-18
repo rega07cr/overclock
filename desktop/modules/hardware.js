@@ -109,6 +109,23 @@ function shortCpu(n) {
 const CPU_BOUND = /shooter|battle royale|moba|hero|sportivo|sandbox|fps|tattico|co-op/i;
 const GPU_HEAVY = /open-world|rpg|soulslike|survival|action/i;
 
+// FPS MOD per gioco: patch reversibili dei file di configurazione (backup .ocbak).
+// path: supporta %VAR% e wildcard * (SteamID, GUID). pairs: [[chiave, valore]].
+const FPS_MODS = {
+  fortnite: { format: 'ini', path: '%LOCALAPPDATA%/FortniteGame/Saved/Config/WindowsClient/GameUserSettings.ini', pairs: [['sg.ResolutionQuality', '70'], ['sg.ViewDistanceQuality', '1'], ['sg.ShadowQuality', '0'], ['sg.PostProcessQuality', '0'], ['sg.EffectsQuality', '1'], ['bUseVSync', 'False']], desc: 'Risoluzione 70% + ombre/post-produzione off + VSync off' },
+  apex: { format: 'qkv', path: '%USERPROFILE%/Saved Games/Respawn/Apex/local/videoconfig.txt', pairs: [['setting.mat_antialias_mode', '0'], ['setting.mat_vsync_mode', '0'], ['setting.csm_enabled', '0']], desc: 'Anti-alias + VSync + ombre dinamiche off' },
+  cs2: { format: 'qkv', path: ['%PROGRAMFILES%/Steam/userdata/*/730/local/cfg/cs2_video.txt', '%PROGRAMFILES(X86)%/Steam/userdata/*/730/local/cfg/cs2_video.txt'], pairs: [['setting.cpu_level', '1'], ['setting.gpu_level', '1'], ['setting.mat_antialias', '0'], ['setting.mat_vsync', '0']], desc: 'Dettagli CPU/GPU bassi + AA/VSync off' },
+  valorant: { format: 'ini', path: '%LOCALAPPDATA%/VALORANT/Saved/Config/*/Windows/GameUserSettings.ini', pairs: [['sg.ResolutionQuality', '75'], ['sg.ShadowQuality', '0'], ['sg.PostProcessQuality', '0'], ['sg.AntiAliasingQuality', '0'], ['bUseVSync', 'False']], desc: 'Risoluzione 75% + ombre/AA/post off + VSync off' },
+  minecraft: { format: 'colon', path: '%APPDATA%/.minecraft/options.txt', pairs: [['graphics', '0'], ['renderDistance', '8'], ['maxFps', '260'], ['particles', '1'], ['enableVsync', 'false']], desc: 'Grafica veloce + chunk 8 + FPS 260 + VSync off' },
+  gta: { format: 'xml', path: '%USERPROFILE%/Documents/Rockstar Games/GTA V/settings.xml', pairs: [['ShadowQuality', '0'], ['ReflectionQuality', '0'], ['MSAA', '0']], desc: 'Ombre/riflessi/MSAA al minimo' },
+  pubg: { format: 'ini', path: '%LOCALAPPDATA%/TslGame/Saved/Config/WindowsNoEditor/GameUserSettings.ini', pairs: [['sg.ResolutionQuality', '70'], ['sg.ShadowQuality', '0'], ['sg.PostProcessQuality', '0']], desc: 'Risoluzione 70% + ombre/post off' },
+  dota2: { format: 'qkv', path: ['%PROGRAMFILES%/Steam/userdata/*/570/remote/cfg/video.txt', '%PROGRAMFILES(X86)%/Steam/userdata/*/570/remote/cfg/video.txt'], pairs: [['setting.cpu_level', '1'], ['setting.gpu_level', '1'], ['setting.mat_antialias', '0'], ['setting.mat_vsync', '0']], desc: 'Dettagli bassi + AA/VSync off' },
+  tf2: { format: 'qkv', path: ['%PROGRAMFILES%/Steam/userdata/*/440/remote/cfg/video.txt', '%PROGRAMFILES(X86)%/Steam/userdata/*/440/remote/cfg/video.txt'], pairs: [['setting.cpu_level', '1'], ['setting.gpu_level', '1'], ['setting.mat_antialias', '0'], ['setting.mat_vsync', '0']], desc: 'Dettagli bassi + AA/VSync off (+ mastercomfig nei launch hint)' },
+  destiny2: { format: 'xmlattr', path: '%APPDATA%/Bungie/DestinyPC/prefs/cvars.xml', pairs: [['framerate_cap_enabled', '1'], ['framerate_cap', '144'], ['low_latency_mode', '1']], desc: 'Cap 144 FPS + bassa latenza (Reflex)' },
+  wukong: { format: 'ini', path: '%LOCALAPPDATA%/b1/Saved/Config/Windows/Engine.ini', section: '[SystemSettings]', pairs: [['r.ScreenPercentage', '75'], ['r.DefaultFeature.MotionBlur', '0']], desc: 'Risoluzione interna 75% + motion blur off' },
+  'marvel-rivals': { format: 'ini', path: '%LOCALAPPDATA%/Marvel/Saved/Config/Windows/GameUserSettings.ini', pairs: [['sg.ResolutionQuality', '75'], ['sg.ShadowQuality', '0'], ['sg.PostProcessQuality', '0']], desc: 'Risoluzione 75% + ombre/post off' }
+};
+
 function estimateFps(gameId, hw) {
   const g = PRESETS.find(x => x.id === gameId);
   if (!g) throw new Error('Gioco non trovato: ' + gameId);
@@ -142,9 +159,14 @@ function estimateFps(gameId, hw) {
   if (!hw.discrete) why.push('ℹ Grafica integrata: abbassa risoluzione/effetti, il boost CPU fa il resto');
 
   const t = pcTier(hw);
+  const mod = FPS_MODS[gameId] || null;
+  const bonus = mod ? [8, 12] : [4, 8];
+  const modLine = mod
+    ? `🧪 FPS MOD disponibile (${mod.desc}): stima extra +${bonus[0]}–${bonus[1]}% oltre al boost base — file di config con backup, tutto ripristinabile.`
+    : `🧪 FPS MOD CPU disponibile (priorità + core dedicati + app pesanti sospese): stima extra +${bonus[0]}–${bonus[1]}%.`; 
   return {
     ok: true, game: g.name, icon: g.icon || '🎮',
-    min, max, tier,
+    min, max, tier, mod: !!mod, modLine,
     title: `📈 Boost stimato su questo PC: +${min}–${max}% FPS (fascia ${tier})`,
     note: 'Stima indicativa su colli CPU/RAM/sistema, non garantita: non tocca i settaggi grafici del gioco.',
     tierWhy: 'Il tuo PC è fascia ' + tier + ': ' + t.why.join(' · '),
@@ -152,4 +174,4 @@ function estimateFps(gameId, hw) {
   };
 }
 
-module.exports = { hardwareProfile, pcTier, estimateFps, shortCpu, shortGpu };
+module.exports = { hardwareProfile, pcTier, estimateFps, shortCpu, shortGpu, FPS_MODS };

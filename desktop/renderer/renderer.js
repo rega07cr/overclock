@@ -284,7 +284,7 @@
         if (isElectron) {
           window.overclock.gameEstimate(g.id).then(est => {
             if (selectedGame !== g.id) return; // hai già selezionato un altro gioco
-            $('#gEstimate').textContent = est.title;
+            $('#gEstimate').textContent = est.title + '\n' + (est.modLine || '');
             $('#gWhy').textContent = est.tierWhy + '\n' + est.why.map(w => '• ' + w).join('\n') + '\n(' + est.note + ')';
           }).catch(() => { $('#gEstimate').textContent = ''; });
         } else {
@@ -310,6 +310,24 @@
       window.__fps = true;
     }
     $('#boostStatus').textContent = '[Status: GAME BOOSTED 🎮⚡]';
+    refreshStats();
+  });
+  $('#modGame').addEventListener('click', async () => {
+    if (!selectedGame) { $('#gameLog').textContent = 'Seleziona prima un gioco dalla lista.'; return; }
+    $('#gameLog').textContent = '🧪 FPS MOD in corso… (config + core + app pesanti)';
+    if (isElectron) {
+      try {
+        const r = await window.overclock.gameMod(selectedGame);
+        $('#gameLog').textContent = r.log.join('\n');
+        window.__fps = true;
+      }
+      catch(e){ $('#gameLog').textContent = '✕ ' + e.message; }
+    } else {
+      await new Promise(r => setTimeout(r, 800));
+      $('#gameLog').textContent = `🧪 MOD simulato (demo browser)\n· Priorità High + core dedicati (no CPU0)\n· App pesanti sospese\n· Config gioco patchata con backup\n🧪 +10–15% FPS extra stimati`;
+      window.__fps = true;
+    }
+    $('#boostStatus').textContent = '[Status: FPS MOD 🧪⚡]';
     refreshStats();
   });
   $('#stopGame').addEventListener('click', async () => {
@@ -344,6 +362,9 @@
       el.textContent = `🖥️ ${cpu} · ${h.cores}C/${h.threads}T · ${h.ramGB}GB RAM · ${gpu} — fascia ${String(h.tier).toUpperCase()} → stime FPS calibrate su questo PC`;
     } catch { el.textContent = '🖥️ PC non rilevato: stime FPS generiche.'; }
   }
+  const bootEl = $('#boot');
+  const hideBoot = () => { if (bootEl) bootEl.classList.add('hide'); };
+  if (bootEl) { bootEl.addEventListener('click', hideBoot); setTimeout(hideBoot, 1600); setTimeout(() => bootEl.remove(), 2300); }
   initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); syncModeChips(); freezeHeaders(); loadHw();
   setInterval(refreshStats, 5000); setInterval(ollamaPing, 10000);
 })();
