@@ -28,6 +28,14 @@
   const el = document.getElementById(card);
   if (el) el.classList.add('highlight');
 
+  // scroll reveal (progressive enhancement: senza JS resta tutto visibile)
+  document.body.classList.add('rv');
+  const rvEls = document.querySelectorAll('.cards .card,.dl-grid .dl-card,.changelog .ch-box,.faq-grid details');
+  rvEls.forEach((el, i) => el.style.setProperty('--d', i % 4));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+    rvEls.forEach(el => io.observe(el));
+  } else rvEls.forEach(el => el.classList.add('in'));
   // 3D tilt
   const mock = document.getElementById('mock3d');
   if (mock && matchMedia('(pointer:fine)').matches) {

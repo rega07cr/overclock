@@ -53,3 +53,18 @@ h2 small{color:#9aa3c0;font-weight:400}.mut{color:#9aa3c0}
 .set-card{background:#0e0e1a;border:1px solid #ffffff1c;border-radius:14px;padding:18px;margin-bottom:12px}
 pre{font-family:"JetBrains Mono",monospace}code{background:#000;border:1px solid #ffffff22;border-radius:6px;padding:1px 6px}
 @media(max-width:900px){.split,.sys-grid,.game-layout{grid-template-columns:1fr}.sidebar{width:86px}}
+/* ===== Caselle animate: ingresso + hover lift ===== */
+.sys-card,.set-card,.game-detail,.editor-box,.out-box{transition:transform .3s cubic-bezier(.2,.7,.3,1.2),box-shadow .3s,border-color .3s}
+.sys-card:hover,.set-card:hover,.game-detail:hover{transform:translateY(-6px);border-color:#00f0ff77;box-shadow:0 14px 36px #000a,0 0 26px #00f0ff33}
+.editor-box:hover,.out-box:hover{border-color:#00f0ff55;box-shadow:0 0 22px #00f0ff22}
+.sys-grid .sys-card{animation:cardIn .5s cubic-bezier(.2,.7,.3,1) both}
+.sys-grid .sys-card:nth-child(2){animation-delay:.06s}.sys-grid .sys-card:nth-child(3){animation-delay:.12s}
+.sys-grid .sys-card:nth-child(4){animation-delay:.18s}.sys-grid .sys-card:nth-child(5){animation-delay:.24s}
+.sys-grid .sys-card:nth-child(6){animation-delay:.3s}
+@keyframes cardIn{from{opacity:0;translate:0 22px}to{opacity:1;translate:0 0}}
+.g-item{transition:transform .25s,border-color .25s,box-shadow .25s}
+.g-item:hover{transform:translateX(5px);border-color:#00f0ff66}
+.g-item.active{box-shadow:0 0 16px #39ff8844}
+.side{transition:transform .25s,box-shadow .25s,background .25s,border-color .25s}
+.side:hover{transform:translateY(-3px);border-color:#00f0ff55;box-shadow:0 6px 18px #00f0ff22}
+@media(prefers-reduced-motion:reduce){.sys-card,.set-card,.game-detail,.editor-box,.out-box,.g-item,.side{transition:none!important;animation:none!important}}
