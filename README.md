@@ -2,20 +2,31 @@
 
 Il Free Buff definitivo per sviluppatori, gamer e power user. macOS · Windows · Linux.
 
+## Cosa fa
+
+- **💻 Code/AI Overclock** — Ollama locale (privacy 100%) + fallback euristico: Speed / Security / Pro + Prompt mode.
+- **🚀 System Booster** — RAM flush, priorità processi, pulizia disco, DNS/TCP, GPU Boost (NVIDIA/AMD/Intel), Overclock OS per PC vecchi.
+  - **👁 Anteprima** prima di ogni modifica (mostra cosa cambierà, senza toccare nulla) + conferma per le azioni distruttive.
+  - **↩ Ripristina** per ogni modulo + ripristino totale (snapshot salvati, valgono anche dopo il riavvio).
+  - **3 livelli**: 🟢 Base (solo sicuro) / 🟡 Media (consigliata) / 🔴 Potente (tutto al massimo).
+  - Intestazioni e testi delle schede non cambiano mai: si aggiorna solo il box di log.
+- **🎮 Game Boost** — 35 preset (Roblox, CS2, GTA, Minecraft…), Proton/Gamemode/DXVK su Linux, Game Mode su macOS.
+
 ## Struttura
 
 ```
-index.html / styles.css / app.js      → landing page (sito ufficiale + download hub)
+index.html / styles.css / app.js      → landing page (sito + download hub)
 desktop/
   main.js / preload.js / package.json → app Electron
   modules/
     ai-overclock.js                   → Ollama locale + fallback euristico
-    system-booster.js                 → RAM / processi / disco / rete per-OS
-    game-boost.js + games-presets.json→ 20 preset + Proton/Gamemode/Game Mode
+    system-booster.js                 → RAM / processi / disco / rete (3 livelli + preview + restore)
+    tuning.js                         → GPU boost + Overclock OS (3 livelli + preview + restore)
+    game-boost.js + games-presets.json→ 35 preset + Proton/Gamemode/Game Mode
   renderer/
-    index.html / app.css / renderer.js→ UI sidebar 3 moduli (funziona anche da browser!)
-releases/                             → hub download (placeholder firmati in CI)
-worker.js + sites-manifest.json       → deploy Cloudflare Sites
+    index.html / app.css / renderer.js→ UI (funziona anche da browser come demo!)
+releases/                             → build locali (ignorate da git; quelle ufficiali stanno nelle GitHub Releases)
+.github/workflows/release.yml        → CI: compila Windows/macOS/Linux a ogni tag v*
 ```
 
 ## Demo immediata (senza installare nulla)
@@ -26,18 +37,14 @@ py -m http.server 8080
 # apri http://localhost:8080/desktop/renderer/  (app demo live nel browser)
 ```
 
-L'app renderer funziona in due modi:
-- **Browser demo**: euristiche locali simulate, Monaco via CDN.
-- **Electron reale**: `npm install && npm start` in `desktop/` → API OS vere via IPC.
-
 ## App desktop reale
 
 ```bash
 cd desktop
 npm install
 npm start                 # dev
-npm run dist:win          # .exe NSIS + .msi + portable zip
-npm run dist:mac          # .dmg universal
+npm run dist:win          # .exe NSIS + .msi + portable
+npm run dist:mac          # .dmg
 npm run dist:linux        # .AppImage + .deb + .tar.gz
 ```
 
@@ -51,4 +58,19 @@ ollama serve
 
 ## Verifiche
 
-- `py verify.py` — controlla che tutti i file, preset (20 giochi) e sezioni esistano.
+- `py verify.py` — controlla file, preset (≥30 giochi) e sezioni.
+- Syntax check JS (senza node installato, usa l'Electron bundlato):
+  `ELECTRON_RUN_AS_NODE=1 ./node_modules/electron/dist/electron.exe --check modules/system-booster.js`
+
+## Pubblicare su GitHub (repo + sito + download)
+
+1. Crea la repo su github.com (es. `overclock`), senza README.
+2. Dal terminale nella cartella del progetto:
+   ```
+   git remote add origin https://github.com/TUO-NOME/overclock.git
+   git push -u origin master
+   ```
+3. In `app.js` scrivi `const GITHUB_REPO = 'TUO-NOME/overclock'` → i pulsanti Download punteranno alle Releases.
+4. Crea una release: `git tag v1.0.0 && git push origin v1.0.0` → la CI compila Windows/macOS/Linux e allega gli exe.
+5. **Sito online**: Settings → Pages → Deploy from branch → `master` → Save. Il sito sarà su `https://TUO-NOME.github.io/overclock/`.
+6. `.exe` e build pesanti **non** vanno nel repo (già in `.gitignore`): vivono solo nelle Releases.

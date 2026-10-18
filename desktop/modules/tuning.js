@@ -1,8 +1,9 @@
 // tuning.js — GPU Driver Boost (NVIDIA/AMD) + Overclock intero sistema (PC vecchi).
 // Solo tweak sicuri e reversibili. Le chiavi scritte vengono salvate per il ripristino.
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
 const { exec } = require('child_process');
-const { isAdmin } = require('./system-booster');
 
 function sh(cmd, opts = {}) {
   return new Promise((resolve) => {
@@ -35,7 +36,50 @@ async function gpuInfo() {
   return { vendor, detail: out + smi };
 }
 
-async function gpuBoost() {
+function normMode(m) { m = String(m || 'media').toLowerCase(); return ['base', 'media', 'potente'].includes(m) ? m : 'media'; }
+const MODE_LABEL = { base: 'Base 🟢 (sicura)', media: 'Media 🟡 (consigliata)', potente: 'Potente 🔴 (spinta)' };
+
+async function previewGpu(mode) {
+  mode = normMode(mode);
+  const info = await gpuInfo();
+  const admin = os.platform() === 'win32' ? await require('./system-booster').isAdmin() : false;
+  const shader = mode === 'base' ? 'NON toccata (livello Base)' : `${info.vendor === 'nvidia' ? 'NVIDIA (GLCache+DxCache)' : info.vendor === 'amd' ? 'AMD (DxCache)' : '(generica)'}: file contati e rimossi (rigenerati al prossimo avvio gioco)`;
+  const hags = mode !== 'potente' ? 'SALTATO (solo livello Potente)' : (admin ? 'VERRÀ applicato (sei admin, serve riavvio)' : 'SALTATO (serve avvio come amministratore)');
+  return {
+    ok: true, preview: true,
+    out: `👁 ANTEPRIMA — GPU Boost [${MODE_LABEL[mode]}] (${info.vendor.toUpperCase()}, nessuna modifica ancora):\n\u2022 Registro: HKCU GameBar AllowAutoGameMode=1, AutoGameModeEnabled=1 + GameConfigStore FSE=2 (HKCU, effetto immediato)\n\u2022 Cache shader: ${shader}\n\u2022 HAGS (HKLM HwSchMode=2): ${hags}\n\u2022 Ripristino: valori precedenti salvati, "\u21a9 Ripristina" li rimette`
+  };
+}
+
+async function previewOs(mode) {
+  mode = normMode(mode);
+  const cur = os.platform() === 'win32' ? await sh('powercfg /getactivescheme') : { out: '' };
+  const plan = mode !== 'potente' ? 'NON toccato (solo livello Potente)' : (os.platform() === 'win32' ? 'ora "' + cur.out.split('\n')[0] + '" \u2192 Prestazioni elevate (' + PERF_GUID + ')' : 'solo Windows');
+  const regs = mode === 'base'
+    ? 'GameDVR_Enabled=0, GameDVR_AppCaptureEnabled=0, AllowAutoGameMode=1'
+    : 'GameDVR off + GameMode on + EnableTransparency=0, TaskbarAnimations=0, MenuShowDelay=0' + (mode === 'potente' ? ', VisualFXSetting=2' : '');
+  return {
+    ok: true, preview: true,
+    out: `👁 ANTEPRIMA — Overclock OS [${MODE_LABEL[mode]}] (nessuna modifica ancora):\n\u2022 Piano energia: ${plan}\n\u2022 Registro HKCU: ${regs}\n\u2022 Explorer/riavvio consigliato per effetto pieno\n\u2022 Ripristino: piano energia + valori precedenti salvati, "\u21a9 Ripristina" li rimette`
+  };
+}
+
+function putSnap(key, snap) {
+  try {
+    const f = path.join(os.tmpdir(), 'overclock-snaps.json');
+    let all = {}; try { all = JSON.parse(fs.readFileSync(f, 'utf8')); } catch {}
+    all[key] = { when: new Date().toISOString(), snap }; fs.writeFileSync(f, JSON.stringify(all, null, 1));
+  } catch {}
+}
+function getSnap(key) {
+  try {
+    const f = path.join(os.tmpdir(), 'overclock-snaps.json');
+    return (JSON.parse(fs.readFileSync(f, 'utf8'))[key] || {}).snap || null;
+  } catch { return null; }
+}
+
+async function gpuBoost(mode) {
+  mode = normMode(mode);
   // Applica preset sicuri. Ritorna snapshot per gpuRestore().
   const info = await gpuInfo();
   const snap = { vendor: info.vendor, regs: [] };
@@ -44,7 +88,7 @@ async function gpuBoost() {
     log.push('Su macOS/Linux usa i pannelli nativi (vedi hint gioco).');
     return { ok: true, out: log.join('\n'), snap };
   }
-  const admin = await isAdmin();
+  const admin = await require('./system-booster').isAdmin();
   const set = async (path, name, value, kind = 'DWord') => {
     const get = await sh(ps(`(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}`));
     const prev = get.ok && get.out !== '(nessun output)' ? get.out.split('\n')[0] : null;
@@ -58,29 +102,31 @@ async function gpuBoost() {
   await set('HKCU:\\Software\\Microsoft\\GameBar', 'AutoGameModeEnabled', 1);
   await set('HKCU:\\System\\GameConfigStore', 'GameDVR_FSEBehaviorMode', 2);
   await set('HKCU:\\System\\GameConfigStore', 'GameDVR_HonorUserFSEBehaviorMode', 1);
-  // Pulizia cache shader vendor-specific (sicura: vengono rigenerate).
-  if (info.vendor === 'nvidia') {
+  // Pulizia cache shader vendor-specific (sicura: vengono rigenerate). Solo Media/Potente.
+  if (mode !== 'base' && info.vendor === 'nvidia') {
     const c = await sh(ps(`$g=Join-Path $env:LOCALAPPDATA 'NVIDIA\\GLCache';$d=Join-Path $env:LOCALAPPDATA 'NVIDIA\\DxCache';`
       + `$n=(Get-ChildItem $g,$d -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;`
       + `Get-ChildItem $g,$d -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Shader cache NVIDIA: ' + $n + ' file rimossi (rigenerati al prossimo avvio gioco)'`));
     log.push((c.ok ? '✓ ' : '✕ ') + c.out.split('\n')[0]);
   }
-  if (info.vendor === 'amd') {
+  if (mode !== 'base' && info.vendor === 'amd') {
     const c = await sh(ps(`$g=Join-Path $env:LOCALAPPDATA 'AMD\\DxCache';`
       + `$n=(Get-ChildItem $g -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;`
       + `Get-ChildItem $g -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Shader cache AMD: ' + $n + ' file rimossi'`));
     log.push((c.ok ? '✓ ' : '✕ ') + c.out.split('\n')[0]);
   }
-  // HAGS (scheduling GPU hardware): HKLM, serve admin + riavvio.
-  if (admin) {
+  // HAGS (scheduling GPU hardware): solo Potente + HKLM, serve admin + riavvio.
+  if (mode === 'potente' && admin) {
     await set('HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'HwSchMode', 2);
     log.push('ℹ HAGS attivato: riavvia il PC per effetto completo.');
-  } else log.push('ℹ HAGS saltato (richiede avvio come amministratore).');
+  } else log.push(mode !== 'potente' ? 'ℹ HAGS saltato (solo livello Potente).' : 'ℹ HAGS saltato (richiede avvio come amministratore).');
   log.push('ℹ Per "Prestazioni massime" apri il pannello del vendor col pulsante dedicato.');
-  return { ok: true, out: log.join('\n'), snap };
+  putSnap('gpu', snap);
+  return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: "↩ Ripristina" riporta tutto come prima (anche dopo il riavvio).', snap };
 }
 
-async function gpuRestore(snap) {
+async function gpuRestore(snapArg) {
+  const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpu') || snapArg);
   const log = [];
   for (const { path, name, prev } of (snap && snap.regs) || []) {
     if (prev === null) {
@@ -106,27 +152,35 @@ function openVendorPanel(vendor) {
 }
 
 // ---------- Overclock OS (PC vecchi) ----------
-const OC_KEYS = [
-  // [path, name, valueOn] — tutti HKCU, reversibili
-  ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 0],
-  ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 0],
-  ['HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '0'],
+// [path, name, valueOn] — tutti HKCU, reversibili. Aggressività per livello.
+const OC_BASE = [
   ['HKCU:\\System\\GameConfigStore', 'GameDVR_Enabled', 0],
   ['HKCU:\\System\\GameConfigStore', 'GameDVR_AppCaptureEnabled', 0],
-  ['HKCU:\\Software\\Microsoft\\GameBar', 'AllowAutoGameMode', 1],
+  ['HKCU:\\Software\\Microsoft\\GameBar', 'AllowAutoGameMode', 1]
+];
+const OC_MEDIA = [
+  ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 0],
+  ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 0],
+  ['HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '0']
+];
+const OC_POWER = [
   ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects', 'VisualFXSetting', 2]
 ];
 const PERF_GUID = '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c'; // Prestazioni elevate
 
-async function osOverclock() {
+async function osOverclock(mode) {
+  mode = normMode(mode);
   if (os.platform() !== 'win32') return { ok: false, out: 'Overclock OS supportato solo su Windows in questa versione.' };
   const snap = { regs: [], power: null };
-  const log = ['⚡ OVERCLOCK SISTEMA ATTIVO'];
-  const cur = await sh('powercfg /getactivescheme');
-  snap.power = cur.out.split('\n')[0];
-  const p = await sh(`powercfg /setactive ${PERF_GUID}`);
-  log.push(`${p.ok ? '✓' : '✕'} Piano energia → Prestazioni elevate`);
-  for (const [path, name, val] of OC_KEYS) {
+  const log = [`⚡ OVERCLOCK SISTEMA ATTIVO [${mode}]`];
+  const keys = mode === 'base' ? OC_BASE : mode === 'media' ? [...OC_BASE, ...OC_MEDIA] : [...OC_BASE, ...OC_MEDIA, ...OC_POWER];
+  if (mode === 'potente') {
+    const cur = await sh('powercfg /getactivescheme');
+    snap.power = cur.out.split('\n')[0];
+    const p = await sh(`powercfg /setactive ${PERF_GUID}`);
+    log.push(`${p.ok ? '✓' : '✕'} Piano energia → Prestazioni elevate`);
+  } else log.push('ℹ Piano energia invariato (solo livello Potente lo cambia).');
+  for (const [path, name, val] of keys) {
     const get = await sh(ps(`(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}`));
     const prev = get.ok && get.out !== '(nessun output)' ? get.out.split('\n')[0] : null;
     snap.regs.push({ path, name, prev });
@@ -136,10 +190,12 @@ async function osOverclock() {
   }
   log.push('ℹ Trasparenza/animazioni/GameDVR off. Riavvia Explorer o il PC per l\u2019effetto pieno.');
   global.__fpsBoost = true;
-  return { ok: true, out: log.join('\n'), snap };
+  putSnap('os', snap);
+  return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: "↩ Ripristina" riporta tutto come prima (anche dopo il riavvio).', snap };
 }
 
-async function osRestore(snap) {
+async function osRestore(snapArg) {
+  const snap = (snapArg && (snapArg.regs || snapArg.power)) ? snapArg : (getSnap('os') || snapArg);
   const log = [];
   if (snap && snap.power) {
     const m = snap.power.match(/[0-9a-f-]{36}/i);
@@ -174,4 +230,4 @@ async function toggleStartup(name, enable) {
   return r;
 }
 
-module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, isAdmin };
+module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs };

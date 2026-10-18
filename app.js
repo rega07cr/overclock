@@ -1,10 +1,19 @@
 // OS detection + download routing + 3D tilt + counters
 (function(){
+  // Dopo il push su GitHub: scrivi qui 'tuo-nome/overclock' e i download
+  // punteranno alla pagina Releases (exe compilati dalla CI). Vuoto = file locali.
+  const GITHUB_REPO = '';
   const ua = navigator.userAgent;
   const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
   let os = 'win', label = 'Download for Windows (x64)', file = 'releases/overclock-1.0.0-win-setup.exe';
   if (/Mac|darwin/i.test(platform + ua)) { os = 'mac'; label = 'Download for macOS (Universal)'; file = 'releases/overclock-1.0.0-mac-universal.dmg'; }
   else if (/Linux|X11/i.test(platform + ua)) { os = 'linux'; label = 'Download for Linux (.AppImage)'; file = 'releases/overclock-1.0.0-linux.AppImage'; }
+  const releasePage = GITHUB_REPO && !/TUO-NOME|USERNAME|ESEMPIO/i.test(GITHUB_REPO)
+    ? 'https://github.com/' + GITHUB_REPO + '/releases/latest' : null;
+  if (releasePage) {
+    file = releasePage; // pagina release: non si rompe mai, nomi asset sempre giusti
+    document.querySelectorAll('a[href^="releases/"]').forEach(a => { a.href = releasePage; a.removeAttribute('download'); });
+  }
   const names = { win: 'Windows 🪟', mac: 'macOS 🍎', linux: 'Linux 🐧' };
   const heroLabel = document.getElementById('heroDlLabel');
   const heroSub = document.getElementById('heroDlSub');

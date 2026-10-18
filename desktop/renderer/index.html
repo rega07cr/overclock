@@ -63,15 +63,22 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
     <section class="view" id="view-system">
       <h2>🚀 System Booster <small>— Global PC Speed Up</small></h2>
       <p class="mut">Adattato all'OS rilevato: <b id="platLabel">…</b>. Ogni azione è reversibile.</p>
+      <div class="mode-row"><span>LIVELLO OTTIMIZZAZIONE:</span>
+        <button class="chip mode-chip" data-mode="base">🟢 Base</button>
+        <button class="chip mode-chip" data-mode="media">🟡 Media</button>
+        <button class="chip mode-chip" data-mode="potente">🔴 Potente</button>
+        <span class="mut" id="modeHint"></span>
+      </div>
       <div class="sys-grid">
-        <div class="sys-card"><h3>🧠 RAM Flush</h3><p>Svuota cache e memoria inattiva.</p><button data-sys="ram">Purge RAM</button><pre data-log="ram"></pre></div>
-        <div class="sys-card"><h3>🧊 Process Priority</h3><p>Deep-freeze dei processi background.</p><button data-sys="processes">Freeze background</button><pre data-log="processes"></pre></div>
-        <div class="sys-card"><h3>🧹 Disk &amp; Junk</h3><p>Temp + cache di build orfane.</p><button data-sys="disk">Clean disk</button><pre data-log="disk"></pre></div>
-        <div class="sys-card"><h3>🌐 Network Optimizer</h3><p>Flush DNS + tuning TCP/IP.</p><button data-sys="network">Optimize ping</button><pre data-log="network"></pre></div>
-        <div class="sys-card"><h3>🎨 GPU Driver Boost</h3><p id="gpuName">Rilevamento GPU…</p><div class="row"><button data-sys="gpu">Boost GPU</button><button class="ghost" data-sys="gpu-panel">Pannello vendor</button><button class="ghost" data-sys="gpu-restore">↩ Ripristina</button></div><pre data-log="gpu"></pre></div>
-        <div class="sys-card"><h3>⚡ Overclock Sistema</h3><p>PC vecchi: piano Alte prestazioni, effetti off, GameDVR off. Reversibile.</p><div class="row"><button data-sys="os-oc">Overclock OS</button><button class="ghost" data-sys="os-restore">↩ Ripristina</button></div><pre data-log="os"></pre></div>
+        <div class="sys-card"><h3>🧠 RAM Flush</h3><p>Svuota cache e memoria inattiva.</p><div class="row"><button class="ghost" data-preview="ram">👁 Anteprima</button><button data-sys="ram">Purge RAM</button><button class="ghost" data-restore="ram">↩ Ripristina</button></div><pre data-log="ram"></pre></div>
+        <div class="sys-card"><h3>🧊 Process Priority</h3><p>Deep-freeze dei processi background.</p><div class="row"><button class="ghost" data-preview="processes">👁 Anteprima</button><button data-sys="processes">Freeze background</button><button class="ghost" data-restore="processes">↩ Ripristina</button></div><pre data-log="processes"></pre></div>
+        <div class="sys-card"><h3>🧹 Disk &amp; Junk</h3><p>Temp + cache di build orfane.</p><div class="row"><button class="ghost" data-preview="disk">👁 Anteprima</button><button data-sys="disk">Clean disk</button><button class="ghost" data-restore="disk">↩ Ripristina</button></div><pre data-log="disk"></pre></div>
+        <div class="sys-card"><h3>🌐 Network Optimizer</h3><p>Flush DNS + tuning TCP/IP.</p><div class="row"><button class="ghost" data-preview="network">👁 Anteprima</button><button data-sys="network">Optimize ping</button><button class="ghost" data-restore="network">↩ Ripristina</button></div><pre data-log="network"></pre></div>
+        <div class="sys-card"><h3>🎨 GPU Driver Boost</h3><p id="gpuName">Rilevamento GPU…</p><div class="row"><button class="ghost" data-tpreview="gpu">👁 Anteprima</button><button data-sys="gpu">Boost GPU</button><button class="ghost" data-sys="gpu-panel">Pannello vendor</button><button class="ghost" data-sys="gpu-restore">↩ Ripristina</button></div><pre data-log="gpu"></pre></div>
+        <div class="sys-card"><h3>⚡ Overclock Sistema</h3><p>PC vecchi: piano Alte prestazioni, effetti off, GameDVR off. Reversibile.</p><div class="row"><button class="ghost" data-tpreview="os">👁 Anteprima</button><button data-sys="os-oc">Overclock OS</button><button class="ghost" data-sys="os-restore">↩ Ripristina</button></div><pre data-log="os"></pre></div>
       </div>
       <div class="sys-card wide"><h3>🚀 Programmi in avvio</h3><p class="mut">Disabilita ciò che rallenta l'accensione (solo HKCU, reversibile).</p><div id="startupList" class="mut">Caricamento…</div></div>
+      <div class="row"><button class="ghost" id="fullPreview">👁 Anteprima full buff (cosa cambia)</button><button class="ghost" id="fullRestore">↩ Ripristina tutto come prima</button></div>
       <button class="apply" id="fullBuff">⚡ 1-CLICK FULL SYSTEM BUFF ⚡</button>
       <pre id="fullLog" class="fulllog"></pre>
     </section>

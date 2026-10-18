@@ -17,3 +17,6 @@ build.log
 build-nsis.log
 build-portable.log
 __pycache__/
+# Zip di distribuzione rigenerabili + staging Pages (si ricreano, non vanno nel repo)
+overclock-*.zip
+pages-site/

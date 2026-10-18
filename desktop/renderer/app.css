@@ -29,8 +29,8 @@ h2 small{color:#9aa3c0;font-weight:400}.mut{color:#9aa3c0}
 .sys-card button{background:#39ff8822;border:1px solid #39ff88;color:#39ff88;border-radius:10px;padding:9px 16px;cursor:pointer}
 .sys-card.wide{grid-column:1/-1}
 .st-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#00000060;border:1px solid #ffffff1c;border-radius:8px;padding:7px 12px;margin:6px 0;font-family:"JetBrains Mono",monospace;font-size:12px}
-.ghost.sm{padding:6px 12px;font-size:12px;border-radius:8px}
-.sys-card pre,.fulllog,#gameLog{background:#000;border:1px solid #ffffff1c;border-radius:10px;padding:10px;font-size:11px;min-height:34px;white-space:pre-wrap;font-family:"JetBrains Mono",monospace}
+.ghost.sm{padding:6px 12px;font-size:12px;border-radius:8px}  .sys-card pre,.fulllog,#gameLog{background:#000;border:1px solid #ffffff1c;border-radius:10px;padding:10px;font-size:11px;min-height:34px;max-height:150px;overflow-y:auto;white-space:pre-wrap;font-family:"JetBrains Mono",monospace}
+  .sys-card h3,.sys-card>p{min-height:1.2em}
 .fulllog{margin-top:12px}
 .game-layout{display:grid;grid-template-columns:300px 1fr;gap:14px}
 .game-list input{width:100%;margin-bottom:10px}#games{display:grid;gap:6px;max-height:480px;overflow:auto}

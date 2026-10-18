@@ -5,6 +5,37 @@
   const isElectron = !!window.overclock;
   let kind = 'code', buff = 'speed', editor = null, selectedGame = null, PRESETS = [];
 
+  // ---------- Livello ottimizzazione: Base / Media / Potente ----------
+  let sysMode = 'media';
+  try { sysMode = localStorage.getItem('oc-mode') || 'media'; } catch {}
+  if (!['base', 'media', 'potente'].includes(sysMode)) sysMode = 'media';
+  const MODE_HINT = {
+    base: '🟢 Base: solo interventi sicuri (niente HKLM, niente piano energia, TEMP >7gg).',
+    media: '🟡 Media: pulizia completa + registro HKCU reversibile. Consigliata.',
+    potente: '🔴 Potente: tutto al massimo (HAGS, piano energia, ECN off). Alcuni tweak richiedono admin.'
+  };
+  function syncModeChips(){
+    $$('.mode-chip').forEach(c => c.classList.toggle('on', c.dataset.mode === sysMode));
+    const h = $('#modeHint'); if (h) h.textContent = MODE_HINT[sysMode];
+  }
+
+  // ---------- Intestazioni schede: testo fisso, mai modificato dalle ottimizzazioni ----------
+  // Solo i box di log cambiano; titoli/descrizioni restano identici prima/dopo ogni azione.
+  const frozenHeaders = new Map();
+  function freezeHeaders(){
+    $$('#view-system .sys-card h3, #view-system .sys-card > p:not(#gpuName), #view-system h2').forEach(el => {
+      if (!frozenHeaders.has(el)) frozenHeaders.set(el, el.tagName === 'H2' ? el.innerHTML : el.textContent);
+    });
+    const g = $('#gpuName');
+    if (g && /Rilevata:/.test(g.textContent) && !frozenHeaders.has(g)) frozenHeaders.set(g, g.textContent);
+  }
+  function enforceHeaders(){
+    frozenHeaders.forEach((t, el) => {
+      if (el.tagName === 'H2') { if (el.innerHTML !== t) el.innerHTML = t; }
+      else if (el.textContent !== t) el.textContent = t;
+    });
+  }
+
   // ---------- Sidebar ----------
   $$('.side[data-view]').forEach(b => b.addEventListener('click', () => {
     $$('.side[data-view]').forEach(x => x.classList.remove('active'));
@@ -86,21 +117,74 @@
   }
 
   let gpuSnap = null, osSnap = null, gpuVendor = 'nvidia';
-  const mark = r => (r && r.ok ? '✓ ' : '✕ ') + ((r && r.out) || JSON.stringify(r).slice(0, 400));
+  const mark = r => ((r && r.preview) ? '' : (r && r.ok ? '✓ ' : '✕ ')) + ((r && r.out) || JSON.stringify(r).slice(0, 1200));
+  // 👁 Anteprima system-booster (ram/processes/disk/network) — non modifica nulla
+  $$('.mode-chip').forEach(c => c.addEventListener('click', () => {
+    sysMode = c.dataset.mode;
+    try { localStorage.setItem('oc-mode', sysMode); } catch {}
+    syncModeChips();
+  }));
+  $$('[data-preview]').forEach(b => b.addEventListener('click', async () => {
+    const a = b.dataset.preview;
+    const log = document.querySelector(`[data-log="${a}"]`);
+    log.textContent = '👁 leggo lo stato attuale…';
+    if (isElectron) {
+      try { log.textContent = mark(await window.overclock.previewSys(a, sysMode)); }
+      catch(e){ log.textContent = '✕ ' + e.message; }
+    } else log.textContent = `👁 Demo browser [${sysMode}]: qui vedresti cosa cambia prima di applicare.`;
+    enforceHeaders();
+  }));
+  // ↩ Ripristina system-booster — rimette come prima
+  $$('[data-restore]').forEach(b => b.addEventListener('click', async () => {
+    const a = b.dataset.restore;
+    const log = document.querySelector(`[data-log="${a}"]`);
+    log.textContent = '↩ ripristino…';
+    if (isElectron) {
+      try { log.textContent = mark(await window.overclock.restoreSys(a)); }
+      catch(e){ log.textContent = '✕ ' + e.message; }
+    } else log.textContent = '↩ Demo browser: ripristino simulato.';
+    enforceHeaders();
+    refreshStats();
+  }));
+  // 👁 Anteprima tuning (gpu/os) — non modifica nulla
+  $$('[data-tpreview]').forEach(b => b.addEventListener('click', async () => {
+    const a = b.dataset.tpreview;
+    const log = document.querySelector(`[data-log="${a}"]`);
+    log.textContent = '👁 leggo lo stato attuale…';
+    if (isElectron) {
+      try { log.textContent = mark(await window.overclock.previewTune(a, sysMode)); }
+      catch(e){ log.textContent = '✕ ' + e.message; }
+    } else log.textContent = `👁 Demo browser [${sysMode}]: qui vedresti cosa cambia prima di applicare.`;
+    enforceHeaders();
+  }));
+  const NEED_CONFIRM = { disk: 'disk', gpu: 'gpu', 'os-oc': 'os' };
   $$('[data-sys]').forEach(b => b.addEventListener('click', async () => {
     const a = b.dataset.sys;
     const logKey = a.startsWith('gpu') ? 'gpu' : (a.startsWith('os') ? 'os' : a);
     const log = document.querySelector(`[data-log="${logKey}"]`);
+    // Prima di modificare: mostra cosa cambia e chiedi conferma (solo azioni che scrivono)
+    if (isElectron && NEED_CONFIRM[a]) {
+      try {
+        const pv = a === 'gpu' || a === 'os-oc'
+          ? await window.overclock.previewTune(a === 'gpu' ? 'gpu' : 'os', sysMode)
+          : await window.overclock.previewSys(a, sysMode);
+        const msg = (pv.out || '').slice(0, 900);
+        if (!window.confirm(msg + '\n\nProcedere con la modifica? ("👁 Anteprima" la rivede senza modificare)')) {
+          log.textContent = mark(pv);
+          return;
+        }
+      } catch {}
+    }
     log.textContent = '⏳ esecuzione…';
     if (isElectron) {
       try {
         let r;
-        if (a === 'gpu') { r = await window.overclock.tune('gpu-boost'); gpuSnap = r.snap; }
+        if (a === 'gpu') { r = await window.overclock.tune('gpu-boost', sysMode); gpuSnap = r.snap; }
         else if (a === 'gpu-restore') r = await window.overclock.tune('gpu-restore', gpuSnap);
         else if (a === 'gpu-panel') r = await window.overclock.tune('gpu-panel', { vendor: gpuVendor });
-        else if (a === 'os-oc') { r = await window.overclock.tune('os-oc'); osSnap = r.snap; }
+        else if (a === 'os-oc') { r = await window.overclock.tune('os-oc', sysMode); osSnap = r.snap; }
         else if (a === 'os-restore') r = await window.overclock.tune('os-restore', osSnap);
-        else r = await window.overclock.runSys(a);
+        else r = await window.overclock.runSys(a, sysMode);
         log.textContent = mark(r);
         if (r && r.ok) window.__fps = true;
       }
@@ -108,8 +192,9 @@
     } else {
       await new Promise(r => setTimeout(r, 700));
       const msgs = { ram: '✓ RAM flush simulato: +1.2 GB liberi', processes: '✓ 14 processi background → BelowNormal', disk: '✓ 840 MB temp/cache rimossi', network: '✓ DNS flushed, RTT 28ms → 19ms', gpu: '✓ GPU boost simulato (demo browser)', 'gpu-restore': '↩ GPU ripristinata (demo)', 'gpu-panel': 'ℹ Demo: il pannello vendor si apre nell\'app reale', 'os-oc': '✓ Overclock OS simulato (demo)', 'os-restore': '↩ OS ripristinato (demo)' };
-      log.textContent = msgs[a] || '…'; window.__fps = true;
+      log.textContent = (msgs[a] || '…') + ` [${sysMode}]`; window.__fps = true;
     }
+    enforceHeaders();
     refreshStats();
   }));
   async function loadTuning(){
@@ -118,6 +203,7 @@
       const info = await window.overclock.tune('gpu-info');
       gpuVendor = info.vendor || 'nvidia';
       $('#gpuName').textContent = 'Rilevata: ' + (info.detail || info.vendor).split('\n')[0];
+      freezeHeaders(); // congela il testo rilevato: le ottimizzazioni non lo cambieranno mai
       const s = await window.overclock.tune('startup-list');
       const box = $('#startupList'); box.innerHTML = '';
       if (!s.items.length) box.textContent = 'Nessun programma in avvio.';
@@ -134,12 +220,33 @@
       });
     } catch(e){ $('#gpuName').textContent = 'Errore rilevamento: ' + e.message; }
   }
+  $('#fullPreview').addEventListener('click', async () => {
+    const L = $('#fullLog'); L.textContent = '👁 leggo lo stato attuale…';
+    if (isElectron) { try { L.textContent = mark(await window.overclock.previewSys('full', sysMode)); } catch(e){ L.textContent = '✕ ' + e.message; } }
+    else L.textContent = `👁 Demo [${sysMode}]: full buff toccherebbe RAM + processi + disco + rete (dettagli nell\'app reale).`;
+    enforceHeaders();
+  });
+  $('#fullRestore').addEventListener('click', async () => {
+    const L = $('#fullLog'); L.textContent = '↩ ripristino tutto…';
+    if (isElectron) { try { L.textContent = mark(await window.overclock.restoreSys('full')); } catch(e){ L.textContent = '✕ ' + e.message; } }
+    else L.textContent = '↩ Demo: tutto ripristinato.';
+    $('#boostStatus').textContent = '[Status: RIPRISTINATO ↩]';
+    enforceHeaders();
+    refreshStats();
+  });
   $('#fullBuff').addEventListener('click', async () => {
-    const L = $('#fullLog'); L.textContent = '⚡ FULL SYSTEM BUFF in corso…';
+    const L = $('#fullLog');
+    if (isElectron) {
+      try {
+        const pv = await window.overclock.previewSys('full', sysMode);
+        if (!window.confirm((pv.out || '').slice(0, 1200) + '\n\nProcedere con il FULL BUFF?')) { L.textContent = mark(pv); return; }
+      } catch {}
+    }
+    L.textContent = '⚡ FULL SYSTEM BUFF in corso…';
     const btn = $('#fullBuff'); btn.classList.remove('cyber'); void btn.offsetWidth; btn.classList.add('cyber');
     $('#boostStatus').textContent = '[Status: BOOSTING… 🌀]';
     if (isElectron) {
-      try { const r = await window.overclock.runSys('full'); L.textContent = JSON.stringify(r, null, 1).slice(0, 1500); }
+      try { const r = await window.overclock.runSys('full', sysMode); L.textContent = JSON.stringify(r, null, 1).slice(0, 1500); }
       catch(e){ L.textContent = '✕ ' + e.message; }
     } else {
       for (const s of ['RAM purge ✓', 'Process freeze ✓', 'Disk clean ✓', 'DNS/TCP tune ✓']) {
@@ -215,6 +322,6 @@
     }
   }
 
-  initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning();
+  initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); syncModeChips(); freezeHeaders();
   setInterval(refreshStats, 5000); setInterval(ollamaPing, 10000);
 })();

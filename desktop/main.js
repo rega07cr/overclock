@@ -25,14 +25,24 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 
 ipcMain.handle('sys:stats', async () => getSystemStats());
-ipcMain.handle('sys:run', async (_e, action) => {
+ipcMain.handle('sys:run', async (_e, action, mode) => {
   const booster = require('./modules/system-booster');
   const map = {
     'ram': () => booster.ramFlush(),
-    'processes': () => booster.freezeBackground(),
-    'disk': () => booster.diskClean(),
-    'network': () => booster.networkOptimize(),
-    'full': () => booster.fullBuff()
+    'processes': () => booster.freezeBackground(mode),
+    'disk': () => booster.diskClean(mode),
+    'network': () => booster.networkOptimize(mode),
+    'full': () => booster.fullBuff(mode),
+    'ram-preview': () => booster.previewRam(),
+    'processes-preview': () => booster.previewFreeze(mode),
+    'disk-preview': () => booster.previewDisk(mode),
+    'network-preview': () => booster.previewNetwork(mode),
+    'full-preview': () => booster.previewFull(mode),
+    'ram-restore': () => booster.restoreRam(),
+    'processes-restore': () => booster.restoreFreeze(),
+    'disk-restore': () => booster.restoreDisk(),
+    'network-restore': () => booster.restoreNetwork(),
+    'full-restore': () => booster.restoreAll()
   };
   if (!map[action]) throw new Error('unknown action');
   return map[action]();
@@ -41,11 +51,13 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
   const tuning = require('./modules/tuning');
   const map = {
     'gpu-info': () => tuning.gpuInfo(),
-    'gpu-boost': () => tuning.gpuBoost(),
+    'gpu-boost': () => tuning.gpuBoost(typeof arg === 'string' ? arg : undefined),
     'gpu-restore': () => tuning.gpuRestore(arg),
     'gpu-panel': () => tuning.openVendorPanel((arg && arg.vendor) || 'nvidia'),
-    'os-oc': () => tuning.osOverclock(),
+    'os-oc': () => tuning.osOverclock(typeof arg === 'string' ? arg : undefined),
     'os-restore': () => tuning.osRestore(arg),
+    'gpu-preview': () => tuning.previewGpu(typeof arg === 'string' ? arg : undefined),
+    'os-preview': () => tuning.previewOs(typeof arg === 'string' ? arg : undefined),
     'startup-list': () => tuning.listStartup(),
     'startup-toggle': () => tuning.toggleStartup(arg.name, arg.enable),
     'is-admin': () => require('./modules/system-booster').isAdmin().then(v => ({ admin: v }))
