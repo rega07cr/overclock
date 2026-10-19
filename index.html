@@ -246,11 +246,18 @@
   </div>
   <div class="changelog">
     <div class="ch-box">
-      <h3>Changelog — v1.3.0 <span class="tag">stable</span></h3>
+      <h3>Changelog — v1.3.0 <span class="tag">stable</span> <small style="opacity:.7">· cosa cambia dalla v1.2</small></h3>
+      <p class="sec-sub" style="margin:.4em 0 .8em">Hai la v1.2? Ecco le <b>3 novità</b> della v1.3, spiegate semplice — niente scatole nere, tutto reversibile.</p>
       <ul>
-        <li>🚀 <b>FPS MAX BEAST</b>: GPU MAX + CPU MAX potenziati (TdrDelay anti-freeze, priorità GPU ai giochi, PCIe/USB sempre alimentati, Ultimate Performance, CPU 100% + core parking OFF + boost aggressivo, UI leggera + RAM standby liberata).</li>
-        <li>🎮 <b>Lancia gioco ottimizzato</b>: nuova card in FPS MAX — avvi il gioco dall'app, applichiamo mod temporanee + argomenti FPS + priorità High, e alla chiusura ripristiniamo tutto da soli.</li>
-        <li>🌀 <b>Sezione Ventole</b>: profili silenziosa/bilanciata/massima + % manuale (10–100%) + stato in sola lettura + <b>reset automatico</b> che rimette la modalità di fabbrica.</li>
+        <li>🚀 <b>FPS MAX BEAST — GPU MAX + CPU MAX + extra, solo più FPS.</b><br>
+          <i>Cosa fa:</i> GPU — GameDVR/capture OFF + Game Mode ON, cache shader NVIDIA/AMD + DirectX + Steam pulite (via gli scattini), HAGS, MPO off (niente stutter a 144 Hz+), <b>TdrDelay=8</b> (il driver non resetta più la GPU nei picchi = niente freeze di 2 s), priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati. CPU — piano <b>Ultimate Performance</b> (o Prestazioni elevate), CPU sempre al 100%, raffreddamento ATTIVO, <b>core parking OFF</b> (tutti i core svegli), boost aggressivo, foreground boost. Extra — UI leggera (trasparenza/animazioni off) + RAM standby liberata subito.<br>
+          <i>Cosa NON tocca:</i> driver, giochi, salvataggi, Discord/browser/musica (restano fluidi). <i>Come si annulla:</i> ↩ Ripristina FPS MAX (snapshot dedicati, vale anche dopo il riavvio). Onesto: nessun software fa ×100 — qui spremi il massimo via software.</li>
+        <li>🎮 <b>Lancia gioco ottimizzato — nuova card in FPS MAX.</b><br>
+          <i>Cosa fa:</i> avvii il gioco <b>dall'app</b>: applichiamo mod FPS temporanee (patch config con backup .ocbak) + argomenti di lancio ufficiali per-gioco (es. CS2 <code>-high -novid +fps_max 400</code>) + priorità High, anche via <code>steam://rungameid/</code>. Quando <b>chiudi il gioco ripristiniamo tutto da soli</b>.<br>
+          <i>Cosa NON tocca:</i> se avvii il gioco da fuori, niente mod. <i>Come si annulla:</i> ■ Stop / Ripristina, o chiudi il gioco — torna tutto come prima.</li>
+        <li>🌀 <b>Sezione Ventole — rumore vs raffreddamento, a tua scelta.</b><br>
+          <i>Cosa fa:</i> profili <b>Silenziosa</b> (policy passiva + CPU 85%: poche ventole, qualche FPS in meno) / <b>Bilanciata</b> (default Windows) / <b>Massima</b> (policy attiva + boost: CPU mai throttlata, più rumore) + <b>% manuale 10–100%</b> + stato in sola lettura (temperatura, policy, vendor) + <b>reset automatico</b> che rimette la modalità di fabbrica. Onesto: Windows non ha un'API standard per i giri — la policy Windows si applica sempre, per i giri esatti proviamo le interfacce WMI del produttore o ti diciamo quale app ufficiale usare (Legion Zone, Armoury Crate…): niente driver strani.<br>
+          <i>Cosa NON tocca:</i> curve custom esistenti (le ritrovi col reset), BIOS. <i>Come si annulla:</i> ↩ Reset automatico (snapshot dedicato).</li>
         <li>⬅️ v1.2.0: disinstallazione semplice, salute sistema, reset totale vero.</li>
       </ul>
     </div>
