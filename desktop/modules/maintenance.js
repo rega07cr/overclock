@@ -41,9 +41,14 @@ async function fullReset() {
   try {
     const t = require('./tuning');
     if (t.restoreSnapKey) {
-      for (const [k, label] of [['os', 'OS'], ['gpu', 'GPU'], ['gpumax', 'GPU MAX'], ['cpumax', 'CPU MAX'], ['font', 'font'], ['appearance-opts', 'aspetto'], ['appearance', 'aspetto standard']]) {
+      for (const [k, label] of [['os', 'OS'], ['gpu', 'GPU'], ['gpumax', 'GPU MAX'], ['cpumax', 'CPU MAX'], ['fpsmax-ui', 'FPS UI'], ['font', 'font'], ['appearance-opts', 'aspetto'], ['appearance', 'aspetto standard']]) {
         try { const r = await t.restoreSnapKey(k); if (!/Niente da ripristinare|nessuno snapshot/i.test(r.out)) log.push(`• ${label}: ripristinato`); } catch {}
       }
+      try { const f = require('./fans'); const r = await f.resetFans(); log.push('• Ventole: reset automatico'); } catch {}
+      try {
+        const l = require('./game-launcher'); const mods = persist.loadModState();
+        for (const id of Object.keys(mods || {})) { try { await l.stopLaunch(id); } catch {} }
+      } catch {}
     } else {
       try { await t.osRestore(); log.push('• OS: ripristinato'); } catch {}
       try { await t.gpuRestore(); log.push('• GPU: ripristinata'); } catch {}

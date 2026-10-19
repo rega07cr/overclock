@@ -414,6 +414,57 @@
     refreshStats();
   });
 
+  // ---------- v1.3: Lancia gioco ottimizzato (mod temporanee a ogni avvio) ----------
+  function fillLaunchSel(){
+    const sel = $('#launchGameSel'); if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '';
+    PRESETS.forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.id; o.textContent = `${g.icon || '🎮'} ${g.name}`;
+      sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+    else if (selectedGame) sel.value = selectedGame;
+  }
+  function launchSelId(){
+    const sel = $('#launchGameSel');
+    return (sel && sel.value) || selectedGame;
+  }
+  function launchRun(fn, demoMsg, confirmMsg){
+    const log = document.querySelector('[data-log="launch"]');
+    const id = launchSelId();
+    if (!id) { log.textContent = 'Seleziona prima un gioco (lista 🎮 o menu qui sopra).'; return; }
+    if (confirmMsg && isElectron && !window.confirm(confirmMsg)) return;
+    log.textContent = '⏳ esecuzione… (il lancio aspetta che il gioco parta, pazienta)';
+    if (isElectron) fn(id).then(r => { log.textContent = mark(r); }).catch(e => { log.textContent = '✕ ' + e.message; });
+    else log.textContent = demoMsg;
+  }
+  const _renderGames = renderGames;
+  renderGames = function(q){ _renderGames(q); fillLaunchSel(); };
+  const _lp = $('#launchPreviewBtn'); if (_lp) _lp.addEventListener('click', () => launchRun(id => window.overclock.launchPreview(id), '👁 Demo: mod temporanee + avvio Steam/exe + argomenti FPS + auto-ripristino alla chiusura.'));
+  const _lb = $('#launchBtn'); if (_lb) _lb.addEventListener('click', () => launchRun(id => window.overclock.launchGame(id), '🚀 Demo: gioco lanciato e boostato (nell\u2019app reale parte davvero).', 'Lanciare il gioco con mod temporanee? All\u2019uscita ripristino tutto da solo.'));
+  const _ls = $('#launchStopBtn'); if (_ls) _ls.addEventListener('click', () => launchRun(id => window.overclock.launchStop(id), '■ Demo: mod temporanee ripristinate.'));
+
+  // ---------- v1.3: Ventole (profili + % + reset automatico) ----------
+  function fanRun(logKey, fn, demoMsg, confirmMsg){
+    const log = document.querySelector(`[data-log="${logKey}"]`);
+    if (confirmMsg && isElectron && !window.confirm(confirmMsg)) return;
+    log.textContent = '⏳ esecuzione…';
+    if (isElectron) fn().then(r => { log.textContent = mark(r); }).catch(e => { log.textContent = '✕ ' + e.message; });
+    else log.textContent = demoMsg;
+  }
+  const _fs = $('#fanStatusBtn'); if (_fs) _fs.addEventListener('click', () => fanRun('fanstatus', () => window.overclock.fanStatus(), '🌀 Demo: policy attivo · 58°C · vendor LEGION · snapshot salvato.'));
+  const _fq = $('#fanQuiet'); if (_fq) _fq.addEventListener('click', () => fanRun('fanmode', () => window.overclock.fanSet('quiet'), '🔇 Demo: profilo silenzioso applicato.', 'Ventole in SILENZIOSA? Meno rumore, qualche FPS in meno.'));
+  const _fb = $('#fanBalanced'); if (_fb) _fb.addEventListener('click', () => fanRun('fanmode', () => window.overclock.fanSet('balanced'), '⚖️ Demo: profilo bilanciato applicato.'));
+  const _fm = $('#fanMax'); if (_fm) _fm.addEventListener('click', () => fanRun('fanmode', () => window.overclock.fanSet('max'), '🌪️ Demo: ventole al massimo (più rumore, CPU mai throttlata).', 'Ventole al MASSIMO? Più rumore, più FPS stabili.'));
+  const _fpq = $('#fanPreviewQuiet'); if (_fpq) _fpq.addEventListener('click', () => fanRun('fanmode', () => window.overclock.fanPreview('quiet'), '👁 Demo: anteprima silenziosa — policy passiva + CPU 85%.'));
+  const _pct = $('#fanPct'), _pctVal = $('#fanPctVal');
+  if (_pct && _pctVal) _pct.addEventListener('input', () => { _pctVal.textContent = _pct.value + '%'; });
+  const _fpc = $('#fanPreviewCustom'); if (_fpc) _fpc.addEventListener('click', () => fanRun('fancustom', () => window.overclock.fanPreview('custom', (_pct || {}).value || 70), '👁 Demo: anteprima % manuale.'));
+  const _fac = $('#fanApplyCustom'); if (_fac) _fac.addEventListener('click', () => fanRun('fancustom', () => window.overclock.fanSet('custom', (_pct || {}).value || 70), '🎚️ Demo: velocità manuale applicata.', 'Applicare la velocità manuale alle ventole?'));
+  const _fr = $('#fanResetBtn'); if (_fr) _fr.addEventListener('click', () => fanRun('fanreset', () => window.overclock.fanReset(), '↩ Demo: ventole in automatico.', 'Rimettere le ventole in AUTOMATICO (come da fabbrica)?'));
+
   // ---------- Ollama badge ----------
   async function ollamaPing(){
     try {

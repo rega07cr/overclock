@@ -8,7 +8,7 @@ function createWindow() {
   // v1.1: splash animata + finestra mostrata subito.
   win = new BrowserWindow({
     width: 1240, height: 800, minWidth: 1024, minHeight: 680,
-    title: 'OVERCLOCK DESKTOP ENGINE v1.2',
+    title: 'OVERCLOCK DESKTOP ENGINE v1.3',
     backgroundColor: '#07070f',
     autoHideMenuBar: true,
     show: true,
@@ -103,6 +103,13 @@ ipcMain.handle('maint:uninstall-app', async () => {
 ipcMain.handle('game:boost', async (_e, gameId) => applyGameBoost(gameId));
 ipcMain.handle('game:mod', async (_e, gameId) => applyFpsMod(gameId));
 ipcMain.handle('game:stop', async (_e, gameId) => stopGameBoost(gameId));
+ipcMain.handle('game:launch-preview', async (_e, gameId) => require('./modules/game-launcher').previewLaunch(gameId));
+ipcMain.handle('game:launch', async (_e, gameId) => require('./modules/game-launcher').launchGame(gameId));
+ipcMain.handle('game:launch-stop', async (_e, gameId) => require('./modules/game-launcher').stopLaunch(gameId));
+ipcMain.handle('fan:status', async () => require('./modules/fans').fanStatus());
+ipcMain.handle('fan:preview', async (_e, mode, pct) => require('./modules/fans').previewFans(mode, pct));
+ipcMain.handle('fan:set', async (_e, mode, pct) => require('./modules/fans').setFanMode(mode, pct));
+ipcMain.handle('fan:reset', async () => require('./modules/fans').resetFans());
 ipcMain.handle('hw:profile', async () => require('./modules/hardware').hardwareProfile());
 ipcMain.handle('game:estimate', async (_e, gameId) => {
   const h = require('./modules/hardware');

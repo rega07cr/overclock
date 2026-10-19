@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OVERCLOCK DESKTOP ENGINE v1.2</title>
+<title>OVERCLOCK DESKTOP ENGINE v1.3</title>
 <link rel="stylesheet" href="app.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 </head>
 <body>
-<div id="boot"><div class="boot-orbit"><i class="o1"></i><i class="o2"></i><i class="o3"></i></div><div class="boot-inner"><div class="boot-bolt">⚡</div><div class="boot-name">OVERCLOCK</div><div class="boot-tag">DESKTOP ENGINE v1.2 · CLEAN UNINSTALL EDITION</div><div class="boot-bar"><i></i></div><div class="boot-steps" id="bootSteps">caricamento moduli…</div><div class="boot-sub">© 2026 REGA</div></div></div>
+<div id="boot"><div class="boot-orbit"><i class="o1"></i><i class="o2"></i><i class="o3"></i></div><div class="boot-inner"><div class="boot-bolt">⚡</div><div class="boot-name">OVERCLOCK</div><div class="boot-tag">DESKTOP ENGINE v1.3 · FPS BEAST EDITION</div><div class="boot-bar"><i></i></div><div class="boot-steps" id="bootSteps">caricamento moduli…</div><div class="boot-sub">© 2026 REGA</div></div></div>
 <div class="titlebar">
-  <span>🟰 OVERCLOCK DESKTOP ENGINE v1.2</span>
+  <span>🟰 OVERCLOCK DESKTOP ENGINE v1.3</span>
   <span class="status" id="boostStatus">[Status: BOOSTED ⚡]</span>
   <span class="wins"><i>—</i><i>▢</i><i>✕</i></span>
 </div>
@@ -21,6 +21,7 @@
     <button class="side" data-view="system">🚀<small>System Booster</small></button>
     <button class="side" data-view="game">🎮<small>Game Boost</small></button>
     <button class="side" data-view="fps">🚀<small>FPS MAX</small></button>
+    <button class="side" data-view="fans">🌀<small>Ventole</small></button>
     <button class="side" data-view="look">🔤<small>Aspetto</small></button>
     <button class="side" data-view="settings">⚙️<small>Settings</small></button>
     <div class="side-foot" id="ollamaBadge">● OLLAMA …</div>
@@ -112,7 +113,13 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
     <!-- FPS MAX (solo più FPS: GPU + CPU) -->
     <section class="view" id="view-fps">
       <h2>🚀 FPS MAX <small>— un solo obiettivo: più frame al secondo</small></h2>
-      <p class="mut">GPU MAX + CPU MAX insieme. Le app in background (Discord, browser, musica) <b>non vengono toccate</b>: nessun freeze. Tutto resta anche dopo aver chiuso l'app.</p>
+      <p class="mut">GPU MAX + CPU MAX + extra BEAST insieme. Le app in background (Discord, browser, musica) <b>non vengono toccate</b>: nessun freeze. Tutto resta anche dopo aver chiuso l'app.<br>⚠️ Onesto: nessun software fa ×100 FPS — qui spremi il massimo via software (su PC inchiodati il salto è grande, su GPU già al 99% il margine è fisico).</p>
+      <div class="set-card hero-launch">
+        <h3>🎮🚀 Lancia gioco ottimizzato <small class="mut">mod temporanee a ogni avvio</small></h3>
+        <p class="mut">Avvia il gioco <b>da qui</b>: applichiamo le mod FPS temporanee + argomenti di lancio + priorità High, e quando chiudi il gioco <b>ripristiniamo tutto da soli</b>. Se lo avvii da fuori, niente mod.</p>
+        <div class="row"><select id="launchGameSel" title="Gioco da lanciare"></select><button class="ghost" id="launchPreviewBtn">👁 Anteprima (leggi prima)</button><button class="apply sm" id="launchBtn">🚀 LANCIA GIOCO 🚀</button><button class="ghost" id="launchStopBtn">■ Stop / Ripristina</button></div>
+        <pre data-log="launch"></pre>
+      </div>
       <div class="set-card hero-fps">
         <h3>🚀 FPS MAX <small class="mut" id="fpsVendor">rilevamento scheda…</small></h3>
         <p class="mut">Il boost totale: scheda video al massimo + CPU che spinge solo il gioco. Premi 👁 e leggi cosa fa, poi applica.</p>
@@ -130,6 +137,35 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
         <p class="mut">Solo il processore: piano Prestazioni elevate + foreground boost + scheduler che dà più CPU al gioco + throttling off (admin + riavvio per le chiavi di sistema).</p>
         <div class="row"><button class="ghost" data-lookprev="cpumax">👁 Anteprima (leggi prima)</button><button class="apply sm" id="cpuMaxBtn">🧠 APPLICA CPU MAX 🧠</button><button class="ghost" id="cpuMaxRestore">↩ Ripristina CPU</button></div>
         <pre data-log="cpumax"></pre>
+      </div>
+    </section>
+
+    <!-- VENTOLE (profili + percentuale + reset automatico) -->
+    <section class="view" id="view-fans">
+      <h2>🌀 Ventole <small>— rumore vs raffreddamento, a tua scelta</small></h2>
+      <p class="mut">Profili rapidi + percentuale manuale in base all'efficienza che vuoi. I giri esatti dipendono dal produttore del PC (Windows non ha un'API standard): la policy Windows si applica sempre, per il controllo fino all'ultimo giro usa l'app del produttore. Il <b>reset automatico</b> rimette sempre tutto come prima.</p>
+      <div class="set-card">
+        <h3>🌀 Stato attuale</h3>
+        <div class="row"><button class="ghost" id="fanStatusBtn">🌀 Leggi stato (non tocca nulla)</button></div>
+        <pre data-log="fanstatus"></pre>
+      </div>
+      <div class="set-card">
+        <h3>🔇🎮 Profili rapidi</h3>
+        <p class="mut">Silenziosa = ventole basse (qualche FPS in meno) · Bilanciata = default · Massima = CPU mai throttlata (più rumore, più FPS).</p>
+        <div class="row"><button class="ghost" id="fanPreviewQuiet">👁 Anteprima silenziosa</button><button class="ghost" id="fanQuiet">🔇 Silenziosa</button><button class="ghost" id="fanBalanced">⚖️ Bilanciata</button><button class="ghost" id="fanMax">🌪️ Massima</button></div>
+        <pre data-log="fanmode"></pre>
+      </div>
+      <div class="set-card">
+        <h3>🎚️ Velocità manuale (10–100%)</h3>
+        <p class="mut">Scegli quanto devono spingere: sotto il 70% diventano silenziose (policy passiva + CPU limitata), sopra spingono (policy attiva). Se il tuo vendor lo permette, proviamo a impostare i giri esatti.</p>
+        <div class="row"><input id="fanPct" type="range" min="10" max="100" value="70" step="5" style="flex:1"><b id="fanPctVal">70%</b><button class="ghost" id="fanPreviewCustom">👁 Anteprima</button><button class="apply sm" id="fanApplyCustom">🎚️ Applica</button></div>
+        <pre data-log="fancustom"></pre>
+      </div>
+      <div class="set-card">
+        <h3>↩ Reset automatico (modalità di fabbrica)</h3>
+        <p class="mut">Rimette policy + CPU come prima e chiede al vendor la modalità auto. Funzionante sempre, anche senza snapshot.</p>
+        <div class="row"><button class="apply sm" id="fanResetBtn">↩ RESET AUTOMATICO 🌀</button></div>
+        <pre data-log="fanreset"></pre>
       </div>
     </section>
 
@@ -188,7 +224,7 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
       </div>
       <div class="set-card">
         <h3>© Crediti</h3>
-        <p class="mut">OVERCLOCK Desktop Engine v1.2 — creato da <b>REGA</b> © 2026, tutti i diritti riservati.</p>
+        <p class="mut">OVERCLOCK Desktop Engine v1.3 — creato da <b>REGA</b> © 2026, tutti i diritti riservati.</p>
       </div>
       <div class="set-card">
         <h3>Provider cloud (opzionale)</h3>

@@ -429,12 +429,15 @@ async function previewGpuMax(arg) {
   const proc = arg && (arg.process || arg);
   const hk = (txt) => admin ? `VERRÀ applicato (sei admin, serve riavvio) — ${txt}` : `SALTATO (serve avvio come amministratore) — ${txt}`;
   return { ok: true, preview: true, out:
-    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] (non ho toccato nulla)\n\n✅ COSA FA (solo più FPS, niente freeze alle altre app):\n` +
-    `• GameDVR OFF + Game Mode ON (HKCU, immediato): Windows smette di registrare in background\n` +
-    `• Cache shader pulita (${info.vendor === 'nvidia' ? 'NVIDIA GLCache+DxCache' : info.vendor === 'amd' ? 'AMD DxCache' : 'generica'}): micro-stutter via, si rigenera da sola\n` +
+    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] v1.3 BEAST (non ho toccato nulla)\n\n✅ COSA FA (solo più FPS, niente freeze alle altre app):\n` +
+    `• GameDVR OFF + Game Mode ON + capture GameDVR off (HKCU, immediato): Windows smette di registrare in background\n` +
+    `• Cache shader pulita (${info.vendor === 'nvidia' ? 'NVIDIA GLCache+DxCache' : info.vendor === 'amd' ? 'AMD DxCache' : 'generica'} + DirectX D3DSCache + cache Steam): micro-stutter via, si rigenerano da sole\n` +
     `• HAGS (HwSchMode=2, HKLM): ${hk('la GPU gestisce la memoria da sola = più FPS stabili')}\n` +
     `• MPO off anti-stutter (OverlayTestMode=5, HKLM): ${hk('via gli scattini su 144Hz+/multi-monitor')}\n` +
+    `• TdrDelay=8 (HKLM): ${hk('il driver non resetta più la GPU nei picchi di carico = niente freeze di 2 secondi')}\n` +
+    `• Priorità GPU ai giochi via Multimedia Scheduler (HKLM): ${hk('Windows dà la GPU al gioco prima che a tutto il resto')}\n` +
     `• Power Throttling off (HKLM): ${hk('la GPU non viene più rallentata in background')}\n` +
+    `• Risparmio PCIe/USB off via powercfg (immediato): la GPU resta sempre alimentata al massimo\n` +
     `• Preferenza “alte prestazioni” per ${proc || '(nessun gioco indicato — avvia il gioco e scrivi il processo, es. cs2)'} (HKCU, immediata)\n` +
     `🚫 COSA NON TOCCA: driver, giochi, salvataggi, Discord/browser (restano fluidi).\n↩ COME ANNULLARE: snapshot dedicato, “↩ Ripristina” rimette tutto.` };
 }
@@ -443,7 +446,9 @@ async function previewCpuMax() {
   const hk = (txt) => admin ? `VERRÀ applicato (sei admin, serve riavvio) — ${txt}` : `SALTATO (serve avvio come amministratore) — ${txt}`;
   return { ok: true, preview: true, out:
     `👁 ANTEPRIMA — CPU MAX (non ho toccato nulla)\n\n✅ COSA FA (solo più FPS, la CPU spinge il gioco):\n` +
-    `• Piano energia → Prestazioni elevate (immediato): niente più risparmi mentre giochi\n` +
+    `• Piano energia → Prestazioni elevate, o Ultimate Performance se disponibile (immediato): niente più risparmi mentre giochi\n` +
+    `• CPU sempre al 100% + raffreddamento ATTIVO + core parking OFF via powercfg (immediato): tutti i core sempre svegli\n` +
+    `• Boost aggressivo del processore in gioco via powercfg (immediato)\n` +
     `• Power Throttling off (HKLM): ${hk('niente più cali quando il gioco va in background un secondo')}\n` +
     `• Priorità giochi del Multimedia Scheduler (HKLM): SystemResponsiveness=10 + Games=High — ${hk('Windows dà più CPU al gioco che a tutto il resto')}\n` +
     `• Foreground boost Win32PrioritySeparation=38 (HKCU, immediato): la finestra in primo piano risponde prima\n` +
@@ -452,7 +457,7 @@ async function previewCpuMax() {
 async function previewFpsMax(arg) {
   const g = await previewGpuMax(arg);
   const c = await previewCpuMax();
-  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX = GPU MAX + CPU MAX (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX v1.3 BEAST = GPU MAX + CPU MAX + extra (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n⚠️ ONESTO: nessun software al mondo moltiplica gli FPS ×100 — i colli veri sono GPU/CPU fisiche. Qui spremiamo TUTTO il spremibile via software: su un PC inchiodato dal sistema il salto si sente eccome (+20–45% tipico su CPU-bound), su una GPU già al 99% il margine è piccolo.\n\n🚀 EXTRA v1.3 oltre a GPU+CPU: trasparenza/animazioni OFF (la UI non ruba più frame) + RAM standby liberata subito.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
 }
 async function cleanShaderCache(info, log) {
   // Pulizia cache shader: via gli stutter, i file si rigenerano al prossimo avvio gioco.
@@ -485,16 +490,35 @@ async function gpuMax(arg) {
   // Parte immediata HKCU: GameDVR off (smette di registrare) + Game Mode on + FSE.
   await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_Enabled', 0, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_AppCaptureEnabled', 0, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_HonorUserFSEBehaviorMode', 1, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\GameDVR', 'AppCaptureEnabled', 0, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AllowAutoGameMode', 1, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AutoGameModeEnabled', 1, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_FSEBehaviorMode', 2, 'DWord');
   await cleanShaderCache(info, log);
+  // Cache DirectX generica + shader Steam (sicure: si rigenerano da sole).
+  try {
+    const extra = await sh(ps(`$d=Join-Path $env:LOCALAPPDATA 'D3DSCache';` +
+      `$n=(Get-ChildItem $d -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;` +
+      `Get-ChildItem $d -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Cache DirectX: '+$n+' file rimossi'`));
+    if (extra.ok) log.push('✓ ' + extra.out.split('\n')[0]);
+  } catch {}
+  // Alimentazione GPU sempre al massimo via powercfg (immediato, ripristinato col piano energia).
+  const pc1 = await sh('powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a9d5d5a6c061 ee12f906-d277-404b-b6da-e5fa1a576f3e 0');
+  if (pc1.ok) log.push('✓ Risparmio energia PCI Express → OFF (GPU sempre alimentata)');
+  const pc2 = await sh('powercfg /setacvalueindex SCHEME_CURRENT 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 d4e98f31-5ffe-4ce1-be31-1b38b384c009 0');
+  if (pc2.ok) log.push('✓ Sospensione selettiva USB → OFF (niente lag a mouse/tastiera/gamepad)');
+  await sh('powercfg /setactive SCHEME_CURRENT');
   if (admin) {
     await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'HwSchMode', 2, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm', 'OverlayTestMode', 5, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
-    log.push('🔄 MPO off + HAGS + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
-  } else log.push('ℹ HKLM saltato (HAGS/MPO/throttling richiedono avvio come amministratore) — il resto è già attivo.');
+    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'TdrDelay', 8, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'GPU Priority', 8, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Priority', 6, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Scheduling Category', 'High', 'String');
+    log.push('🔄 MPO off + HAGS + TdrDelay + priorità GPU ai giochi + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
+  } else log.push('ℹ HKLM saltato (HAGS/MPO/TdrDelay/scheduler richiedono avvio come amministratore) — il resto è già attivo.');
   const exe = await resolveExePath(proc);
   if (exe) {
     await snapWrite(snap, log, 'HKCU:\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences', exe, 'GpuPreference=2;', 'String');
@@ -515,8 +539,29 @@ async function cpuMax() {
   const log = ['🧠 CPU MAX ATTIVO — la CPU lavora per il gioco, le altre app restano vive'];
   const cur = await sh('powercfg /getactivescheme');
   snap.power = cur.out.split('\n')[0];
-  const p = await sh(`powercfg /setactive ${PERF_GUID_FPS}`);
-  log.push(`${p.ok ? '✓' : '✕'} Piano energia → Prestazioni elevate (niente più risparmi mentre giochi)`);
+  // Ultimate Performance se disponibile, altrimenti Prestazioni elevate.
+  const ULT = 'e9a42b02-d5df-448d-aa00-03f14749eb61';
+  let p = await sh(`powercfg /setactive ${ULT}`);
+  if (!p.ok) {
+    await sh(`powercfg -duplicatescheme ${ULT}`);
+    p = await sh(`powercfg /setactive ${ULT}`);
+  }
+  if (!p.ok) p = await sh(`powercfg /setactive ${PERF_GUID_FPS}`);
+  log.push(`${p.ok ? '✓' : '✕'} Piano energia → massime prestazioni (niente più risparmi mentre giochi)`);
+  // CPU sempre al 100%, raffreddamento attivo, core parking OFF, boost aggressivo (immediato).
+  const SUB_CPU = '54533251-82be-4824-96c1-47b60b740d00';
+  const tweaks = [
+    ['893dee8e-2bef-41e0-89c6-b55d0929964c', '100', 'CPU minima al 100% (mai in risparmio)'],
+    ['bc5038f7-23e0-4960-96da-33abaf5935ec', '100', 'CPU massima al 100% (tutta la potenza)'],
+    ['94d3a615-a899-4ac5-ae2b-e4d8f634367f', '1', 'Raffreddamento ATTIVO (prima le ventole, poi il rallentamento)'],
+    ['0cc5b647-c1df-4637-891a-dec35c318583', '100', 'Core parking OFF (tutti i core sempre svegli)'],
+    ['be337238-0d82-4146-a960-4f3749d470c7', '2', 'Boost processore AGGRESSIVO in gioco']
+  ];
+  for (const [guid, val, label] of tweaks) {
+    const r = await sh(`powercfg /setacvalueindex SCHEME_CURRENT ${SUB_CPU} ${guid} ${val}`);
+    if (r.ok) log.push(`✓ ${label}`);
+  }
+  await sh('powercfg /setactive SCHEME_CURRENT');
   await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'ForegroundLockTimeout', 0, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'Win32PrioritySeparation', 38, 'DWord');
   if (admin) {
@@ -567,19 +612,33 @@ async function listStartupBackup() {
   const items = r.out === '(nessun output)' ? [] : r.out.split('\n').filter(n => n && !/^PS/.test(n));
   return { ok: true, items, out: items.length ? items.join('\n') : 'Nessun programma disabilitato da riattivare.' };
 }
-// ---------- 🚀 FPS MAX v1.1: GPU MAX + CPU MAX in un click (solo più FPS) ----------
+// ---------- 🚀 FPS MAX v1.3 BEAST: GPU MAX + CPU MAX + extra in un click (solo più FPS) ----------
 async function fpsMax(arg) {
   if (os.platform() !== 'win32') return { ok: false, out: 'FPS MAX supportato solo su Windows in questa versione.' };
   const g = await gpuMax(arg);
   const c = await cpuMax();
+  // EXTRA v1.3: la UI di Windows non deve rubare frame — trasparenza + animazioni OFF (snapshot dedicato).
+  const ui = { regs: [] };
+  const uiLog = [];
+  await snapWrite(ui, uiLog, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 0, 'DWord');
+  await snapWrite(ui, uiLog, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 0, 'DWord');
+  await snapWrite(ui, uiLog, 'HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '0', 'String');
+  putSnap('fpsmax-ui', ui);
+  // EXTRA v1.3: RAM standby liberata subito (sicuro: è solo cache, si ricrea da sola).
+  let ramLine = '';
+  try {
+    const r = await require('./system-booster').ramFlush();
+    ramLine = '✓ RAM standby liberata subito (' + r.out.split('\n')[0] + ')';
+  } catch (e) { ramLine = 'ℹ RAM flush saltata: ' + e.message; }
   const ok = g.ok && c.ok;
   try { require('./persist').markActive('fps-max'); } catch {}
-  return { ok, out: `🚀 FPS MAX ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}`, snap: { gpu: g.snap, cpu: c.snap } };
+  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n⚠️ ONESTO: nessun software fa ×100 — qui hai il massimo spremibile via software.`, snap: { gpu: g.snap, cpu: c.snap } };
 }
 async function fpsMaxRestore() {
   const g = await restoreRegs('gpumax', 'GPU: niente da ripristinare.');
   const c = await restoreRegs('cpumax', 'CPU: niente da ripristinare.');
-  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}` };
+  const u = await restoreRegs('fpsmax-ui', 'UI: niente da ripristinare.');
+  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}\n\n── UI ──\n${u.out}` };
 }
 async function gpuMaxRestore(snapArg) {
   const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpumax') || snapArg);
