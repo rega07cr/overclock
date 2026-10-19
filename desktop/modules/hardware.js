@@ -144,7 +144,7 @@ function estimateFps(gameId, hw) {
   const p = hw.platform || os.platform();
   const why = [];
   if (p === 'win32') {
-    why.push('⬆ Priorità processo di gioco al massimo (HighPerformance)');
+    why.push('⬆ Priorità processo di gioco al massimo (High) — solo il gioco, le altre app restano intatte');
     if (g.affinityAllCores) why.push('🧠 Affinity su tutti i ' + (hw.cores || 'N') + ' core disponibili');
     why.push('🔕 Focus-Assist: niente notifiche mentre giochi');
   } else if (p === 'darwin') {
@@ -163,7 +163,7 @@ function estimateFps(gameId, hw) {
   const bonus = mod ? [8, 12] : [4, 8];
   const modLine = mod
     ? `🧪 FPS MOD disponibile (${mod.desc}): stima extra +${bonus[0]}–${bonus[1]}% oltre al boost base — file di config con backup, tutto ripristinabile.`
-    : `🧪 FPS MOD CPU disponibile (priorità + core dedicati + app pesanti sospese): stima extra +${bonus[0]}–${bonus[1]}%.`; 
+    : `🧪 FPS MOD CPU disponibile (priorità + core dedicati, senza toccare le altre app): stima extra +${bonus[0]}–${bonus[1]}%.`; 
   return {
     ok: true, game: g.name, icon: g.icon || '🎮',
     min, max, tier, mod: !!mod, modLine,

@@ -5,10 +5,10 @@ const { applyGameBoost, applyFpsMod, stopGameBoost } = require('./modules/game-b
 
 let win = null;
 function createWindow() {
-  // Avvio veloce: finestra mostrata subito, niente attesa, niente animazioni di troppo.
+  // v1.1: splash animata + finestra mostrata subito.
   win = new BrowserWindow({
     width: 1240, height: 800, minWidth: 1024, minHeight: 680,
-    title: 'OVERCLOCK DESKTOP ENGINE v1.0',
+    title: 'OVERCLOCK DESKTOP ENGINE v1.1',
     backgroundColor: '#07070f',
     autoHideMenuBar: true,
     show: true,
@@ -19,6 +19,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  try { require('./modules/persist').reapplyFlag(); } catch {}
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
@@ -59,11 +60,19 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
     'gpu-preview': () => tuning.previewGpu(typeof arg === 'string' ? arg : undefined),
     'os-preview': () => tuning.previewOs(typeof arg === 'string' ? arg : undefined),
     'font-mode': () => tuning.setFontMode(typeof arg === 'string' ? arg : 'cleartype'),
+    'font-preview': () => tuning.previewFont(),
     'appearance-restore': () => tuning.restoreAppearance(),
     'appearance-preview': () => tuning.previewAppearance(),
+    'look-option': () => tuning.setLookOption(arg && arg.opt, arg && arg.val),
     'gpu-max': () => tuning.gpuMax(arg),
     'gpu-max-restore': () => tuning.gpuMaxRestore(arg),
     'gpumax-preview': () => tuning.previewGpuMax(arg),
+    'cpu-max': () => tuning.cpuMax(),
+    'cpu-max-restore': () => tuning.cpuMaxRestore(),
+    'cpumax-preview': () => tuning.previewCpuMax(),
+    'fps-max': () => tuning.fpsMax(arg),
+    'fps-max-restore': () => tuning.fpsMaxRestore(),
+    'fpsmax-preview': () => tuning.previewFpsMax(arg),
     'startup-list': () => tuning.listStartup(),
     'startup-toggle': () => tuning.toggleStartup(arg.name, arg.enable),
     'is-admin': () => require('./modules/system-booster').isAdmin().then(v => ({ admin: v }))
@@ -71,6 +80,7 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
   if (!map[action]) throw new Error('unknown tuning action');
   return map[action]();
 });
+ipcMain.handle('game:list', async () => require('./modules/game-boost').PRESETS);
 ipcMain.handle('game:boost', async (_e, gameId) => applyGameBoost(gameId));
 ipcMain.handle('game:mod', async (_e, gameId) => applyFpsMod(gameId));
 ipcMain.handle('game:stop', async (_e, gameId) => stopGameBoost(gameId));

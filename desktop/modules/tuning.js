@@ -43,11 +43,11 @@ async function previewGpu(mode) {
   mode = normMode(mode);
   const info = await gpuInfo();
   const admin = os.platform() === 'win32' ? await require('./system-booster').isAdmin() : false;
-  const shader = mode === 'base' ? 'NON toccata (livello Base)' : `${info.vendor === 'nvidia' ? 'NVIDIA (GLCache+DxCache)' : info.vendor === 'amd' ? 'AMD (DxCache)' : '(generica)'}: file contati e rimossi (rigenerati al prossimo avvio gioco)`;
+  const shader = mode === 'base' ? 'NON toccata (livello Base)' : `${info.vendor === 'nvidia' ? 'NVIDIA (GLCache+DxCache)' : info.vendor === 'amd' ? 'AMD (DxCache)' : '(generica)'}: file contati e rimossi (si rigenerano da soli al prossimo gioco)`;
   const hags = mode !== 'potente' ? 'SALTATO (solo livello Potente)' : (admin ? 'VERRÀ applicato (sei admin, serve riavvio)' : 'SALTATO (serve avvio come amministratore)');
   return {
     ok: true, preview: true,
-    out: `👁 ANTEPRIMA — GPU Boost [${MODE_LABEL[mode]}] (${info.vendor.toUpperCase()}, nessuna modifica ancora):\n\u2022 Registro: HKCU GameBar AllowAutoGameMode=1, AutoGameModeEnabled=1 + GameConfigStore FSE=2 (HKCU, effetto immediato)\n\u2022 Cache shader: ${shader}\n\u2022 HAGS (HKLM HwSchMode=2): ${hags}\n\u2022 Ripristino: valori precedenti salvati, "\u21a9 Ripristina" li rimette`
+    out: `👁 ANTEPRIMA — GPU Boost [${MODE_LABEL[mode]}] (${info.vendor.toUpperCase()}, non ho toccato nulla)\n\n✅ COSA FA:\n• Game Mode ON + fullscreen esclusivo (HKCU, immediato)\n• Cache shader: ${shader}\n• HAGS (HKLM HwSchMode=2): ${hags}\n🚫 COSA NON TOCCA: driver, giochi, salvataggi, altre app.\n👤 ADMIN: serve solo per HAGS. 🔄 RIAVVIO: serve solo per HAGS.\n↩ COME ANNULLARE: valori salvati, "↩ Ripristina" rimette tutto (anche dopo il riavvio).`
   };
 }
 
@@ -60,23 +60,13 @@ async function previewOs(mode) {
     : 'GameDVR off + GameMode on + EnableTransparency=0, TaskbarAnimations=0, MenuShowDelay=0' + (mode === 'potente' ? ', VisualFXSetting=3 (Custom) + ClearType preservato (FontSmoothing=2, Type=2, Gamma=1400)' : '');
   return {
     ok: true, preview: true,
-    out: `👁 ANTEPRIMA — Overclock OS [${MODE_LABEL[mode]}] (nessuna modifica ancora):\n\u2022 Piano energia: ${plan}\n\u2022 Registro HKCU: ${regs}\n\u2022 Explorer/riavvio consigliato per effetto pieno\n\u2022 Ripristino: piano energia + valori precedenti salvati, "\u21a9 Ripristina" li rimette`
+    out: `👁 ANTEPRIMA — Overclock OS [${MODE_LABEL[mode]}] (non ho toccato nulla)\n\n✅ COSA FA:\n• Piano energia: ${plan}\n• Registro HKCU: ${regs}\n🚫 COSA NON TOCCA: file, giochi, altre app. 👤 ADMIN: serve solo per il piano energia.\n🔄 RIAVVIO: consigliato (o riavvia Explorer) per l\u2019effetto pieno.\n↩ COME ANNULLARE: piano + valori salvati, "↩ Ripristina" rimette tutto.`
   };
 }
 
-function putSnap(key, snap) {
-  try {
-    const f = path.join(os.tmpdir(), 'overclock-snaps.json');
-    let all = {}; try { all = JSON.parse(fs.readFileSync(f, 'utf8')); } catch {}
-    all[key] = { when: new Date().toISOString(), snap }; fs.writeFileSync(f, JSON.stringify(all, null, 1));
-  } catch {}
-}
-function getSnap(key) {
-  try {
-    const f = path.join(os.tmpdir(), 'overclock-snaps.json');
-    return (JSON.parse(fs.readFileSync(f, 'utf8'))[key] || {}).snap || null;
-  } catch { return null; }
-}
+// Snapshot persistenti in ~/.overclock (sopravvivono a chiusura app + riavvio)
+const persist = require('./persist');
+const { putSnap, getSnap } = persist;
 
 async function gpuBoost(mode) {
   mode = normMode(mode);
@@ -90,9 +80,8 @@ async function gpuBoost(mode) {
   }
   const admin = await require('./system-booster').isAdmin();
   const set = async (path, name, value, kind = 'DWord') => {
-    const get = await sh(ps(`(Get-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue).${name}`));
-    const prev = get.ok && get.out !== '(nessun output)' ? get.out.split('\n')[0] : null;
-    snap.regs.push({ path, name, prev });
+    const prev = await readReg(path, name);
+    snap.regs.push({ path, name, prev: prev.prev, prevKind: prev.kind, val: value });
     const r = await sh(ps(`if (-not (Test-Path '${path}')) { New-Item -Path '${path}' -Force | Out-Null }; Set-ItemProperty -Path '${path}' -Name ${name} -Value ${value} -Type ${kind}; '${name}=${value}'`));
     log.push(`${r.ok ? '✓' : '✕'} ${name} → ${value}`);
     return r.ok;
@@ -133,10 +122,14 @@ async function gpuRestore(snapArg) {
       await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
       log.push(`↩ ${name} rimosso (default)`);
     } else {
-      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev}; 'ok'`));
+      // BUGFIX v1.1: prima il tipo registro veniva ignorato e il ripristino falliva
+      // su String vs DWord. Ora riusa il tipo originale salvato.
+      const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
       log.push(`↩ ${name} → ${prev}`);
     }
   }
+  try { require('./persist').markRestored(); } catch {}
   return { ok: true, out: log.join('\n') || 'Niente da ripristinare.' };
 }
 
@@ -255,7 +248,7 @@ async function osOverclock(mode) {
     log.push(`${fs1.ok ? '✓' : 'ℹ'} Font nitidi preservati (ClearType attivo subito${fs1.ok ? '' : ', verifica al riavvio'})`);
   }
   log.push('ℹ Trasparenza/animazioni/GameDVR off. Riavvia Explorer o il PC per l\u2019effetto pieno.');
-  global.__fpsBoost = true;
+  try { require('./persist').markActive('os-overclock:' + mode); } catch { global.__fpsBoost = true; }
   putSnap('os', snap);
   return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: "↩ Ripristina" riporta tutto come prima (anche dopo il riavvio).', snap };
 }
@@ -277,8 +270,8 @@ async function osRestore(snapArg) {
     else {
       const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
       await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      log.push(`↩ ${name} ripristinato`);
     }
-    log.push(`↩ ${name} ripristinato`);
   }
   try {
     const curS = await readReg('HKCU:\\Control Panel\\Desktop', 'FontSmoothing');
@@ -292,7 +285,7 @@ async function osRestore(snapArg) {
       log.push('↩ Smoothing ripristinato (off, come prima)');
     }
   } catch {}
-  global.__fpsBoost = false;
+  try { require('./persist').markRestored(); } catch { global.__fpsBoost = false; }
   return { ok: true, out: log.join('\n') || 'Niente da ripristinare.' };
 }
 
@@ -383,16 +376,44 @@ async function restoreAppearance() {
 async function previewAppearance() {
   if (os.platform() !== 'win32') return { ok: true, preview: true, out: 'Solo Windows.' };
   const keys = [
-    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects', 'VisualFXSetting'],
-    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency'],
-    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations'],
-    ['HKCU:\\Control Panel\\Desktop', 'MenuShowDelay'],
-    ['HKCU:\\Control Panel\\Desktop', 'FontSmoothing'],
-    ['HKCU:\\Control Panel\\Desktop', 'FontSmoothingType']
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects', 'VisualFXSetting', 'Effetti visivi (assente = Decide Windows)'],
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 'Trasparenza finestre (1 = ON)'],
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 'Animazioni barra (1 = ON)'],
+    ['HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', 'Velocità menu in ms (400 = normale, 0 = istantaneo)'],
+    ['HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'AppsUseLightTheme', 'Tema app (1 = chiaro, 0 = scuro)'],
+    ['HKCU:\\Control Panel\\Desktop', 'FontSmoothing', 'Testo smussato (2 = ON)'],
+    ['HKCU:\\Control Panel\\Desktop', 'FontSmoothingType', 'Tipo testo (2 = ClearType nitido, 1 = Standard)']
   ];
   const rows = [];
-  for (const [p, n] of keys) { const r = await readReg(p, n); rows.push(`• ${n} = ${r.prev === null ? '(assente/default)' : r.prev}`); }
-  return { ok: true, preview: true, out: `👁 ANTEPRIMA — Aspetto standard (nessuna modifica ancora):\n${rows.join('\n')}\n\u2022 Verranno rimessi: VisualFX default, trasparenza ON, animazioni ON, MenuShowDelay 400, ClearType` };
+  for (const [p, n, what] of keys) { const r = await readReg(p, n); rows.push(`• ${n} = ${r.prev === null ? '(assente/default)' : r.prev} — ${what}`); }
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — Aspetto standard (non ho toccato nulla)\n\n📊 VALORI ATTUALI SUL TUO PC:\n${rows.join('\n')}\n\n✅ COSA FARÀ “Torna tutto normale”: VisualFX default, trasparenza ON, animazioni ON, menu 400ms, tema chiaro, ClearType nitido.\n🚫 COSA NON TOCCA: file, giochi, app. 👤 ADMIN: non serve. 🔄 RIAVVIO: basta chiudere/riaprire le app.\n↩ COME ANNULLARE: snapshot dedicato, ogni singola opzione sotto è comunque separata.` };
+}
+async function previewFont() {
+  if (os.platform() !== 'win32') return { ok: true, preview: true, out: 'Solo Windows.' };
+  const DP = 'HKCU:\\Control Panel\\Desktop';
+  const s = await readReg(DP, 'FontSmoothing');
+  const t = await readReg(DP, 'FontSmoothingType');
+  const g = await readReg(DP, 'FontSmoothingGamma');
+  const cur = s.prev === '2' ? (String(t.prev) === '1' ? 'Standard classico' : 'ClearType nitido') : s.prev === '0' ? 'Smoothing OFF' : 'sconosciuto/default';
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — Testo di Windows (non ho toccato nulla)\n\n📊 ORA HAI: ${cur} (FontSmoothing=${s.prev}, Type=${t.prev}, Gamma=${g.prev}).\n\n✅ COSA FA LA SCELTA:\n• ✨ ClearType nitido (consigliato): caratteri pieni e definiti, ideale su schermi moderni.\n• 📝 Standard classico: resa più leggera stile Windows classico.\n• ⬜ Smoothing OFF: testo secco, solo se sai cosa fai.\n🚫 NON TOCCA: nient\u2019altro — solo 2-4 chiavi font. 👤 ADMIN: non serve. 🔄 EFFETTO: immediato + resta dopo il riavvio.\n↩ COME ANNULLARE: snapshot dedicato, “↩ Torna tutto normale” rimette ClearType.` };
+}
+// ---------- Aspetto esteso v1.1: singole opzioni ----------
+async function setLookOption(opt, val) {
+  if (os.platform() !== 'win32') return { ok: false, out: 'Solo Windows.' };
+  const snap = getSnap('appearance-opts') || { regs: [] };
+  const log = [];
+  const P = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize';
+  const A = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced';
+  const D = 'HKCU:\\Control Panel\\Desktop';
+  if (opt === 'transparency') await snapWrite(snap, log, P, 'EnableTransparency', val ? 1 : 0, 'DWord');
+  else if (opt === 'animations') { await snapWrite(snap, log, A, 'TaskbarAnimations', val ? 1 : 0, 'DWord'); if (!val) await snapWrite(snap, log, P, 'EnableTransparency', 0, 'DWord'); }
+  else if (opt === 'menudelay') await snapWrite(snap, log, D, 'MenuShowDelay', String(val), 'String');
+  else if (opt === 'theme') await snapWrite(snap, log, P, 'AppsUseLightTheme', val === 'light' ? 1 : 0, 'DWord');
+  else return { ok: false, out: 'Opzione sconosciuta: ' + opt };
+  putSnap('appearance-opts', snap);
+  try { require('./persist').markActive('aspetto:' + opt); } catch {}
+  const labels = { transparency: 'Trasparenza → ' + (val ? 'ON' : 'OFF'), animations: 'Animazioni → ' + (val ? 'ON' : 'OFF'), menudelay: 'Velocità menu → ' + val + 'ms' + (String(val) === '0' ? ' (istantaneo)' : String(val) === '400' ? ' (normale)' : ''), theme: 'Tema app → ' + val };
+  return { ok: true, out: (log.join('\n') || labels[opt]) + '\n💾 Resta anche dopo aver chiuso l\u2019app. ↩ “Torna tutto normale” annulla tutto.', snap };
 }
 
 // ---------- GPU MAX: massimi tweak in base alla scheda rilevata ----------
@@ -406,13 +427,53 @@ async function previewGpuMax(arg) {
   const info = await gpuInfo();
   const admin = os.platform() === 'win32' ? await require('./system-booster').isAdmin() : false;
   const proc = arg && (arg.process || arg);
+  const hk = (txt) => admin ? `VERRÀ applicato (sei admin, serve riavvio) — ${txt}` : `SALTATO (serve avvio come amministratore) — ${txt}`;
   return { ok: true, preview: true, out:
-    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] (nessuna modifica ancora):\n` +
-    `\u2022 HAGS (HwSchMode=2): ${admin ? 'VERRÀ assicurato (sei admin, serve riavvio)' : 'SALTATO (serve admin)'}\n` +
-    `\u2022 MPO off anti-stutter (OverlayTestMode=5, HKLM): ${admin ? 'VERRÀ applicato (serve riavvio)' : 'SALTATO (serve admin)'}\n` +
-    `\u2022 Power Throttling off (HKLM): ${admin ? 'VERRÀ applicato (serve riavvio)' : 'SALTATO (serve admin)'}\n` +
-    `\u2022 Preferenza GPU "alte prestazioni" per ${proc || '(nessun processo indicato — avvia il gioco)'}: VERRÀ applicata (HKCU, immediata)\n` +
-    `\u2022 Ripristino: snapshot dedicato, "■ Stop / Ripristina" rimette tutto` };
+    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] (non ho toccato nulla)\n\n✅ COSA FA (solo più FPS, niente freeze alle altre app):\n` +
+    `• GameDVR OFF + Game Mode ON (HKCU, immediato): Windows smette di registrare in background\n` +
+    `• Cache shader pulita (${info.vendor === 'nvidia' ? 'NVIDIA GLCache+DxCache' : info.vendor === 'amd' ? 'AMD DxCache' : 'generica'}): micro-stutter via, si rigenera da sola\n` +
+    `• HAGS (HwSchMode=2, HKLM): ${hk('la GPU gestisce la memoria da sola = più FPS stabili')}\n` +
+    `• MPO off anti-stutter (OverlayTestMode=5, HKLM): ${hk('via gli scattini su 144Hz+/multi-monitor')}\n` +
+    `• Power Throttling off (HKLM): ${hk('la GPU non viene più rallentata in background')}\n` +
+    `• Preferenza “alte prestazioni” per ${proc || '(nessun gioco indicato — avvia il gioco e scrivi il processo, es. cs2)'} (HKCU, immediata)\n` +
+    `🚫 COSA NON TOCCA: driver, giochi, salvataggi, Discord/browser (restano fluidi).\n↩ COME ANNULLARE: snapshot dedicato, “↩ Ripristina” rimette tutto.` };
+}
+async function previewCpuMax() {
+  const admin = os.platform() === 'win32' ? await require('./system-booster').isAdmin() : false;
+  const hk = (txt) => admin ? `VERRÀ applicato (sei admin, serve riavvio) — ${txt}` : `SALTATO (serve avvio come amministratore) — ${txt}`;
+  return { ok: true, preview: true, out:
+    `👁 ANTEPRIMA — CPU MAX (non ho toccato nulla)\n\n✅ COSA FA (solo più FPS, la CPU spinge il gioco):\n` +
+    `• Piano energia → Prestazioni elevate (immediato): niente più risparmi mentre giochi\n` +
+    `• Power Throttling off (HKLM): ${hk('niente più cali quando il gioco va in background un secondo')}\n` +
+    `• Priorità giochi del Multimedia Scheduler (HKLM): SystemResponsiveness=10 + Games=High — ${hk('Windows dà più CPU al gioco che a tutto il resto')}\n` +
+    `• Foreground boost Win32PrioritySeparation=38 (HKCU, immediato): la finestra in primo piano risponde prima\n` +
+    `🚫 COSA NON TOCCA: file, altre app (non vengono chiuse né sospese), overclock hardware reale (no voltage).\n↩ COME ANNULLARE: snapshot dedicato, “↩ Ripristina” rimette piano energia + registro.` };
+}
+async function previewFpsMax(arg) {
+  const g = await previewGpuMax(arg);
+  const c = await previewCpuMax();
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX = GPU MAX + CPU MAX (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
+}
+async function cleanShaderCache(info, log) {
+  // Pulizia cache shader: via gli stutter, i file si rigenerano al prossimo avvio gioco.
+  try {
+    if (info.vendor === 'nvidia') {
+      const c = await sh(ps(`$g=Join-Path $env:LOCALAPPDATA 'NVIDIA\\GLCache';$d=Join-Path $env:LOCALAPPDATA 'NVIDIA\\DxCache';` +
+        `$n=(Get-ChildItem $g,$d -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;` +
+        `Get-ChildItem $g,$d -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Shader cache NVIDIA: '+$n+' file rimossi'`));
+      log.push((c.ok ? '✓ ' : '✕ ') + c.out.split('\n')[0]);
+    } else if (info.vendor === 'amd') {
+      const c = await sh(ps(`$g=Join-Path $env:LOCALAPPDATA 'AMD\\DxCache';` +
+        `$n=(Get-ChildItem $g -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;` +
+        `Get-ChildItem $g -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Shader cache AMD: '+$n+' file rimossi'`));
+      log.push((c.ok ? '✓ ' : '✕ ') + c.out.split('\n')[0]);
+    } else {
+      const c = await sh(ps(`$d=Join-Path $env:LOCALAPPDATA 'D3DSCache';` +
+        `$n=(Get-ChildItem $d -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;` +
+        `Get-ChildItem $d -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Cache DirectX: '+$n+' file rimossi'`));
+      log.push((c.ok ? '✓ ' : '✕ ') + c.out.split('\n')[0]);
+    }
+  } catch (e) { log.push('ℹ Cache shader saltata: ' + e.message); }
 }
 async function gpuMax(arg) {
   if (os.platform() !== 'win32') return { ok: false, out: 'GPU MAX supportato solo su Windows in questa versione.' };
@@ -420,21 +481,91 @@ async function gpuMax(arg) {
   const info = await gpuInfo();
   const admin = await require('./system-booster').isAdmin();
   const snap = { vendor: info.vendor, regs: [] };
-  const log = [`🎨 GPU MAX ATTIVO [${info.vendor.toUpperCase()}]${admin ? '' : ' (senza admin: solo tweak HKCU)'}`];
+  const log = [`🎨 GPU MAX ATTIVO [${info.vendor.toUpperCase()}]${admin ? '' : ' (senza admin: solo tweak HKCU — riavvia come admin per il massimo)'}`];
+  // Parte immediata HKCU: GameDVR off (smette di registrare) + Game Mode on + FSE.
+  await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_Enabled', 0, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_AppCaptureEnabled', 0, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AllowAutoGameMode', 1, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AutoGameModeEnabled', 1, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_FSEBehaviorMode', 2, 'DWord');
+  await cleanShaderCache(info, log);
   if (admin) {
     await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'HwSchMode', 2, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm', 'OverlayTestMode', 5, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
-    log.push('ℹ MPO off + HAGS + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
-  } else log.push('ℹ HKLM saltato (HAGS/MPO/throttling richiedono avvio come amministratore).');
+    log.push('🔄 MPO off + HAGS + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
+  } else log.push('ℹ HKLM saltato (HAGS/MPO/throttling richiedono avvio come amministratore) — il resto è già attivo.');
   const exe = await resolveExePath(proc);
   if (exe) {
     await snapWrite(snap, log, 'HKCU:\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences', exe, 'GpuPreference=2;', 'String');
     log.push(`✓ ${exe.split('\\').pop()} → GPU alte prestazioni dedicata`);
   } else log.push(`ℹ Preferenza GPU saltata: avvia il gioco${proc ? ` (${proc})` : ''} e ripremi GPU MAX.`);
-  global.__fpsBoost = true;
+  log.push('✅ App in background: intatte, nessun freeze.');
+  log.push('💾 Resta anche dopo aver chiuso l\u2019app (registro + snapshot in ~/.overclock).');
+  try { require('./persist').markActive('gpu-max'); } catch { global.__fpsBoost = true; }
   putSnap('gpumax', snap);
   return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: ripristino dedicato rimette tutto come prima.', snap };
+}
+// ---------- CPU MAX v1.1: la CPU spinge solo il gioco ----------
+const PERF_GUID_FPS = '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c';
+async function cpuMax() {
+  if (os.platform() !== 'win32') return { ok: false, out: 'CPU MAX supportato solo su Windows in questa versione.' };
+  const admin = await require('./system-booster').isAdmin();
+  const snap = { regs: [], power: null };
+  const log = ['🧠 CPU MAX ATTIVO — la CPU lavora per il gioco, le altre app restano vive'];
+  const cur = await sh('powercfg /getactivescheme');
+  snap.power = cur.out.split('\n')[0];
+  const p = await sh(`powercfg /setactive ${PERF_GUID_FPS}`);
+  log.push(`${p.ok ? '✓' : '✕'} Piano energia → Prestazioni elevate (niente più risparmi mentre giochi)`);
+  await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'ForegroundLockTimeout', 0, 'DWord');
+  await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'Win32PrioritySeparation', 38, 'DWord');
+  if (admin) {
+    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile', 'SystemResponsiveness', 10, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'GPU Priority', 8, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Priority', 6, 'DWord');
+    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Scheduling Category', 'High', 'String');
+    log.push('🔄 Throttling off + scheduler giochi: RIAVVIA il PC per l\u2019effetto pieno.');
+  } else log.push('ℹ Scheduler giochi saltato (serve admin) — piano energia + foreground boost già attivi.');
+  log.push('✅ App in background: intatte, nessun freeze. 💾 Resta dopo la chiusura dell\u2019app.');
+  try { require('./persist').markActive('cpu-max'); } catch { global.__fpsBoost = true; }
+  putSnap('cpumax', snap);
+  return { ok: true, out: log.join('\n') + '\n↩ Snapshot salvato: ripristino dedicato rimette tutto come prima.', snap };
+}
+async function restoreRegs(key, fallbackMsg) {
+  const snap = getSnap(key);
+  const log = [];
+  if (snap && snap.power) {
+    const m = String(snap.power).match(/[0-9a-f-]{36}/i);
+    if (m) { await sh(`powercfg /setactive ${m[0]}`); log.push('↩ Piano energia ripristinato'); }
+  }
+  for (const { path, name, prev, prevKind } of ((snap && snap.regs) || [])) {
+    if (prev === null) {
+      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+      log.push(`↩ ${name} rimosso (default)`);
+    } else {
+      const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      log.push(`↩ ${name} → ${prev}`);
+    }
+  }
+  try { require('./persist').markRestored(); } catch {}
+  return { ok: true, out: log.join('\n') || fallbackMsg };
+}
+async function cpuMaxRestore() { return restoreRegs('cpumax', 'Niente da ripristinare (CPU MAX mai applicato).'); }
+// ---------- 🚀 FPS MAX v1.1: GPU MAX + CPU MAX in un click (solo più FPS) ----------
+async function fpsMax(arg) {
+  if (os.platform() !== 'win32') return { ok: false, out: 'FPS MAX supportato solo su Windows in questa versione.' };
+  const g = await gpuMax(arg);
+  const c = await cpuMax();
+  const ok = g.ok && c.ok;
+  try { require('./persist').markActive('fps-max'); } catch {}
+  return { ok, out: `🚀 FPS MAX ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}`, snap: { gpu: g.snap, cpu: c.snap } };
+}
+async function fpsMaxRestore() {
+  const g = await restoreRegs('gpumax', 'GPU: niente da ripristinare.');
+  const c = await restoreRegs('cpumax', 'CPU: niente da ripristinare.');
+  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}` };
 }
 async function gpuMaxRestore(snapArg) {
   const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpumax') || snapArg);
@@ -452,4 +583,4 @@ async function gpuMaxRestore(snapArg) {
   return { ok: true, out: log.join('\n') || 'Niente da ripristinare (GPU MAX mai applicato).' };
 }
 
-module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewGpuMax, gpuMax, gpuMaxRestore };
+module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewFont, setLookOption, previewGpuMax, previewCpuMax, previewFpsMax, gpuMax, gpuMaxRestore, cpuMax, cpuMaxRestore, fpsMax, fpsMaxRestore };

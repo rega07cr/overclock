@@ -1,20 +1,17 @@
-// game-boost.js — boost PER-GIOCO reale, senza toccare le impostazioni di sistema.
-// - Boost base: priorità High + affinity su tutti i core (transitorio, si perde alla chiusura).
+// game-boost.js — boost PER-GIOCO reale, senza toccare le altre app (v1.1: NESSUN freeze).
+// - Boost base: priorità High + affinity su tutti i core (solo processo di gioco).
 // - FPS MOD: + patch reversibile del file config del gioco (backup .ocbak)
-//            + affinity senza CPU0 (il sistema resta sul core 0)
-//            + sospensione app pesanti (Chrome/Discord/...) mentre giochi.
-// Tutto ripristinato da stopGameBoost(). Nessuna chiave di sistema modificata.
+//            + affinity senza CPU0 (il sistema resta sul core 0).
+// v1.1: la sospensione di Chrome/Discord/Spotify è STATA RIMOSSA (causava freeze).
+// Le app in background restano vive e fluide. Tutto ripristinato da stopGameBoost().
 const { exec } = require('child_process');
-const fs = require('fs');
 const os = require('os');
-const path = require('path');
 const PRESETS = require('./games-presets.json');
 const { FPS_MODS } = require('./hardware');
+const persist = require('./persist');
 
-const STATE_FILE = path.join(os.tmpdir(), 'ocmod-state.json');
-const MODSTATE = {};
-try { Object.assign(MODSTATE, JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))); } catch { /* nessun residuo */ }
-function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(MODSTATE)); } catch {} }
+const MODSTATE = persist.loadModState();
+function saveState() { persist.saveModState(MODSTATE); }
 
 function sh(cmd, timeout = 25000) {
   return new Promise((resolve) => {
@@ -31,9 +28,8 @@ function psRaw(script) {
   const q = String.fromCharCode(34);
   return 'powershell -NoProfile -ExecutionPolicy Bypass -Command ' + q + script + q;
 }
-const ADD_SUSPEND = 'if (-not (' + String.fromCharCode(39) + 'OcMod.P' + String.fromCharCode(39) + ' -as [type])) { $dq=[char]34; Add-Type -Namespace OcMod -Name P -MemberDefinition (' + String.fromCharCode(39) + '[DllImport(' + String.fromCharCode(39) + '+$dq+' + String.fromCharCode(39) + 'ntdll.dll' + String.fromCharCode(39) + '+$dq+' + String.fromCharCode(39) + ')] public static extern int NtSuspendProcess(IntPtr h); [DllImport(' + String.fromCharCode(39) + '+$dq+' + String.fromCharCode(39) + 'ntdll.dll' + String.fromCharCode(39) + '+$dq+' + String.fromCharCode(39) + ')] public static extern int NtResumeProcess(IntPtr h);' + String.fromCharCode(39) + ') }';
-
-const SUSPEND_LIST = ['chrome', 'msedge', 'firefox', 'Discord', 'Spotify', 'Teams', 'OneDrive', 'Skype'];
+// v1.1: NtSuspendProcess rimosso. Le app in background non si toccano più.
+const SUSPEND_LIST = [];
 
 function findGame(id) { return PRESETS.find(g => g.id === id); }
 function expandEnv(p) { return String(p).replace(/%([^%]+)%/g, (m, n) => process.env[n] || process.env[n.toUpperCase()] || m); }
@@ -58,7 +54,7 @@ async function applyGameBoost(gameId) {
     log.push('· Priorità → High + affinity su tutti i core (' + n + ' processi di gioco trovati)');
     if (n === '0') log.push('ℹ Gioco non in esecuzione: avvia il gioco e ripremi BOOST per agganciare il processo');
     if (g.affinityAllCores) log.push('· Affinity esplicita (prima era solo scritta, ora applicata davvero)');
-    log.push('· Notifiche Focus-Assist ON (bloat disabilitato)');
+    log.push('· Notifiche Focus-Assist ON (solo mentre giochi, le app restano aperte)');
   } else if (p === 'darwin') {
     await sh(`sudo renice -10 $(pgrep -i '${g.process}' | head -1) 2>/dev/null; echo reniced`);
     log.push('· Game Mode macOS richiesto + nice -10');
@@ -69,7 +65,8 @@ async function applyGameBoost(gameId) {
     await sh(`renice -10 $(pgrep -i '${g.process}' | head -1) 2>/dev/null; echo reniced`);
     log.push('· gamemoderun + nice -10 sul processo di gioco');
   }
-  global.__fpsBoost = true;
+  try { require('./persist').markActive('game-boost:' + gameId); } catch { global.__fpsBoost = true; }
+  log.push('✅ App in background: intatte, nessun freeze (migliorato v1.1)');
   return { ok: true, game: g.name, log, launchHint: g.launchHint[p] || g.launchHint.default };
 }
 
@@ -135,18 +132,9 @@ async function applyFpsMod(gameId) {
     if (mAff[2] === '0') log.push('ℹ Gioco non in esecuzione: la MOD resta armata, ripremi dopo averlo avviato');
   }
 
-  // 2) Sospensione app pesanti (transitoria: nessuna impostazione toccata)
-  const r2 = await sh(psRaw(
-    ADD_SUSPEND +
-    `$out=@(); Get-Process -Name ${SUSPEND_LIST.join(',')} -ErrorAction SilentlyContinue | ForEach-Object {` +
-    `try { if ([OcMod.P]::NtSuspendProcess($_.Handle) -eq 0) { $out += $_.Id } } catch {} };` +
-    `'SUSPENDED:'+($out -join ',')`
-  ));
-  const mSusp = r2.out.match(/SUSPENDED:([\d,]*)/);
-  if (mSusp && mSusp[1]) {
-    st.suspended = mSusp[1].split(',').filter(Boolean).map(Number);
-    log.push('· App pesanti sospese (' + st.suspended.length + ' processi: RAM/CPU liberate, si risvegliano allo Stop)');
-  } else log.push('· Nessuna app pesante da sospendere');
+  // 2) v1.1: NESSUNA sospensione — Discord/browser/Spotify restano aperti e fluidi.
+  st.suspended = [];
+  log.push('· ✅ App in background: intatte, nessun freeze (migliorato v1.1)');
 
   // 3) Patch file di config con backup
   if (mod) {
@@ -174,22 +162,22 @@ async function applyFpsMod(gameId) {
       log.push('· Backup salvato (.ocbak): Stop ripristina il file originale');
     }
   } else {
-    log.push('· MOD CPU pura per questo gioco (nessun file di config noto): priorità + core + suspend');
+    log.push('· MOD CPU pura per questo gioco (nessun file di config noto): priorità + core dedicati');
   }
   saveState();
-  global.__fpsBoost = true;
+  try { require('./persist').markActive('fps-mod:' + gameId); } catch { global.__fpsBoost = true; }
+  log.push('💾 Persistente: le patch config restano anche dopo aver chiuso l\u2019app (backup .ocbak)');
   return { ok: true, game: g.name, log };
 }
 
 async function resumeStale() {
-  // Risveglia sospesi rimasti da una sessione precedente (crash).
-  const prev = MODSTATE && typeof MODSTATE === 'object' ? MODSTATE : {};
-  const ids = new Set();
-  Object.values(prev).forEach(s => (s && s.suspended || []).forEach(id => ids.add(id)));
-  if (!ids.size || os.platform() !== 'win32') return;
-  await sh(psRaw(ADD_SUSPEND + `$ids=@(${[...ids].join(',')}); foreach ($i in $ids) { try { $pr=Get-Process -Id $i -ErrorAction Stop; [OcMod.P]::NtResumeProcess($pr.Handle) | Out-Null } catch {} }; 'resumed-stale'`));
-  Object.values(prev).forEach(s => { if (s) s.suspended = []; });
-  saveState();
+  // v1.1: pulisce eventuali stati 'suspended' lasciati dalla vecchia versione (pre-v1.1).
+  // I processi non si possono 'risvegliare' per PID riciclati: li marchiamo solo come puliti.
+  try {
+    let dirty = false;
+    Object.values(MODSTATE || {}).forEach(s => { if (s && s.suspended && s.suspended.length) { s.suspended = []; dirty = true; } });
+    if (dirty) saveState();
+  } catch {}
 }
 
 async function stopGameBoost(gameId) {
@@ -215,10 +203,7 @@ async function stopGameBoost(gameId) {
     }
     log.push('↩ Priorità gioco → Normale');
   }
-  if (st && st.suspended && st.suspended.length && os.platform() === 'win32') {
-    await sh(psRaw(ADD_SUSPEND + `$ids=@(${st.suspended.join(',')}); $n=0; foreach ($i in $ids) { try { $pr=Get-Process -Id $i -ErrorAction Stop; [OcMod.P]::NtResumeProcess($pr.Handle) | Out-Null; $n++ } catch {} }; 'RESUMED:'+$n`));
-    log.push('↩ App sospese risvegliate (' + st.suspended.length + ')');
-  }
+  log.push('✅ App in background: mai toccate, niente da risvegliare');
   if (st && st.backups && st.backups.length && os.platform() === 'win32') {
     for (const b of st.backups) {
       if (!b.orig) continue;
@@ -227,9 +212,18 @@ async function stopGameBoost(gameId) {
     }
   }
   if (st) { delete MODSTATE[gameId]; saveState(); }
-  global.__fpsBoost = false;
+  try {
+    const persist = require('./persist');
+    if (!Object.keys(MODSTATE).length && !persist.getPersist().active) global.__fpsBoost = false;
+    else if (!Object.keys(MODSTATE).length) persist.markRestored();
+  } catch { global.__fpsBoost = false; }
   log.unshift('■ Boost/MOD disattivati per ' + (g ? g.name : gameId) + '.');
   return { ok: true, game: g ? g.name : gameId, log };
 }
 
-module.exports = { applyGameBoost, applyFpsMod, stopGameBoost, PRESETS, _patchScript: patchScript, _expandEnv: expandEnv, _sh: sh, _ps: ps, _psRaw: psRaw, _suspendList: SUSPEND_LIST };
+function psRaw(script) {
+  const q = String.fromCharCode(34);
+  return 'powershell -NoProfile -ExecutionPolicy Bypass -Command ' + q + script + q;
+}
+
+module.exports = { applyGameBoost, applyFpsMod, stopGameBoost, resumeStale, PRESETS, _patchScript: patchScript, _expandEnv: expandEnv, _sh: sh, _ps: ps, _psRaw: psRaw, _suspendList: SUSPEND_LIST };

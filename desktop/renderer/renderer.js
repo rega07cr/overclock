@@ -271,35 +271,76 @@
   }
   $$('[data-lookprev]').forEach(b => b.addEventListener('click', () => {
     const a = b.dataset.lookprev;
-    const map = { font: ['font', () => window.overclock.previewTune('font', sysMode), '👁 Demo: anteprima testo.'], appearance: ['appearance', () => window.overclock.tune('appearance-preview'), '👁 Demo: anteprima aspetto.'], gpumax: ['gpumax', () => window.overclock.tune('gpumax-preview', { process: $('#gpuMaxProc').value.trim() }), '👁 Demo: anteprima GPU MAX.'] };
-    lookRun(map[a][0], map[a][1], map[a][2]);
+    const map = {
+      font: ['font', () => window.overclock.previewTune('font', sysMode), '👁 Demo: anteprima testo — ClearType nitido vs Standard, effetto immediato, admin non serve.'],
+      appearance: ['appearance', () => window.overclock.tune('appearance-preview'), '👁 Demo: anteprima aspetto standard.'],
+      gpumax: ['gpumax', () => window.overclock.tune('gpumax-preview', { process: ($('#gpuMaxProc') || {}).value ? $('#gpuMaxProc').value.trim() : '' }), '👁 Demo: anteprima GPU MAX — GameDVR off, HAGS, MPO off, preferenza alte prestazioni.'],
+      cpumax: ['cpumax', () => window.overclock.tune('cpumax-preview'), '👁 Demo: anteprima CPU MAX — piano Prestazioni elevate + scheduler giochi.'],
+      fpsmax: ['fpsmax', () => window.overclock.tune('fpsmax-preview', { process: ($('#fpsProc') || {}).value ? $('#fpsProc').value.trim() : '' }), '👁 Demo: anteprima FPS MAX = GPU + CPU, solo più FPS.']
+    };
+    if (map[a]) lookRun(map[a][0], map[a][1], map[a][2]);
   }));
   $('#fontClear').addEventListener('click', () => lookRun('font', () => window.overclock.tune('font-mode', 'cleartype'), '✨ Demo: ClearType simulato.'));
   $('#fontStd').addEventListener('click', () => lookRun('font', () => window.overclock.tune('font-mode', 'standard'), '📝 Demo: Standard simulato.'));
+  $('#fontOff').addEventListener('click', () => lookRun('font', () => window.overclock.tune('font-mode', 'off'), '⬜ Demo: smoothing OFF simulato.'));
+  function lookOpt(logKey, opt, val, demoMsg){
+    const log = document.querySelector(`[data-log="${logKey}"]`);
+    log.textContent = '⏳ esecuzione…';
+    if (isElectron) window.overclock.tune('look-option', { opt, val }).then(r => { log.textContent = mark(r); }).catch(e => { log.textContent = '✕ ' + e.message; });
+    else log.textContent = demoMsg;
+    enforceHeaders();
+  }
+  $('#transOn').addEventListener('click', () => lookOpt('lookopts', 'transparency', true, '🪟 Demo: trasparenza ON simulata.'));
+  $('#transOff').addEventListener('click', () => lookOpt('lookopts', 'transparency', false, '🪟 Demo: trasparenza OFF simulata (più FPS).'));
+  $('#animOn').addEventListener('click', () => lookOpt('lookopts', 'animations', true, '✨ Demo: animazioni ON simulate.'));
+  $('#animOff').addEventListener('click', () => lookOpt('lookopts', 'animations', false, '✨ Demo: animazioni OFF simulate (più FPS).'));
+  $('#menuFast').addEventListener('click', () => lookOpt('lookopts2', 'menudelay', 0, '⚡ Demo: menu istantanei simulati.'));
+  $('#menuNorm').addEventListener('click', () => lookOpt('lookopts2', 'menudelay', 400, '🕐 Demo: menu normali simulati.'));
+  $('#themeDark').addEventListener('click', () => lookOpt('lookopts2', 'theme', 'dark', '🌙 Demo: tema scuro simulato.'));
+  $('#themeLight').addEventListener('click', () => lookOpt('lookopts2', 'theme', 'light', '☀️ Demo: tema chiaro simulato.'));
   $('#appearanceBtn').addEventListener('click', () => {
     if (isElectron && !window.confirm('Rimettere trasparenza, animazioni, effetti e testo come Windows standard?')) return;
     lookRun('appearance', () => window.overclock.tune('appearance-restore'), '↩ Demo: aspetto standard simulato.');
   });
   $('#gpuMaxBtn').addEventListener('click', () => {
-    if (isElectron && !window.confirm('Applicare i massimi tweak GPU? Le chiavi di sistema (HAGS/MPO/throttling) richiedono admin e RIAVVIO del PC.')) return;
+    if (isElectron && !window.confirm('Applicare i massimi tweak GPU? Le chiavi di sistema (HAGS/MPO/throttling) richiedono admin e RIAVVIO del PC. Le altre app restano intatte.')) return;
     lookRun('gpumax', () => window.overclock.tune('gpu-max', { process: $('#gpuMaxProc').value.trim() }), '🎨 Demo: GPU MAX simulato.');
   });
   $('#gpuMaxRestore').addEventListener('click', () => lookRun('gpumax', () => window.overclock.tune('gpu-max-restore', null), '↩ Demo: GPU ripristinata.'));
+  $('#cpuMaxBtn').addEventListener('click', () => {
+    if (isElectron && !window.confirm('Applicare CPU MAX? Piano Prestazioni elevate subito; scheduler giochi richiede admin + riavvio. Le altre app restano intatte.')) return;
+    lookRun('cpumax', () => window.overclock.tune('cpu-max'), '🧠 Demo: CPU MAX simulato.');
+  });
+  $('#cpuMaxRestore').addEventListener('click', () => lookRun('cpumax', () => window.overclock.tune('cpu-max-restore', null), '↩ Demo: CPU ripristinata.'));
+  $('#fpsMaxBtn').addEventListener('click', () => {
+    if (isElectron && !window.confirm('Applicare FPS MAX (GPU + CPU)? Unico obiettivo: più FPS. Chiavi di sistema = admin + riavvio. Le altre app restano intatte.')) return;
+    lookRun('fpsmax', () => window.overclock.tune('fps-max', { process: $('#fpsProc').value.trim() }), '🚀 Demo: FPS MAX simulato.');
+  });
+  $('#fpsMaxRestore').addEventListener('click', () => lookRun('fpsmax', () => window.overclock.tune('fps-max-restore', null), '↩ Demo: FPS MAX ripristinato.'));
   async function loadLook(){
-    if (!isElectron) return;
+    if (!isElectron) { const f = $('#fpsVendor'); if (f) f.textContent = 'demo browser'; return; }
     try {
       const info = await window.overclock.tune('gpu-info');
       $('#gpuMaxVendor').textContent = '· scheda ' + String(info.vendor || '?').toUpperCase();
+      const f = $('#fpsVendor'); if (f) f.textContent = '· scheda ' + String(info.vendor || '?').toUpperCase();
     } catch {}
   }
 
   // ---------- Game boost ----------
   async function loadGames(){
+    // BUGFIX v1.1: prima caricava solo via fetch (fallisce in Electron file://) e mostrava 2 giochi.
+    // Ora: IPC reale -> fetch -> fallback. Tutti i 35 preset sempre visibili.
     try {
-      const r = await fetch('../modules/games-presets.json');
-      PRESETS = await r.json();
+      if (isElectron && window.overclock.gameList) {
+        PRESETS = await window.overclock.gameList();
+      } else throw 0;
     } catch {
-      PRESETS = [{ id: 'cs2', name: 'Counter-Strike 2 (CS2)', genre: 'Shooter', process: 'cs2' }, { id: 'cyberpunk', name: 'Cyberpunk 2077', genre: 'RPG', process: 'Cyberpunk2077' }];
+      try {
+        const r = await fetch('../modules/games-presets.json');
+        PRESETS = await r.json();
+      } catch {
+        PRESETS = [{ id: 'cs2', name: 'Counter-Strike 2 (CS2)', genre: 'Shooter', process: 'cs2' }, { id: 'cyberpunk', name: 'Cyberpunk 2077', genre: 'RPG', process: 'Cyberpunk2077' }];
+      }
     }
     renderGames('');
   }
@@ -359,7 +400,7 @@
       catch(e){ $('#gameLog').textContent = '✕ ' + e.message; }
     } else {
       await new Promise(r => setTimeout(r, 800));
-      $('#gameLog').textContent = `🧪 MOD simulato (demo browser)\n· Priorità High + core dedicati (no CPU0)\n· App pesanti sospese\n· Config gioco patchata con backup\n🧪 +10–15% FPS extra stimati`;
+      $('#gameLog').textContent = `🧪 MOD simulato (demo browser)\n· Priorità High + core dedicati (no CPU0)\n· ✅ App in background intatte (nessun freeze)\n· Config gioco patchata con backup\n🧪 +10–15% FPS extra stimati`;
       window.__fps = true;
     }
     $('#boostStatus').textContent = '[Status: FPS MOD 🧪⚡]';
@@ -398,8 +439,11 @@
     } catch { el.textContent = '🖥️ PC non rilevato: stime FPS generiche.'; }
   }
   const bootEl = $('#boot');
+  const bootSteps = $('#bootSteps');
+  const steps = ['caricamento moduli…', 'rilevamento GPU e CPU…', 'ripristino boost persistente…', 'pronto ⚡'];
+  if (bootSteps) { steps.forEach((s, i) => setTimeout(() => { if (bootSteps) bootSteps.textContent = s; }, i * 450)); }
   const hideBoot = () => { if (bootEl) bootEl.classList.add('hide'); };
-  if (bootEl) { bootEl.addEventListener('click', hideBoot); setTimeout(hideBoot, 1600); setTimeout(() => bootEl.remove(), 2300); }
+  if (bootEl) { bootEl.addEventListener('click', hideBoot); setTimeout(hideBoot, 2100); setTimeout(() => bootEl.remove(), 2900); }
   initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); loadLook(); syncModeChips(); freezeHeaders(); loadHw();
   setInterval(refreshStats, 5000); setInterval(ollamaPing, 10000);
 })();

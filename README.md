@@ -7,7 +7,9 @@ Il Free Buff definitivo per sviluppatori, gamer e power user. macOS · Windows �
 ## Cosa fa
 
 - **💻 Code/AI Overclock** — Ollama locale (privacy 100%) + fallback euristico: Speed / Security / Pro + Prompt mode.
-- **🚀 System Booster** — RAM flush, priorità processi, pulizia disco, DNS/TCP, GPU Boost (NVIDIA/AMD/Intel), Overclock OS per PC vecchi.
+- **🚀 System Booster** — RAM flush, pulizia disco, DNS/TCP, GPU Boost (NVIDIA/AMD/Intel), Overclock OS per PC vecchi. Niente freeze: le app in background non vengono mai toccate.
+- **🚀 FPS MAX (v1.1)** — GPU MAX + CPU MAX in un click, unico obiettivo: più FPS. Persistente dopo chiusura e riavvio.
+- **🔤 Aspetto esteso (v1.1)** — testo ClearType/Standard/OFF, trasparenza, animazioni, menu, tema scuro/chiaro, ognuno con anteprima leggibile.
   - **👁 Anteprima** prima di ogni modifica (mostra cosa cambierà, senza toccare nulla) + conferma per le azioni distruttive.
   - **↩ Ripristina** per ogni modulo + ripristino totale (snapshot salvati, valgono anche dopo il riavvio).
   - **3 livelli**: 🟢 Base (solo sicuro) / 🟡 Media (consigliata) / 🔴 Potente (tutto al massimo).
@@ -73,6 +75,6 @@ ollama serve
    git push -u origin master
    ```
 3. In `app.js` scrivi `const GITHUB_REPO = 'TUO-NOME/overclock'` → i pulsanti Download punteranno alle Releases.
-4. Crea una release: `git tag v1.0.1 && git push origin v1.0.1` → la CI compila Windows/macOS/Linux e allega gli exe.
+4. Crea una release: `git tag v1.1.0 && git push origin v1.1.0` → la CI compila Windows/macOS/Linux e allega gli exe.
 5. **Sito online**: Settings → Pages → Deploy from branch → `master` → Save. Il sito sarà su `https://TUO-NOME.github.io/overclock/`.
 6. `.exe` e build pesanti **non** vanno nel repo (già in `.gitignore`): vivono solo nelle Releases.

@@ -1,8 +1,6 @@
 // System Booster — comandi testati su Windows reale, stato onesto (ok/fail veri).
 // Ogni azione ha: preview (cosa cambia, senza toccare nulla) + apply + restore.
 const os = require('os');
-const fs = require('fs');
-const path = require('path');
 const { exec } = require('child_process');
 
 const MAX_OUT = 1200;
@@ -25,18 +23,9 @@ function ps(script) {
   return `powershell -NoProfile -ExecutionPolicy Bypass -Command "${script.replace(/"/g, "'")}"`;
 }
 
-// ---------- Snapshot persistenti (sopravvivono al riavvio) ----------
-const SNAP_FILE = path.join(os.tmpdir(), 'overclock-snaps.json');
-function loadSnaps() {
-  try { return JSON.parse(fs.readFileSync(SNAP_FILE, 'utf8')); } catch { return {}; }
-}
-function saveSnaps(s) {
-  try { fs.writeFileSync(SNAP_FILE, JSON.stringify(s, null, 1)); } catch {}
-}
-function putSnap(key, snap) {
-  const all = loadSnaps(); all[key] = { when: new Date().toISOString(), snap }; saveSnaps(all);
-}
-function getSnap(key) { return (loadSnaps()[key] || {}).snap || null; }
+// ---------- Snapshot persistenti (sopravvivono a chiusura app + riavvio: ~/.overclock) ----------
+const persist = require('./persist');
+const { putSnap, getSnap } = persist;
 
 async function getSystemStats() {
   const total = os.totalmem(), free = os.freemem();
@@ -53,11 +42,11 @@ async function getSystemStats() {
 // ---------- RAM ----------
 async function previewRam() {
   if (os.platform() !== 'win32')
-    return { ok: true, preview: true, out: '• Svuota working-set dei processi (EmptyWorkingSet via psapi.dll)\n• Non chiude nessun programma, non tocca il registro\n• Effetto: memoria inattiva restituita a Windows; si riempie da sola = già reversibile' };
+    return { ok: true, preview: true, out: '👁 ANTEPRIMA — RAM Flush\n\n✅ COSA FA: svuota la memoria inattiva (working-set) di ogni processo: il PC torna scattante.\n🚫 COSA NON TOCCA: non chiude nessun programma, non modifica registro né disco.\n👤 ADMIN: non serve. 🔄 RIAVVIO: non serve, effetto immediato.\n↩ COME ANNULLARE: non serve — Windows ricarica la RAM da solo.' };
   const r = await sh(ps(`$t=(Get-Process -ErrorAction SilentlyContinue|Measure-Object).Count;'Processi attivi: ' + $t`));
   return {
     ok: true, preview: true,
-    out: `👁 ANTEPRIMA — RAM Flush (nessuna modifica ancora):\n• Azione: EmptyWorkingSet su ogni processo (solo cache inattiva)\n• ${r.out.split('\n')[0]}\n• Non chiude app, non modifica registro/disco\n• Reversibile: sì, automatico (Windows ricarica la RAM da solo)`
+    out: `👁 ANTEPRIMA — RAM Flush (non ho toccato nulla)\n\n✅ COSA FA: EmptyWorkingSet su ogni processo (solo cache inattiva). ${r.out.split('\n')[0]}.\n🚫 COSA NON TOCCA: nessun programma chiuso, nessun registro, nessun file.\n👤 ADMIN: non serve. 🔄 RIAVVIO: non serve.\n↩ COME ANNULLARE: automatico — la RAM si riempie da sola.`
   };
 }
 async function ramFlush() {
@@ -90,46 +79,29 @@ const BG_LISTS = {
   potente: 'OneDrive|Skype|Teams|Spotify|Discord|Cortana|SearchHost| widgets|PhoneExperience|YourPhone|XboxGameBar|ScreenClipping'
 };
 
-// ---------- Processi ----------
+// ---------- Processi: FUNZIONE RIMOSSA v1.1 (Freeze Buff eliminato) ----------
+// Motivo: abbassare/sospendere le altre app in background creava freeze e lag
+// (Discord, browser, Spotify...). Ora NESSUN boost tocca le altre app: solo il gioco.
 async function previewFreeze(mode) {
-  mode = normMode(mode);
-  const list = BG_LISTS[mode];
-  if (os.platform() !== 'win32')
-    return { ok: true, preview: true, out: '• Mostra top processi (nessuna modifica).' };
-  const r = await sh(ps(`Get-Process -ErrorAction SilentlyContinue | Where-Object {$_.ProcessName -match '${list}'} | ForEach-Object {$_.ProcessName + ' (priorita attuale: ' + $_.PriorityClass + ')'} | Out-String`));
-  const names = r.out === '(nessun output)' ? '(nessun processo background trovato — nessuna modifica verrà fatta)' : r.out;
-  return {
-    ok: true, preview: true,
-    out: `👁 ANTEPRIMA — Process Priority [${MODE_LABEL[mode]}] (nessuna modifica ancora):\n• Azione: PriorityClass → BelowNormal SOLO su questi processi:\n${names}\n• Non vengono chiusi/terminati, solo deprioritizzati\n• Ripristino: salva priorità originali e le rimette con "↩ Ripristina"`
-  };
+  return { ok: true, preview: true, out: '👁 ANTEPRIMA — Priorità processi\n\n🚫 FUNZIONE RIMOSSA nella v1.1: il Freeze Buff è stato eliminato.\n✅ COSA FA ORA: niente — le tue app in background (Discord, browser, musica) non vengono più toccate.\n💡 AL POSTO: usa 🚀 FPS MAX (sezione dedicata) o 🎮 Game Boost: potenziano solo il gioco.' };
 }
 async function freezeBackground(mode) {
-  mode = normMode(mode);
-  const list = BG_LISTS[mode];
-  const p = os.platform();
-  if (p === 'win32') {
-    // Snapshot priorità originali per il restore.
-    const snapR = await sh(ps(`Get-Process -ErrorAction SilentlyContinue | Where-Object {$_.ProcessName -match '${list}'} | ForEach-Object {$_.Id.ToString() + '=' + $_.PriorityClass} | Out-String`));
-    const snap = {};
-    if (snapR.ok && snapR.out !== '(nessun output)')
-      snapR.out.split('\n').forEach(l => { const m = l.trim().match(/^(\d+)=(\w+)/); if (m) snap[m[1]] = m[2]; });
-    putSnap('processes', snap);
-    const s = `$ok=0;$skip=0;Get-Process -ErrorAction SilentlyContinue | Where-Object {$_.ProcessName -match '${list}'} | ForEach-Object {try{$_.PriorityClass='BelowNormal';$ok++}catch{$skip++}};'Priorita abbassata [${mode}]: ' + $ok + ' processi | saltati (protetti/sistema): ' + $skip;`;
-    const r = await sh(ps(s));
-    r.restore = '↩ Ripristino disponibile: "↩ Ripristina" rimette le priorità originali salvate.';
-    return r;
-  }
-  if (p === 'darwin') return sh('ps aux | head -20');
-  return sh('ps -eo pid,comm,%cpu --sort=-%cpu | head -20');
+  return { ok: true, out: '🚫 Freeze Buff rimosso nella v1.1: non tocco più le app in background (causava freeze). Usa FPS MAX o Game Boost: lavorano solo sul gioco.', restore: 'Niente da ripristinare.' };
 }
 async function restoreFreeze(snapArg) {
-  if (os.platform() !== 'win32') return { ok: true, out: '↩ Niente da ripristinare su questo OS.' };
-  const snap = (snapArg && Object.keys(snapArg).length ? snapArg : getSnap('processes')) || {};
-  const ids = Object.keys(snap);
-  if (!ids.length) return { ok: true, out: '↩ Nessuno snapshot priorità trovato (fai prima "Freeze background").' };
-  const pairs = ids.map(id => `${id}=${snap[id]}`).join(',');
-  const r = await sh(ps(`$m=@{};('${pairs}'.Split(',')|ForEach-Object{$k,$v=$_.Split('=');$m[$k]=$v});$ok=0;$sk=0;Get-Process -ErrorAction SilentlyContinue|ForEach-Object{$id=$_.Id.ToString();if($m.ContainsKey($id)){try{$_.PriorityClass=$m[$id];$ok++}catch{$sk++}}};'Priorita ripristinate: ' + $ok + ' | saltati: ' + $sk`));
-  return r;
+  // Ripristina eventuali priorità salvate dalla vecchia versione, poi chiude il capitolo.
+  try {
+    if (os.platform() === 'win32') {
+      const snap = (snapArg && Object.keys(snapArg).length ? snapArg : getSnap('processes')) || {};
+      const ids = Object.keys(snap);
+      if (ids.length) {
+        const pairs = ids.map(id => `${id}=${snap[id]}`).join(',');
+        await sh(ps(`$m=@{};('${pairs}'.Split(',')|ForEach-Object{$k,$v=$_.Split('=');$m[$k]=$v});Get-Process -ErrorAction SilentlyContinue|ForEach-Object{$id=$_.Id.ToString();if($m.ContainsKey($id)){try{$_.PriorityClass=$m[$id]}catch{}}};'ok'`));
+        return { ok: true, out: '↩ Vecchie priorità pre-v1.1 ripristinate. Freeze Buff ora rimosso: le app non verranno più toccate.' };
+      }
+    }
+  } catch {}
+  return { ok: true, out: '↩ Freeze Buff rimosso: niente da ripristinare, le tue app sono intatte.' };
 }
 
 // ---------- Disco ----------
@@ -145,7 +117,7 @@ async function previewDisk(mode) {
   const r = await sh(ps(`$t=(Get-ChildItem $env:TEMP -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object Length -Sum).Sum;$g=Join-Path $env:LOCALAPPDATA 'NVIDIA\\GLCache';$d=Join-Path $env:LOCALAPPDATA 'D3DSCache';$s=(Get-ChildItem $g,$d -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object Length -Sum).Sum;'TEMP: ' + [math]::Round($t/1MB,1) + ' MB | Cache shader: ' + [math]::Round($s/1MB,1) + ' MB'`), { timeout: 45000 });
   return {
     ok: true, preview: true,
-    out: `👁 ANTEPRIMA — Disk & Junk [${MODE_LABEL[mode]}] (nessun file cancellato):\n• Cosa verrebbe rimosso: ${DISK_DESC[mode]}\n• ${r.out.split('\n')[0] || 'dimensione non calcolata'}\n• ⚠️ File cancellati NON ripristinabili (sono temp/cache: Windows e i giochi li ricreano)\n• Premi "Clean disk" solo se sei d'accordo`
+    out: `👁 ANTEPRIMA — Disk & Junk [${MODE_LABEL[mode]}] (non ho cancellato nulla)\n\n✅ COSA FA: rimuove ${DISK_DESC[mode]}. Ora: ${r.out.split('\n')[0] || 'dimensione non calcolata'}.\n🚫 COSA NON TOCCA: mai documenti, foto, giochi o salvataggi — solo cache rigenerabili.\n👤 ADMIN: non serve. 🔄 RIAVVIO: non serve.\n⚠️ COME ANNULLARE: i file temp non si recuperano, ma Windows e i giochi li ricreano da soli.`
   };
 }
 async function diskClean(mode) {
@@ -207,7 +179,7 @@ async function previewNetwork(mode) {
   const tcpNote = mode === 'base' ? 'NON toccato (livello Base)' : (admin ? 'VERRÀ applicato (sei admin)' : 'NON verrà applicato (serve avvio come amministratore)');
   return {
     ok: true, preview: true,
-    out: `👁 ANTEPRIMA — Network [${MODE_LABEL[mode]}] (nessuna modifica ancora):\n• Sempre: ipconfig /flushdns (solo svuota cache DNS, innocuo)\n• TCP (${NET_DESC[mode]}): ${tcpNote}\n• Valori attuali: ${line}\n• Ripristino: salva i valori attuali e li rimette con "↩ Ripristina"`
+    out: `👁 ANTEPRIMA — Network [${MODE_LABEL[mode]}] (non ho cambiato nulla)\n\n✅ COSA FA: svuota la cache DNS (ping più stabile) + TCP (${NET_DESC[mode]}): ${tcpNote}.\n📊 VALORI ATTUALI: ${line}\n🚫 COSA NON TOCCA: password, Wi-Fi, file. 👤 ADMIN: serve solo per il tuning TCP. 🔄 RIAVVIO: non serve.\n↩ COME ANNULLARE: i valori TCP precedenti sono salvati e tornano con "↩ Ripristina".`
   };
 }
 async function networkOptimize(mode) {
@@ -261,22 +233,23 @@ async function isAdmin() {
 
 async function previewFull(mode) {
   mode = normMode(mode);
-  const parts = [await previewRam(), await previewFreeze(mode), await previewDisk(mode), await previewNetwork(mode)];
-  return { ok: true, preview: true, out: `👁 ANTEPRIMA — FULL SYSTEM BUFF [${MODE_LABEL[mode]}] (non ho toccato nulla):\n\n` + parts.map(p => p.out).join('\n\n──────────\n\n') };
+  const parts = [await previewRam(), await previewDisk(mode), await previewNetwork(mode)];
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — FULL SYSTEM BUFF [${MODE_LABEL[mode]}] (non ho toccato nulla)\n\n✅ Include: RAM + Disco + Rete. Le app in background NON vengono toccate (freeze rimosso v1.1).\n\n` + parts.map(p => p.out).join('\n\n──────────\n\n') };
 }
 
 async function fullBuff(mode) {
   mode = normMode(mode);
   const steps = {
     ram: await ramFlush(),
-    processi: await freezeBackground(mode),
     disco: await diskClean(mode),
     rete: await networkOptimize(mode)
   };
   const okCount = Object.values(steps).filter(s => s.ok).length;
-  global.__fpsBoost = okCount >= 3;
+  if (okCount >= 2) persist.markActive('full-buff'); else { global.__fpsBoost = okCount >= 2; }
   const lines = Object.entries(steps).map(([k, s]) => `${s.ok ? '✓' : '✕'} ${k}: ${s.out.split('\n')[0]}`);
-  return { ok: okCount === 4, partial: okCount >= 2, out: lines.join('\n'), steps };
+  lines.push('✅ App in background: intatte (freeze rimosso v1.1)');
+  lines.push('💾 Persistente: resta attivo anche dopo aver chiuso l\u2019app (registro + snapshot in ~/.overclock)');
+  return { ok: okCount === 3, partial: okCount >= 2, out: lines.join('\n'), steps };
 }
 
 async function restoreAll(gpuSnapArg, osSnapArg) {
@@ -293,7 +266,7 @@ async function restoreAll(gpuSnapArg, osSnapArg) {
     const osn = osSnapArg || getSnap('os');
     if (osn && ((osn.regs || []).length || osn.power)) out.push('OS: ' + (await tuning.osRestore(osn)).out.split('\n')[0]);
   } catch (e) { out.push('(GPU/OS: ' + e.message + ')'); }
-  global.__fpsBoost = false;
+  persist.markRestored();
   return { ok: true, out: '↩ RIPRISTINO COMPLETO:\n' + out.map(l => '• ' + l).join('\n') };
 }
 

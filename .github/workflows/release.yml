@@ -25,7 +25,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Nomi prevedibili (niente spazi) = link stabili dal sito:
-      # Overclock.Setup.1.0.1.exe / Overclock.1.0.1.exe / Overclock.1.0.1.dmg ...
+      # Overclock.Setup.1.1.0.exe / Overclock.1.1.0.exe / Overclock.1.1.0.dmg ...
       - name: Rename artifacts (spaces to dots)
         shell: python
         run: |
