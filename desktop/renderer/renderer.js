@@ -428,6 +428,27 @@
     }
   }
 
+  // ---------- Manutenzione v1.2: salute + reset totale + disinstallazione ----------
+  function maintRun(logKey, fn, demoMsg, confirmMsg){
+    const log = document.querySelector(`[data-log="${logKey}"]`);
+    if (confirmMsg && isElectron && !window.confirm(confirmMsg)) return;
+    log.textContent = '⏳ esecuzione…';
+    if (isElectron) {
+      fn().then(r => { log.textContent = mark(r); enforceHeaders(); refreshStats(); })
+        .catch(e => { log.textContent = '✕ ' + e.message; });
+    } else { log.textContent = demoMsg; }
+  }
+  $('#healthBtn').addEventListener('click', () => maintRun('health', () => window.overclock.maint('health'), '🩺 Demo: OS ✓ · admin ✓ · snapshot 3 · boost ON · Ollama offline.'));
+  $('#uninstallPreview').addEventListener('click', () => maintRun('uninstall', () => window.overclock.maint('uninstall-preview'), '👁 Demo: il reset ripristina sistema, GPU, CPU, aspetto, avvio, giochi e pulisce ~/.overclock.'));
+  $('#fullResetBtn').addEventListener('click', () => maintRun('uninstall', () => window.overclock.maint('full-reset'), '🧹 Demo: tutto ripristinato + dati puliti.', 'Rimettere DAVVERO tutto come prima (sistema, GPU, CPU, aspetto, avvio, giochi) e cancellare i dati app?'));
+  $('#uninstallInfoBtn').addEventListener('click', () => maintRun('uninstallApp', () => window.overclock.maint('uninstall-info'), '🔍 Demo: Uninstall.exe trovato in C:\\Program Files\\Overclock.'));
+  $('#uninstallLaunchBtn').addEventListener('click', () => {
+    if (!isElectron) { document.querySelector('[data-log="uninstallApp"]').textContent = '❌ Demo: qui partirebbe il disinstallatore.'; return; }
+    if (!window.confirm('Fai prima il reset qui sopra! Avviare DAVVERO il disinstallatore e chiudere l\u2019app?')) return;
+    const log = document.querySelector('[data-log="uninstallApp"]');
+    log.textContent = '⏳ avvio disinstallatore…';
+    window.overclock.uninstallApp().then(r => { log.textContent = mark(r); }).catch(e => { log.textContent = '✕ ' + e.message; });
+  });
   async function loadHw(){
     const el = $('#pcBanner');
     if (!isElectron) { el.textContent = "🖥️ Demo browser: nell'app reale qui vedi il tuo PC e le stime FPS sono calibrate su di esso."; return; }

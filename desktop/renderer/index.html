@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OVERCLOCK DESKTOP ENGINE v1.1</title>
+<title>OVERCLOCK DESKTOP ENGINE v1.2</title>
 <link rel="stylesheet" href="app.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 </head>
 <body>
-<div id="boot"><div class="boot-orbit"><i class="o1"></i><i class="o2"></i><i class="o3"></i></div><div class="boot-inner"><div class="boot-bolt">⚡</div><div class="boot-name">OVERCLOCK</div><div class="boot-tag">DESKTOP ENGINE v1.1 · FPS MAX EDITION</div><div class="boot-bar"><i></i></div><div class="boot-steps" id="bootSteps">caricamento moduli…</div><div class="boot-sub">© 2026 REGA</div></div></div>
+<div id="boot"><div class="boot-orbit"><i class="o1"></i><i class="o2"></i><i class="o3"></i></div><div class="boot-inner"><div class="boot-bolt">⚡</div><div class="boot-name">OVERCLOCK</div><div class="boot-tag">DESKTOP ENGINE v1.2 · CLEAN UNINSTALL EDITION</div><div class="boot-bar"><i></i></div><div class="boot-steps" id="bootSteps">caricamento moduli…</div><div class="boot-sub">© 2026 REGA</div></div></div>
 <div class="titlebar">
-  <span>🟰 OVERCLOCK DESKTOP ENGINE v1.1</span>
+  <span>🟰 OVERCLOCK DESKTOP ENGINE v1.2</span>
   <span class="status" id="boostStatus">[Status: BOOSTED ⚡]</span>
   <span class="wins"><i>—</i><i>▢</i><i>✕</i></span>
 </div>
@@ -173,8 +173,22 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
         <div>Stato: <b id="ollamaState">controllo…</b></div>
       </div>
       <div class="set-card">
+        <h3>🩺 Salute sistema</h3>
+        <p class="mut">Check rapido: admin, snapshot salvati, boost attivo, mod giochi, Ollama. Non cambia nulla, dice solo come stai messo.</p>
+        <div class="row"><button class="ghost" id="healthBtn">🩺 Esegui check</button></div>
+        <pre data-log="health"></pre>
+      </div>
+      <div class="set-card danger">
+        <h3>🧹 Disinstallazione e reset totale</h3>
+        <p class="mut">Vuoi togliere tutto? Prima <b>ripristina</b> (rimette PC e giochi come prima e pulisce i dati), poi <b>disinstalla</b> l'app. Niente resta sporco: né registro, né file.</p>
+        <div class="row"><button class="ghost" id="uninstallPreview">👁 Anteprima (leggi prima)</button><button class="apply sm danger-btn" id="fullResetBtn">🧹 RIPRISTINA TUTTO + PULISCI DATI</button></div>
+        <pre data-log="uninstall"></pre>
+        <div class="row"><button class="ghost" id="uninstallInfoBtn">🔍 Trova disinstallatore</button><button class="ghost" id="uninstallLaunchBtn">❌ Disinstalla l'app</button></div>
+        <pre data-log="uninstallApp"></pre>
+      </div>
+      <div class="set-card">
         <h3>© Crediti</h3>
-        <p class="mut">OVERCLOCK Desktop Engine v1.1 — creato da <b>REGA</b> © 2026, tutti i diritti riservati.</p>
+        <p class="mut">OVERCLOCK Desktop Engine v1.2 — creato da <b>REGA</b> © 2026, tutti i diritti riservati.</p>
       </div>
       <div class="set-card">
         <h3>Provider cloud (opzionale)</h3>

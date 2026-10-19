@@ -5,13 +5,13 @@
   const GITHUB_REPO = 'rega07cr/overclock';
   const ua = navigator.userAgent;
   const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
-  let os = 'win', label = 'Download for Windows (x64)', file = 'releases/overclock-1.1.0-win-setup.exe';
-  if (/Mac|darwin/i.test(platform + ua)) { os = 'mac'; label = 'Download for macOS (Universal)'; file = 'releases/overclock-1.1.0-mac-universal.dmg'; }
-  else if (/Linux|X11/i.test(platform + ua)) { os = 'linux'; label = 'Download for Linux (.AppImage)'; file = 'releases/overclock-1.1.0-linux.AppImage'; }
+  let os = 'win', label = 'Download for Windows (x64)', file = 'releases/overclock-1.2.0-win-setup.exe';
+  if (/Mac|darwin/i.test(platform + ua)) { os = 'mac'; label = 'Download for macOS (Universal)'; file = 'releases/overclock-1.2.0-mac-universal.dmg'; }
+  else if (/Linux|X11/i.test(platform + ua)) { os = 'linux'; label = 'Download for Linux (.AppImage)'; file = 'releases/overclock-1.2.0-linux.AppImage'; }
   const releasePage = GITHUB_REPO && !/TUO-NOME|USERNAME|ESEMPIO/i.test(GITHUB_REPO)
     ? 'https://github.com/' + GITHUB_REPO + '/releases/latest' : null;
-  // Asset reali pubblicati dalla CI (nomi esatti della Release v1.1.0)
-  const ASSET = { win: 'Overclock.Setup.1.1.0.exe', mac: 'Overclock-1.1.0-arm64.dmg', linux: 'Overclock-1.1.0.AppImage' };
+  // Asset reali pubblicati dalla CI (nomi esatti della Release v1.2.0)
+  const ASSET = { win: 'Overclock.Setup.1.2.0.exe', mac: 'Overclock-1.2.0-arm64.dmg', linux: 'Overclock-1.2.0.AppImage' };
   if (releasePage) {
     file = releasePage + '/download/' + ASSET[os]; // download diretto dell'installer giusto
     document.querySelectorAll('a[href^="releases/"]').forEach(a => { a.href = releasePage; a.removeAttribute('download'); });

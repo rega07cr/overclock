@@ -8,7 +8,7 @@ function createWindow() {
   // v1.1: splash animata + finestra mostrata subito.
   win = new BrowserWindow({
     width: 1240, height: 800, minWidth: 1024, minHeight: 680,
-    title: 'OVERCLOCK DESKTOP ENGINE v1.1',
+    title: 'OVERCLOCK DESKTOP ENGINE v1.2',
     backgroundColor: '#07070f',
     autoHideMenuBar: true,
     show: true,
@@ -81,6 +81,25 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
   return map[action]();
 });
 ipcMain.handle('game:list', async () => require('./modules/game-boost').PRESETS);
+ipcMain.handle('maint:run', async (_e, action) => {
+  const maint = require('./modules/maintenance');
+  const map = {
+    'uninstall-preview': () => maint.previewUninstall(),
+    'full-reset': () => maint.fullReset(),
+    'uninstall-info': () => maint.findUninstaller(app.getPath('exe')),
+    'health': () => maint.healthCheck()
+  };
+  if (!map[action]) throw new Error('unknown maint action');
+  return map[action]();
+});
+ipcMain.handle('maint:uninstall-app', async () => {
+  const maint = require('./modules/maintenance');
+  const info = await maint.findUninstaller(app.getPath('exe'));
+  if (!info.found) return info;
+  const r = await maint.launchUninstaller(info.path);
+  if (r.ok) setTimeout(() => app.quit(), 1500);
+  return r;
+});
 ipcMain.handle('game:boost', async (_e, gameId) => applyGameBoost(gameId));
 ipcMain.handle('game:mod', async (_e, gameId) => applyFpsMod(gameId));
 ipcMain.handle('game:stop', async (_e, gameId) => stopGameBoost(gameId));

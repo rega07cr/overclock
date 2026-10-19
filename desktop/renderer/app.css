@@ -104,6 +104,9 @@ pre{font-family:"JetBrains Mono",monospace}code{background:#000;border:1px solid
 pre[data-log]{transition:border-color .3s,box-shadow .3s}
 .status{animation:statusPulse 2.4s ease-in-out infinite}
 @keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.65}}
+.set-card.danger{border-color:#f43f5e66!important}
+.set-card.danger:hover{border-color:#f43f5e!important;box-shadow:0 14px 36px #000a,0 0 26px #f43f5e44}
+.apply.danger-btn{background:linear-gradient(90deg,#f43f5e,#f97316);color:#fff}
 .hero-fps{border-color:#39ff8866!important;box-shadow:0 0 30px #39ff8822;animation:fpsGlow 3s ease-in-out infinite}
 @keyframes fpsGlow{0%,100%{box-shadow:0 0 18px #39ff8822}50%{box-shadow:0 0 34px #39ff8855}}
 @media(prefers-reduced-motion:reduce){.sys-card,.set-card,.game-detail,.editor-box,.out-box,.g-item,.side,.view.active{transition:none!important;animation:none!important}}

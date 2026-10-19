@@ -553,6 +553,20 @@ async function restoreRegs(key, fallbackMsg) {
   return { ok: true, out: log.join('\n') || fallbackMsg };
 }
 async function cpuMaxRestore() { return restoreRegs('cpumax', 'Niente da ripristinare (CPU MAX mai applicato).'); }
+// ---------- Reset generico per chiave snapshot (usato dal reset totale v1.2) ----------
+async function restoreSnapKey(key) {
+  if (key === 'os') return osRestore();
+  if (key === 'gpu') return gpuRestore();
+  if (key === 'gpumax') return gpuMaxRestore();
+  if (key === 'cpumax') return cpuMaxRestore();
+  return restoreRegs(key, 'Niente da ripristinare (' + key + ' mai applicato).');
+}
+async function listStartupBackup() {
+  if (os.platform() !== 'win32') return { ok: true, items: [], out: 'Solo Windows.' };
+  const r = await sh(ps(`Get-ItemProperty 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\RunBackup' -ErrorAction SilentlyContinue | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name`));
+  const items = r.out === '(nessun output)' ? [] : r.out.split('\n').filter(n => n && !/^PS/.test(n));
+  return { ok: true, items, out: items.length ? items.join('\n') : 'Nessun programma disabilitato da riattivare.' };
+}
 // ---------- 🚀 FPS MAX v1.1: GPU MAX + CPU MAX in un click (solo più FPS) ----------
 async function fpsMax(arg) {
   if (os.platform() !== 'win32') return { ok: false, out: 'FPS MAX supportato solo su Windows in questa versione.' };
@@ -583,4 +597,4 @@ async function gpuMaxRestore(snapArg) {
   return { ok: true, out: log.join('\n') || 'Niente da ripristinare (GPU MAX mai applicato).' };
 }
 
-module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewFont, setLookOption, previewGpuMax, previewCpuMax, previewFpsMax, gpuMax, gpuMaxRestore, cpuMax, cpuMaxRestore, fpsMax, fpsMaxRestore };
+module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, listStartupBackup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewFont, setLookOption, previewGpuMax, previewCpuMax, previewFpsMax, gpuMax, gpuMaxRestore, cpuMax, cpuMaxRestore, fpsMax, fpsMaxRestore, restoreSnapKey };
