@@ -3,26 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OVERCLOCK — Overclock Your PC, Code & Gaming. One App, Total Power.</title>
-<meta name="description" content="Il Free Buff definitivo per sviluppatori, gamer e power user. Disponibile per macOS, Windows e Linux.">
+<title>OVERCLOCK v1.4 — Overclock Your PC, Code &amp; Gaming. One App, Total Power.</title>
+<meta name="description" content="Il Free Buff definitivo per sviluppatori, gamer e power user: FPS MAX, NVIDIA MAX con reset, ventole davvero funzionanti, AI locale. Windows, macOS e Linux.">
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<div class="bg-mesh"></div>
 <div class="bg-grid"></div>
 <div class="bg-glow glow-a"></div>
 <div class="bg-glow glow-b"></div>
 
 <nav class="nav">
   <div class="nav-inner">
-    <div class="logo"><span class="logo-bolt">⚡</span> OVERCLOCK <span class="logo-tag">FREE BUFF</span></div>
+    <div class="logo"><span class="logo-bolt">⚡</span> OVERCLOCK <span class="logo-tag">v1.4</span></div>
     <div class="nav-links">
       <a href="#features">Features</a>
+      <a href="#novita">Novità v1.4</a>
       <a href="#guida">Guida</a>
       <a href="#download">Download</a>
-      <a href="#faq">FAQ & Privacy</a>
-      <a href="desktop/renderer/index.html" class="nav-demo">Live Demo App →</a>
+      <a href="#faq">FAQ</a>
+      <a href="desktop/renderer/index.html" class="nav-demo">Demo app →</a>
     </div>
     <button class="nav-cta" data-dl>Download Free ⬇</button>
   </div>
@@ -31,70 +33,86 @@
 <header class="hero" id="top">
   <div class="hero-inner">
     <div class="hero-copy">
-      <div class="pill"><span class="pulse-dot"></span> v1.3 FPS BEAST EDITION 🧹 · macOS · Windows · Linux</div>
+      <div class="pill"><span class="pulse-dot"></span> v1.4 FPS BEAST+ · NVIDIA MAX · Windows · macOS · Linux</div>
       <h1>Overclock Your <span class="neon">PC</span>, <span class="neon-pink">Code</span> &amp; <span class="neon-green">Gaming</span>.<br>One App, Total Power.</h1>
-      <p class="sub">Il Free Buff definitivo per sviluppatori, gamer e power user. Disponibile per macOS, Windows e Linux. 100% offline-ready con Ollama.</p>
+      <p class="sub">Il Free Buff definitivo per sviluppatori, gamer e power user. Ora con <b>NVIDIA MAX</b> (power limit, clock e PowerMizer con reset), <b>ventole che funzionano davvero</b> e un'interfaccia vetrata. 100% offline-ready con Ollama.</p>
       <div class="cta-row">
         <button class="btn-neon" id="heroDl" data-dl><span id="heroDlLabel">⬇ Download Free Buff</span><small id="heroDlSub">rilevamento OS…</small></button>
-        <a class="btn-ghost" href="#features">Vedi i 3 moduli ↓</a>
+        <a class="btn-ghost" href="desktop/renderer/index.html">Prova la demo live →</a>
       </div>
-      <div class="hero-stats">
+      <div class="hero-stats glass-strip">
         <div><b data-count="42000">0</b><span>download</span></div>
         <div><b>+45%</b><span>max FPS boost</span></div>
+        <div><b>6</b><span>motori di boost</span></div>
         <div><b>100%</b><span>offline privacy</span></div>
-        <div><b>35</b><span>game preset</span></div>
       </div>
     </div>
     <div class="hero-visual">
       <div class="mock3d" id="mock3d">
-        <div class="mock-bar"><span>🟰 OVERCLOCK DESKTOP ENGINE v1.0</span><span class="status">Status: BOOSTED ⚡</span></div>
+        <div class="mock-bar"><span>⚡ OVERCLOCK DESKTOP ENGINE <b>v1.4</b></span><span class="status">Status: BOOSTED</span></div>
         <div class="mock-body">
-          <div class="mock-side">💻 Code/AI<br>🚀 System<br>🎮 Game<br>⚙️ Settings</div>
+          <div class="mock-side">
+            <small>PERFORMANCE</small>
+            <span class="ms on">🚀 FPS MAX</span>
+            <span class="ms">🎮 NVIDIA</span>
+            <span class="ms">🌀 Ventole</span>
+            <span class="ms">🧠 System</span>
+            <small>LAVORO</small>
+            <span class="ms">💻 Code/AI</span>
+          </div>
           <div class="mock-main">
-            <div class="mock-tabs">💻 Code · 📝 Prompt &nbsp;|&nbsp; ⚡ SPEED 🛡️ SEC 🧠 PRO</div>
-            <div class="mock-code">// input → AI buff<br><span class="c-green">const fps = boost(game);</span><br><span class="c-pink">ram.purge(); cpu.prioritize();</span></div>
-            <button class="mock-apply" type="button">⚡ APPLY FREE BUFF (AI) ⚡</button>
-            <div class="mock-quick">RAM: 42% Free · CPU: 48°C · FPS Boost: ON</div>
+            <div class="mock-title">🚀 FPS MAX <em>GPU + CPU + NVIDIA</em></div>
+            <div class="mock-stats">
+              <span><b>61°C</b><small>GPU</small></span>
+              <span><b>42%</b><small>ventola</small></span>
+              <span><b>115 W</b><small>power</small></span>
+              <span><b>2640</b><small>MHz</small></span>
+            </div>
+            <div class="mock-code">// un click, sei motori<br><span class="c-green">gpu.max() · cpu.max() · nvidia.squeeze()</span><br><span class="c-pink">fans.verify() · ram.flush() · ui.light()</span></div>
+            <button class="mock-apply" type="button">⚡ APPLICA FPS MAX ⚡</button>
+            <div class="mock-quick">VERIFICATO ✓ policy attiva · CPU 100% · clock lock</div>
           </div>
         </div>
+        <div class="mock-ver">v1.4.0 · FPS BEAST+</div>
       </div>
-      <p class="mock-hint">🖱️ muovi il mouse — mockup 3D interattivo · <a href="desktop/renderer/index.html">apri la demo live dell'app →</a></p>
+      <p class="mock-hint">🖱️ muovi il mouse — mockup 3D · <a href="desktop/renderer/index.html">apri la demo live →</a></p>
     </div>
   </div>
 </header>
 
 <section class="logos"><div class="logos-inner">
-  <span>OLLAMA OFFLINE</span><span>MONACO EDITOR</span><span>PROTON · GAMEMODE · DXVK</span><span>GAME MODE macOS</span><span>NSIS · DMG · APPIMAGE</span>
+  <span>NVIDIA-SMI</span><span>POWERCFG</span><span>OLLAMA OFFLINE</span><span>MONACO EDITOR</span><span>PROTON · GAMEMODE</span><span>NSIS · DMG · APPIMAGE</span>
 </div></section>
 
 <section class="features" id="features">
-  <h2>Features <span class="neon">&amp; Buffs</span> — come funziona</h2>
-  <p class="sec-sub">Tre motori, un solo click. Tutto gira in locale se vuoi.</p>
-  <div class="cards">
+  <div class="sec-head">
+    <span class="eyebrow">Tre motori, un click</span>
+    <h2>Features <span class="neon">&amp; Buffs</span></h2>
+    <p class="sec-sub">Tutto gira in locale. Ogni azione ha un'anteprima e un ripristino.</p>
+  </div>
+  <div class="cards cards-3">
     <article class="card">
-      <div class="card-icon">⚡</div>
-      <h3>Code &amp; Prompt AI Overclock</h3>
-      <p>L'IA locale (Ollama) o cloud (OpenAI / Anthropic) ottimizza codice e prompt in 3 varianti:</p>
+      <div class="card-icon">💻</div>
+      <h3>Code &amp; Prompt AI</h3>
+      <p>L'IA locale (Ollama) riscrive il tuo codice in tre varianti, senza mandare niente online.</p>
       <ul>
-        <li><b>⚡ Speed Buff</b> — refactor per prestazioni, complessità minima O(1)/O(n).</li>
-        <li><b>🛡️ Security Buff</b> — bug-fix, type-check rigoroso, validazione input.</li>
-        <li><b>🧠 Pro Senior Buff</b> — riscrittura con i migliori pattern del settore.</li>
-        <li><b>📝 Prompt Mode</b> — Chain-of-Thought + Role-Prompting automatici.</li>
+        <li><b>⚡ Speed</b> — refactor per prestazioni, complessità minima.</li>
+        <li><b>🛡️ Security</b> — validazione input, errori tipizzati.</li>
+        <li><b>🧠 Pro</b> — pattern senior, puro e testabile.</li>
+        <li><b>📝 Prompt</b> — Chain-of-Thought automatico.</li>
       </ul>
       <div class="mini-code">input → [SPEED|SEC|PRO] → diff + apply</div>
     </article>
     <article class="card">
       <div class="card-icon">🚀</div>
       <h3>System Speed Boost</h3>
-      <p>Libera la potenza del PC prima di lavorare o giocare:</p>
+      <p>Libera la potenza del PC prima di lavorare o giocare.</p>
       <ul>
-        <li><b>RAM Flush</b> — purge cache e memoria inattiva in 1 click.</li>
-        <li><b>Niente più freeze</b> — le app in background non vengono mai toccate (freeze rimosso).</li>
-        <li><b>🚀 FPS MAX BEAST</b> — GPU MAX + CPU MAX + extra in un click: solo più frame al secondo.</li>
-        <li><b>🎮 Lancia gioco ottimizzato</b> — avvialo dall'app: mod temporanee + argomenti FPS + auto-ripristino alla chiusura.</li>
-        <li><b>🌀 Ventole</b> — profili silenziosa/bilanciata/massima + % manuale + reset automatico di fabbrica.</li>
-        <li><b>Disk &amp; Junk Cleaner</b> — temp + cache di build orfane.</li>
-        <li><b>Network Optimizer</b> — flush DNS + tuning TCP/IP, ping ridotto.</li>
+        <li><b>🚀 FPS MAX</b> — GPU MAX + CPU MAX + NVIDIA + extra in un click.</li>
+        <li><b>🎮 NVIDIA MAX</b> — power limit, clock, PowerMizer, con reset.</li>
+        <li><b>🌀 Ventole</b> — profili verificati + % manuale + reset esatto.</li>
+        <li><b>RAM / Disk / Network</b> — flush, pulizia sicura, ping più stabile.</li>
+        <li><b>🎮 Lancia gioco ottimizzato</b> — mod temporanee, auto-ripristino alla chiusura.</li>
       </ul>
       <div class="bars">
         <div class="bar"><span>RAM libera</span><div class="track"><div class="fill f1"></div></div></div>
@@ -105,181 +123,208 @@
     <article class="card">
       <div class="card-icon">🎮</div>
       <h3>Game-Specific Ultra Boost</h3>
-      <p>Profili di performance dedicati per singolo gioco:</p>
+      <p>Profili dedicati per singolo gioco, calibrati sul tuo PC.</p>
       <ul>
         <li><b>GPU/CPU Priority</b> — priorità massima al processo di gioco.</li>
-        <li><b>Core Affinity</b> — pin sui core fisici dedicati.</li>
+        <li><b>Core Affinity</b> — pin sui core dedicati, sistema sul core 0.</li>
         <li><b>Disable OS Bloat</b> — notifiche e servizi off durante il play.</li>
-        <li><b>Linux</b>: Proton + Gamemode + <code>DXVK_ASYNC=1</code> automatici.</li>
-        <li><b>macOS</b>: Game Mode nativo + Game Porting Toolkit.</li>
+        <li><b>Linux</b>: Proton + Gamemode + <code>DXVK_ASYNC=1</code>.</li>
+        <li><b>macOS</b>: Game Mode nativo.</li>
       </ul>
-      <div class="mini-code">35 preset pronti · auto-detect + manuale</div>
+      <div class="mini-code">35 preset · stima FPS sul tuo hardware</div>
+    </article>
+  </div>
+</section>
+
+<section class="novita" id="novita">
+  <div class="sec-head">
+    <span class="eyebrow">Nuova versione</span>
+    <h2>Novità <span class="neon-green">v1.4</span> — quello che hai chiesto</h2>
+    <p class="sec-sub">Ventole sistemate, NVIDIA spremuta, interfaccia vetrata e un avvio che si frantuma.</p>
+  </div>
+  <div class="cards cards-3">
+    <article class="card card-accent">
+      <div class="card-icon">🌀</div>
+      <h3>Ventole che ora funzionano</h3>
+      <p>La vecchia versione non verificava niente e la % diventava un limite CPU. Ora:</p>
+      <ul>
+        <li>legge <b>temperature reali</b>, ventole dichiarate dal firmware e ventola GPU;</li>
+        <li>applica su <b>AC e DC</b> con il GUID del piano attivo, poi <b>rilegge e verifica</b>;</li>
+        <li>la % è una <b>curva di calore</b> sensata (mai 40% ventole = CPU al 40%);</li>
+        <li>se LibreHardwareMonitor o FanControl sono aperti, mostra gli <b>RPM veri</b>;</li>
+        <li><b>reset esatto</b> ai valori letti prima, non a valori inventati.</li>
+      </ul>
+    </article>
+    <article class="card card-accent">
+      <div class="card-icon">🎮</div>
+      <h3>NVIDIA MAX + reset</h3>
+      <p>Un modulo nuovo che spreme la GeForce con strumenti ufficiali:</p>
+      <ul>
+        <li><b>power limit</b> al massimo consentito dal driver;</li>
+        <li><b>persistence mode</b> e <b>clock GPU</b> bloccato (niente cali);</li>
+        <li><b>PowerMizer</b> forzato su massime prestazioni nel registro;</li>
+        <li><b>guida ai 5 valori del pannello NVIDIA</b> che spostano gli FPS + apertura del pannello;</li>
+        <li><b>↩ Reset NVIDIA</b> che rimette tutto come prima.</li>
+      </ul>
+      <div class="mini-code">nvidia-smi · PowerMizer · snapshot in ~/.overclock</div>
+    </article>
+    <article class="card card-accent">
+      <div class="card-icon">🪟</div>
+      <h3>Interfaccia vetrata + avvio</h3>
+      <p>Stessa identità, più ordine e più carattere:</p>
+      <ul>
+        <li>sidebar <b>a gruppi</b> (Performance / Lavoro / Sistema) e header per sezione;</li>
+        <li>card in <b>vetro smerigliato</b>, bordi luminosi e ombre profonde;</li>
+        <li>avvio con <b>vetro che si incrina e va in pezzi</b> prima dell'app;</li>
+        <li><b>versione in basso a destra</b>, sempre visibile;</li>
+        <li>animazioni leggere, rispetto di “riduci movimento”.</li>
+      </ul>
+      <div class="mini-code">glass · backdrop-filter · shatter</div>
     </article>
   </div>
 </section>
 
 <section class="features" id="guida">
-  <h2>Cosa fa <span class="neon">ogni opzione</span> — spiegato semplice</h2>
-  <p class="sec-sub">Niente scatole nere: prima di toccare il PC, l'app ti mostra l'anteprima. Tutto reversibile.</p>
+  <div class="sec-head">
+    <span class="eyebrow">Trasparenza</span>
+    <h2>Cosa fa <span class="neon">ogni opzione</span></h2>
+    <p class="sec-sub">Niente scatole nere: prima di toccare il PC vedi l'anteprima, e tutto si ripristina.</p>
+  </div>
   <div class="cards">
     <article class="card">
-      <div class="card-icon">🧠</div>
-      <h3>RAM Flush</h3>
-      <p>Svuota la memoria inattiva dei processi: <b>nessun programma viene chiuso</b>, Windows ricarica da solo ciò che serve. Effetto immediato, zero rischi, si ripete quando vuoi.</p>
+      <div class="card-icon">👁</div>
+      <h3>Anteprima + Ripristina</h3>
+      <p>Il pulsante 👁 mostra <b>prima</b> cosa verrà toccato (processi, MB, chiavi di registro, valori powercfg). Le azioni che scrivono chiedono conferma. ↩ rimette tutto, anche dopo il riavvio.</p>
     </article>
     <article class="card">
-      <div class="card-icon">🚀</div>
-      <h3>FPS MAX BEAST: GPU + CPU + extra, solo più FPS</h3>
-      <p>La sezione dedicata all'unico obiettivo che conta: <b>GPU MAX</b> (GameDVR off, Game Mode on, cache shader + DirectX + Steam pulite, HAGS, MPO off anti-stutter, TdrDelay anti-freeze, priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati) + <b>CPU MAX</b> (Ultimate Performance, CPU 100% + core parking OFF + boost aggressivo, foreground boost, scheduler giochi, throttling off) + <b>extra</b> (UI leggera + RAM standby liberata). Onesto: nessun software fa ×100 — qui spremi il massimo via software.</p>
+      <div class="card-icon">🎨</div>
+      <h3>GPU MAX</h3>
+      <p>GameDVR/capture OFF, Game Mode ON, cache shader + DirectX + Steam pulite, HAGS, MPO off anti-stutter, <b>TdrDelay=8</b> anti-freeze, priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati.</p>
+    </article>
+    <article class="card">
+      <div class="card-icon">🧠</div>
+      <h3>CPU MAX</h3>
+      <p>Piano <b>Ultimate Performance</b>, CPU 100%, core parking OFF, boost aggressivo, foreground boost, scheduler giochi. Le altre app restano aperte e fluide.</p>
     </article>
     <article class="card">
       <div class="card-icon">✅</div>
-      <h3>Niente più freeze alle tue app</h3>
-      <p>Il Freeze Buff è stato <b>rimosso</b>: Game Boost e FPS MOD non sospendono più Discord, browser o musica. Potenziano <b>solo il gioco</b> (priorità High + core dedicati + patch config con backup). Le altre app restano aperte e fluide.</p>
+      <h3>Niente più freeze</h3>
+      <p>Game Boost e FPS MOD non sospendono più Discord, browser o musica. Potenziano <b>solo il gioco</b> (priorità High + core dedicati + patch config con backup).</p>
     </article>
     <article class="card">
       <div class="card-icon">🧹</div>
-      <h3>Disco &amp; Junk + 3 livelli</h3>
-      <p><b>Base</b>: solo file TEMP vecchi di 7+ giorni. <b>Media</b>: tutta la TEMP + cache shader. <b>Potente</b>: + cache Windows Update e miniature. Solo cache rigenerabili: mai documenti, mai giochi.</p>
+      <h3>Disco &amp; Junk, tre livelli</h3>
+      <p><b>Base</b>: TEMP vecchia di 7+ giorni. <b>Media</b>: tutta la TEMP + cache shader. <b>Potente</b>: + Windows Update e miniature. Solo cache rigenerabili: mai documenti, mai giochi.</p>
     </article>
     <article class="card">
       <div class="card-icon">🌐</div>
       <h3>Rete: DNS + TCP</h3>
-      <p>Svuota la cache DNS per un ping più stabile. A livello <b>Media/Potente</b> ottimizza anche il TCP (autotuning, RSS, ECN) se hai i permessi admin — i valori originali vengono salvati per il ripristino.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">🎨</div>
-      <h3>GPU Boost NVIDIA / AMD / Intel</h3>
-      <p>Rileva la tua scheda, attiva Game Mode e fullscreen esclusivo, pulisce le cache shader (si rigenerano da sole) e — solo a livello Potente con admin — attiva HAGS. Con un click apre anche il pannello del produttore.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">⚡</div>
-      <h3>Overclock OS per PC vecchi</h3>
-      <p><b>Base</b>: GameDVR off. <b>Media</b>: + trasparenze e animazioni off. <b>Potente</b>: + piano “Prestazioni elevate”. Dà anni di vita a un PC lento — e tutto si ripristina.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">👁</div>
-      <h3>Anteprima + Ripristina</h3>
-      <p>Il pulsante 👁 mostra <b>prima</b> cosa verrà toccato (processi, MB, chiavi di registro). Le azioni distruttive chiedono conferma. ↩ rimette tutto come prima, anche dopo aver riavviato.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">🎮</div>
-      <h3>Game Boost con stima FPS</h3>
-      <p>35 giochi con icona dedicata: l'app rileva CPU, RAM e GPU e ti dice <b>cosa fa il boost e quanti FPS puoi guadagnare (+x–y%)</b> sul tuo PC. Priorità massima, affinity, bloat off e hint di avvio per ogni titolo.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">🧪</div>
-      <h3>FPS MOD per gioco (senza freeze)</h3>
-      <p>La mod che alza davvero gli FPS: patch dei settaggi grafici del gioco <b>con backup e ripristino</b> + core dedicati (il sistema resta sul core 0). <b>Le app pesanti non vengono più sospese</b>: Stop = tutto come prima, senza aver mai freezato niente.</p>
+      <p>Flush DNS per un ping stabile. A livello Media/Potente ottimizza anche il TCP (autotuning, RSS, ECN) con admin: i valori originali vengono salvati per il ripristino.</p>
     </article>
     <article class="card">
       <div class="card-icon">🔤</div>
-      <h3>Aspetto: testo, animazioni e tema</h3>
-      <p>La finestra <b>Aspetto</b> ora ha tutto: testo <b>ClearType nitido / Standard classico / OFF</b>, trasparenza ON/OFF, animazioni ON/OFF, menu istantanei o normali, tema scuro o chiaro — ognuno con la sua <b>anteprima leggibile</b> (cosa fa, cosa non tocca, serve admin?, serve riavvio?, come si annulla). Più il pulsante <b>“Torna tutto normale”</b>. Tutto resta dopo la chiusura.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">🧹</div>
-      <h3>Disinstallazione semplice e pulita</h3>
-      <p>Nuova sezione nelle <b>Impostazioni</b>: leggi l'anteprima, premi <b>“Ripristina tutto + pulisci dati”</b> (PC, giochi e avvio tornano come prima, dati in ~/.overclock eliminati) e poi <b>disinstalla l'app</b> con un click — o segui la guida per la portable. Zero residui.</p>
-    </article>
-    <article class="card">
-      <div class="card-icon">🩺</div>
-      <h3>Salute sistema</h3>
-      <p>Un check rapido senza modificare nulla: permessi admin, snapshot salvati, boost attivo, mod giochi e stato Ollama — così sai sempre come stai messo prima di toccare qualcosa.</p>
+      <h3>Aspetto: testo e animazioni</h3>
+      <p>Testo <b>ClearType / Standard / OFF</b>, trasparenza e animazioni ON/OFF, menu istantanei, tema scuro o chiaro. Più il pulsante <b>“Torna tutto normale”</b>. Tutto resta dopo la chiusura.</p>
     </article>
     <article class="card">
       <div class="card-icon">💾</div>
-      <h3>Persistente: resta dopo la chiusura</h3>
-      <p>Snapshot e stato ora vivono in <b>~/.overclock</b> (non più nei file temporanei): chiudi l'app, riavvia il PC — le ottimizzazioni al registro restano e lo [Status] le ricorda. Ogni 👁 anteprima ora spiega in chiaro cosa fa, cosa non tocca e come annullarla.</p>
+      <h3>Persistente per davvero</h3>
+      <p>Snapshot e stato vivono in <b>~/.overclock</b>: chiudi l'app, riavvia il PC — le ottimizzazioni restano e lo [Status] le ricorda. Ogni anteprima dice cosa fa, cosa non tocca e come annullarla.</p>
     </article>
     <article class="card">
-      <div class="card-icon">🤖</div>
-      <h3>AI: Speed / Security / Pro</h3>
-      <p>Incolla codice o un'idea: l'IA locale (Ollama, privata al 100%) o cloud la ottimizza in 3 varianti — prestazioni, sicurezza, qualità senior — oppure trasforma un prompt vago in un prompt ingegnerizzato.</p>
+      <div class="card-icon">🧹</div>
+      <h3>Disinstallazione pulita</h3>
+      <p>Nelle Impostazioni: leggi l'anteprima, premi <b>“Ripristina tutto + pulisci dati”</b> (PC, NVIDIA, GPU, CPU, giochi e avvio tornano come prima) e poi <b>disinstalla</b> con un click. Zero residui.</p>
     </article>
   </div>
 </section>
 
 <section class="steps">
-  <h2>Pronto in <span class="neon-green">3 passi</span></h2>
-  <div class="cards">
-    <article class="card"><div class="card-icon">1️⃣</div><h3>Scarica</h3><p>Un click, installer Windows. Oppure <a href="desktop/renderer/index.html"><b>prova subito la demo live nel browser</b></a> — niente installazione.</p></article>
-    <article class="card"><div class="card-icon">2️⃣</div><h3>Boost</h3><p>1-Click Full System Buff: RAM, processi, disco, rete, GPU e piano energia in un colpo solo.</p></article>
-    <article class="card"><div class="card-icon">3️⃣</div><h3>Gioca / Codifica</h3><p>35 giochi con profilo dedicato, AI che riscrive il tuo codice in 3 varianti. Tutto reversibile.</p></article>
+  <div class="sec-head">
+    <span class="eyebrow">Da zero a boost</span>
+    <h2>Pronto in <span class="neon-green">3 passi</span></h2>
   </div>
-  <div class="demo-banner">⚡ <b>Senza installare niente:</b> <a href="desktop/renderer/index.html">apri la demo interattiva dell'app →</a> <span>RAM flush, game boost e AI funzionano davvero nel browser.</span></div>
+  <div class="cards cards-3">
+    <article class="card"><div class="card-icon">1️⃣</div><h3>Scarica</h3><p>Un click, installer Windows. Oppure <a href="desktop/renderer/index.html"><b>prova la demo live nel browser</b></a> — niente installazione.</p></article>
+    <article class="card"><div class="card-icon">2️⃣</div><h3>Boost</h3><p>FPS MAX: GPU, CPU, NVIDIA e ventole in un colpo. Ogni motore ha il suo reset.</p></article>
+    <article class="card"><div class="card-icon">3️⃣</div><h3>Gioca / Codifica</h3><p>35 giochi con profilo dedicato, AI che riscrive il codice in tre varianti. Tutto reversibile.</p></article>
+  </div>
+  <div class="demo-banner">⚡ <b>Senza installare niente:</b> <a href="desktop/renderer/index.html">apri la demo interattiva dell'app →</a> <span>nuova UI vetrata, sezione NVIDIA e ventole incluse.</span></div>
 </section>
 
 <section class="download" id="download">
-  <h2>Download <span class="neon-green">Hub</span> cross-platform</h2>
-  <p class="sec-sub">Scegli il tuo OS. Ogni build è firmata con hash SHA-256.</p>
+  <div class="sec-head">
+    <span class="eyebrow">Cross-platform</span>
+    <h2>Download <span class="neon-green">Hub</span></h2>
+    <p class="sec-sub">Scegli il tuo OS. Ogni build è firmata con hash SHA-256.</p>
+  </div>
   <div class="dl-detect">Il tuo sistema rilevato: <b id="osDetected">…</b> — <button class="link" id="dlRecommended" data-dl>scarica la build consigliata ⬇</button></div>
   <div class="dl-grid">
     <article class="dl-card" id="dl-win">
       <div class="dl-os">🪟 Windows <span>10 / 11 · x64 / ARM64</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.3.0-win-setup.exe" download>Direct Download Installer ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.0-win-setup.exe" download>Direct Download Installer ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.3.0-win-setup.exe" download>Overclock-Setup-1.3.0.exe <span>⭐ Installer · avvio veloce</span></a></li>
-        <li><a href="releases/overclock-1.3.0-win-x64.exe" download>Overclock-1.3.0-win-x64.exe <span>Portable · no install</span></a></li>
-        <li><a href="releases/overclock-1.3.0-win-x64.msi" download>Overclock-1.3.0-win-x64.msi <span>MSI · in arrivo via CI</span></a></li>
+        <li><a href="releases/overclock-1.4.0-win-setup.exe" download>Overclock-Setup installer <span>⭐ avvio veloce</span></a></li>
+        <li><a href="releases/overclock-1.4.0-win-x64.exe" download>Overclock portable <span>no install</span></a></li>
+        <li><a href="releases/overclock-1.4.0-win-x64.msi" download>MSI <span>per flotte / GPO</span></a></li>
       </ul>
-      <div class="req">Requisiti: Windows 10 21H2+, 4 GB RAM, WebView2.</div>
+      <div class="req">Requisiti: Windows 10 21H2+, 4 GB RAM, WebView2. NVIDIA MAX richiede il driver NVIDIA (nvidia-smi).</div>
     </article>
     <article class="dl-card" id="dl-mac">
-      <div class="dl-os">🍎 macOS <span>M1/M2/M3/M4 + Intel · Universal</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.3.0-mac-universal.dmg" download>Direct Download .dmg ⬇</a>
+      <div class="dl-os">🍎 macOS <span>M1/M2/M3/M4 + Intel</span></div>
+      <a class="btn-neon sm" href="releases/overclock-1.4.0-mac-universal.dmg" download>Direct Download .dmg ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.3.0-mac-universal.dmg" download>Overclock-1.3.0-universal.dmg <span>Universal · 92 MB</span></a></li>
+        <li><a href="releases/overclock-1.4.0-mac-universal.dmg" download>Overclock universal <span>Apple Silicon + Intel</span></a></li>
       </ul>
       <div class="req">Requisiti: macOS 13+, Game Mode supportato su Apple Silicon.</div>
     </article>
     <article class="dl-card" id="dl-linux">
       <div class="dl-os">🐧 Linux <span>Ubuntu · Fedora · Arch</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.3.0-linux.AppImage" download>Direct Download .AppImage ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.0-linux.AppImage" download>Direct Download .AppImage ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.3.0-linux.AppImage" download>Overclock-1.3.0.AppImage <span>Portable · 85 MB</span></a></li>
-        <li><a href="releases/overclock-1.3.0-linux.deb" download>Overclock-1.3.0.deb <span>Debian/Ubuntu</span></a></li>
-        <li><a href="releases/overclock-1.3.0-linux.tar.gz" download>Overclock-1.3.0.tar.gz <span>Any distro</span></a></li>
+        <li><a href="releases/overclock-1.4.0-linux.AppImage" download>AppImage <span>portable</span></a></li>
+        <li><a href="releases/overclock-1.4.0-linux.deb" download>.deb <span>Debian/Ubuntu</span></a></li>
+        <li><a href="releases/overclock-1.4.0-linux.tar.gz" download>.tar.gz <span>qualsiasi distro</span></a></li>
       </ul>
-      <div class="req">Requisiti: glibc 2.35+, gamemode opzionale per il boost.</div>
+      <div class="req">Requisiti: glibc 2.35+, gamemode opzionale. NVIDIA: nvidia-smi + nvidia-settings.</div>
     </article>
   </div>
+
   <div class="changelog">
     <div class="ch-box">
-      <h3>Changelog — v1.3.0 <span class="tag">stable</span> <small style="opacity:.7">· cosa cambia dalla v1.2</small></h3>
-      <p class="sec-sub" style="margin:.4em 0 .8em">Hai la v1.2? Ecco le <b>3 novità</b> della v1.3, spiegate semplice — niente scatole nere, tutto reversibile.</p>
+      <h3>Changelog — v1.4.0 <span class="tag">nuova</span> <small>· cosa cambia dalla v1.3</small></h3>
+      <p class="sec-sub inset">Le 4 novità, spiegate semplice: cosa fa / cosa non tocca / come si annulla.</p>
       <ul>
-        <li>🚀 <b>FPS MAX BEAST — GPU MAX + CPU MAX + extra, solo più FPS.</b><br>
-          <i>Cosa fa:</i> GPU — GameDVR/capture OFF + Game Mode ON, cache shader NVIDIA/AMD + DirectX + Steam pulite (via gli scattini), HAGS, MPO off (niente stutter a 144 Hz+), <b>TdrDelay=8</b> (il driver non resetta più la GPU nei picchi = niente freeze di 2 s), priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati. CPU — piano <b>Ultimate Performance</b> (o Prestazioni elevate), CPU sempre al 100%, raffreddamento ATTIVO, <b>core parking OFF</b> (tutti i core svegli), boost aggressivo, foreground boost. Extra — UI leggera (trasparenza/animazioni off) + RAM standby liberata subito.<br>
-          <i>Cosa NON tocca:</i> driver, giochi, salvataggi, Discord/browser/musica (restano fluidi). <i>Come si annulla:</i> ↩ Ripristina FPS MAX (snapshot dedicati, vale anche dopo il riavvio). Onesto: nessun software fa ×100 — qui spremi il massimo via software.</li>
-        <li>🎮 <b>Lancia gioco ottimizzato — nuova card in FPS MAX.</b><br>
-          <i>Cosa fa:</i> avvii il gioco <b>dall'app</b>: applichiamo mod FPS temporanee (patch config con backup .ocbak) + argomenti di lancio ufficiali per-gioco (es. CS2 <code>-high -novid +fps_max 400</code>) + priorità High, anche via <code>steam://rungameid/</code>. Quando <b>chiudi il gioco ripristiniamo tutto da soli</b>.<br>
-          <i>Cosa NON tocca:</i> se avvii il gioco da fuori, niente mod. <i>Come si annulla:</i> ■ Stop / Ripristina, o chiudi il gioco — torna tutto come prima.</li>
-        <li>🌀 <b>Sezione Ventole — rumore vs raffreddamento, a tua scelta.</b><br>
-          <i>Cosa fa:</i> profili <b>Silenziosa</b> (policy passiva + CPU 85%: poche ventole, qualche FPS in meno) / <b>Bilanciata</b> (default Windows) / <b>Massima</b> (policy attiva + boost: CPU mai throttlata, più rumore) + <b>% manuale 10–100%</b> + stato in sola lettura (temperatura, policy, vendor) + <b>reset automatico</b> che rimette la modalità di fabbrica. Onesto: Windows non ha un'API standard per i giri — la policy Windows si applica sempre, per i giri esatti proviamo le interfacce WMI del produttore o ti diciamo quale app ufficiale usare (Legion Zone, Armoury Crate…): niente driver strani.<br>
-          <i>Cosa NON tocca:</i> curve custom esistenti (le ritrovi col reset), BIOS. <i>Come si annulla:</i> ↩ Reset automatico (snapshot dedicato).</li>
-        <li>⬅️ v1.2.0: disinstallazione semplice, salute sistema, reset totale vero.</li>
+        <li>🌀 <b>Ventole riscritte: ora funzionano e lo dimostrano.</b><br>
+          <i>Cosa fa:</i> legge temperature ACPI, ventole dichiarate dal firmware e ventola GPU; applica policy + CPU min/max su <b>AC e DC</b> con il piano attivo; <b>rilegge i valori e li verifica</b> (se non tornano te lo dice). La % richiesta diventa una curva di calore sensata (sotto 50% silenziosa, sopra 85% spinge), non più un limite CPU. Se LibreHardwareMonitor/FanControl sono aperti, mostra gli <b>RPM reali</b>. Nuovo profilo <b>Gaming</b> e tasto per aprire l'app delle ventole.<br>
+          <i>Cosa NON tocca:</i> curve custom esistenti, BIOS, app aperte. <i>Come si annulla:</i> ↩ Reset automatico rimette i <b>valori esatti</b> letti prima (AC e DC) e il piano energia originale.</li>
+        <li>🎮 <b>NVIDIA MAX — nuova sezione, con reset.</b><br>
+          <i>Cosa fa:</i> legge la scheda dal driver (temp, ventola, clock, power, VRAM), alza il <b>power limit</b> al massimo consentito, attiva il <b>persistence mode</b>, blocca il <b>clock GPU</b> al massimo (se la temperatura è sotto 82 °C), forza <b>PowerMizer</b> su massime prestazioni nel registro, verifica dal driver cosa è cambiato. In più: guida ai <b>5 valori del pannello NVIDIA</b> (prestazioni massime, low latency, VSync, filtro 16x, DLSS) e pulsante per aprire il pannello.<br>
+          <i>Cosa NON tocca:</i> voltaggi, BIOS della scheda, “modalità debug”. <i>Come si annulla:</i> ↩ <b>Reset NVIDIA</b> (clock, power limit, persistence e registro tornano come prima).</li>
+        <li>🪟 <b>Interfaccia vetrata e avvio a frantumazione.</b><br>
+          <i>Cosa fa:</i> sidebar a gruppi (Performance / Lavoro / Sistema), header per ogni sezione, card in vetro smerigliato con bordi luminosi; all'avvio il <b>vetro si incrina e va in pezzi</b> prima dell'app; <b>versione in basso a destra</b> sempre visibile; animazioni leggere e rispetto di “riduci movimento”.<br>
+          <i>Cosa NON tocca:</i> nessuna funzione cambia nome o posto nella logica, solo l'ordine e l'aspetto.</li>
+        <li>🚀 <b>Più FPS ovunque.</b><br>
+          <i>Cosa fa:</i> FPS MAX ora include anche NVIDIA MAX (power limit, clock, PowerMizer) e disattiva le <b>fullscreen optimizations</b> del processo del gioco (meno latenza e stutter), oltre a UI leggera e RAM standby.<br>
+          <i>Cosa NON tocca:</i> gli altri programmi. <i>Come si annulla:</i> ↩ Ripristina tutto (include la sezione NVIDIA).</li>
+        <li>⬅️ v1.3.0: FPS MAX BEAST, lancio gioco ottimizzato, sezione ventole.</li>
       </ul>
     </div>
     <div class="ch-box">
-      <h3>Changelog — v1.1.0 <span class="tag ghost">storico</span></h3>
+      <h3>Changelog — v1.3.0 <span class="tag ghost">storico</span></h3>
       <ul>
-        <li>🚀 <b>Nuova sezione FPS MAX</b> (solo più FPS): GPU MAX potenziato (GameDVR off, Game Mode on, shader pulita, HAGS, MPO off, throttling off) + CPU MAX (Prestazioni elevate, foreground boost, scheduler giochi).</li>
-        <li>✅ <b>Freeze rimosso</b>: tolto il Freeze Buff; Game Boost e FPS MOD non toccano più Discord/browser/musica — solo il gioco.</li>
-        <li>💾 <b>Persistenza vera</b>: snapshot in ~/.overclock, il boost resta dopo chiusura e riavvio.</li>
-        <li>🔤 <b>Aspetto esteso</b>: testo (ClearType/Standard/OFF) + trasparenza + animazioni + menu + tema scuro/chiaro, ognuno con anteprima leggibile.</li>
-        <li>👁 <b>Anteprime riscritte</b>: ogni anteprima dice cosa fa, cosa non tocca, serve admin?, serve riavvio?, come si annulla.</li>
-        <li>🐛 <b>Bug fix</b>: ripristino GPU con tipo registro corretto; log duplicato nel ripristino OS; lista giochi sempre completa (IPC, non più 2 soli); anteprima font mancante.</li>
-        <li>✨ <b>Splash orbitale + animazioni ovunque</b>: shine sui bottoni, glow sulla sidebar, card a cascata, vista FPS con glow verde.</li>
-        <li>⬅️ v1.0.1: finestra Aspetto, fix font, GPU MAX base, card animate.</li>
+        <li>🚀 <b>FPS MAX BEAST</b>: TdrDelay, priorità GPU, PCIe/USB, Ultimate Performance, core parking OFF, UI leggera + RAM.</li>
+        <li>🎮 <b>Lancia gioco ottimizzato</b>: mod temporanee + argomenti FPS + auto-ripristino alla chiusura.</li>
+        <li>🌀 <b>Sezione Ventole</b>: profili + % + reset (prima versione).</li>
+        <li>⬅️ v1.2.0: disinstallazione semplice, salute sistema.</li>
       </ul>
     </div>
     <div class="ch-box">
       <h3>SHA-256 <span class="tag ghost">verifica</span></h3>
-      <pre id="shaBox">(hash SHA-256 pubblicati dalla CI con la Release v1.3.0)
-Overclock.Setup.1.3.0.exe (installer Windows)
-Overclock.1.3.0.exe (portable Windows)
-Overclock-1.3.0-arm64.dmg (macOS) · Overclock-1.3.0.AppImage (Linux)
+      <pre id="shaBox">(gli hash SHA-256 sono pubblicati dalla CI nella Release)
+Overclock.Setup.exe (installer Windows)
+Overclock.exe (portable Windows)
+Overclock.dmg (macOS) · Overclock.AppImage (Linux)
 Verifica (PowerShell): Get-FileHash .\Overclock* -Algorithm SHA256</pre>
       <button class="btn-ghost sm" id="copySha">Copia hash</button>
     </div>
@@ -287,20 +332,23 @@ Verifica (PowerShell): Get-FileHash .\Overclock* -Algorithm SHA256</pre>
 </section>
 
 <section class="faq" id="faq">
-  <h2>FAQ <span class="neon-pink">&amp;</span> Privacy</h2>
+  <div class="sec-head">
+    <span class="eyebrow">Domande vere</span>
+    <h2>FAQ <span class="neon-pink">&amp;</span> Privacy</h2>
+  </div>
   <div class="faq-grid">
-    <details open><summary>Funziona davvero 100% offline?</summary><p>Sì. Il modulo AI usa <b>Ollama</b> (<code>http://localhost:11434</code>) con modelli come Llama 3 / CodeLlama / Mistral. Nessun byte di codice lascia il tuo PC se scegli la modalità offline. I provider cloud sono opt-in.</p></details>
-    <details><summary>Quali dati raccogliete?</summary><p>Nessuno. Niente telemetria obbligatoria, niente account. Le statistiche di sistema restano in locale.</p></details>
-    <details><summary>Come faccio a usare Ollama?</summary><p>Installa Ollama, poi <code>ollama pull llama3 && ollama pull codellama</code>. Overclock lo rileva da solo e mostra <b>● OLLAMA ONLINE</b> nelle Settings.</p></details>
-    <details><summary>È sicuro il Game Boost?</summary><p>Sì: alza priorità e affinità solo mentre giochi e ripristina tutto all'uscita. Su Linux usa i tuoi Proton/Gamemode esistenti, non li sostituisce.</p></details>
-    <details><summary>Su quali OS gira?</summary><p>Windows 10/11 (.exe/.msi/portable), macOS Universal (.dmg), Linux (.AppImage/.deb/.tar.gz).</p></details>
+    <details open><summary>NVIDIA MAX cambia davvero gli FPS?</summary><p>Sì, nella misura in cui il driver lo permette: power limit più alto e clock bloccato danno <b>frame più stabili</b> e meno cali nei picchi. Le impostazioni 3D del pannello NVIDIA (prestazioni massime, low latency, DLSS) non hanno un'API pubblica: per quelle c'è la guida + il pulsante che apre il pannello. È tutto reversibile con ↩ Reset NVIDIA.</p></details>
+    <details><summary>Perché le ventole non hanno una percentuale esatta?</summary><p>Windows non espone un'API standard per i giri: dipende dal chip di controllo della scheda madre. Overclock agisce su ciò che è universale (calore prodotto + policy di raffreddamento) e <b>verifica</b> i valori; per i giri esatti legge gli RPM da LibreHardwareMonitor/FanControl o apre l'app del produttore.</p></details>
+    <details><summary>Funziona davvero 100% offline?</summary><p>Sì. Il modulo AI usa <b>Ollama</b> (<code>http://localhost:11434</code>) con Llama 3 / CodeLlama / Mistral. Nessun byte di codice lascia il PC in modalità offline.</p></details>
+    <details><summary>Quali dati raccogliete?</summary><p>Nessuno. Niente telemetria, niente account. Le statistiche di sistema restano in locale e gli snapshot stanno in <code>~/.overclock</code>.</p></details>
+    <details><summary>Su quali OS gira?</summary><p>Windows 10/11 (installer/portable/MSI), macOS Universal (.dmg), Linux (AppImage/.deb/.tar.gz). NVIDIA MAX richiede driver NVIDIA su Windows/Linux.</p></details>
   </div>
 </section>
 
 <footer class="footer">
   <div class="foot-inner">
     <div><b>⚡ OVERCLOCK</b> — One App, Total Power.<br><small>Creato da <b>REGA</b> · © 2026 REGA — Tutti i diritti riservati.</small></div>
-    <div class="foot-links"><a href="#top">Top ↑</a><a href="desktop/renderer/index.html">Demo app</a><a href="README.md">README</a></div>
+    <div class="foot-links"><a href="#top">Top ↑</a><a href="desktop/renderer/index.html">Demo app</a><a href="README.md">README</a><span class="foot-ver">v1.4.0</span></div>
   </div>
 </footer>
 

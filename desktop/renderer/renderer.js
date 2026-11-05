@@ -464,6 +464,53 @@
   const _fpc = $('#fanPreviewCustom'); if (_fpc) _fpc.addEventListener('click', () => fanRun('fancustom', () => window.overclock.fanPreview('custom', (_pct || {}).value || 70), '👁 Demo: anteprima % manuale.'));
   const _fac = $('#fanApplyCustom'); if (_fac) _fac.addEventListener('click', () => fanRun('fancustom', () => window.overclock.fanSet('custom', (_pct || {}).value || 70), '🎚️ Demo: velocità manuale applicata.', 'Applicare la velocità manuale alle ventole?'));
   const _fr = $('#fanResetBtn'); if (_fr) _fr.addEventListener('click', () => fanRun('fanreset', () => window.overclock.fanReset(), '↩ Demo: ventole in automatico.', 'Rimettere le ventole in AUTOMATICO (come da fabbrica)?'));
+  const _fgm = $('#fanGaming'); if (_fgm) _fgm.addEventListener('click', () => fanRun('fanmode', () => window.overclock.fanSet('gaming'), '🎮 Demo: profilo gaming applicato (CPU sveglia, ventole presenti).'));
+  const _fvb = $('#fanVendorBtn'); if (_fvb) _fvb.addEventListener('click', () => fanRun('fanstatus', () => window.overclock.fanVendor(), '🖥️ Demo: qui si aprirebbe FanControl / l\u2019app del produttore.'));
+
+  // ---------- v1.4: NVIDIA MAX ----------
+  function nvPaint(g){
+    const box = $('#nvStats');
+    if (!g || !g.available) { if (box) box.innerHTML = '<span class="mut">Scheda NVIDIA non rilevata: ' + ((g && g.reason) || 'nvidia-smi non trovato') + '</span>'; return; }
+    const chip = (label, val) => `<span class="stat"><b>${val}</b><small>${label}</small></span>`;
+    const nn = v => (v === null || v === undefined) ? 'n/d' : v;
+    if (box) box.innerHTML = [
+      chip('scheda', String(g.name || '—').replace(/NVIDIA GeForce /i, '')),
+      chip('temp', nn(g.tempC) === 'n/d' ? 'n/d' : g.tempC + '°C'),
+      chip('ventola', nn(g.fanPct) === 'n/d' ? 'n/d' : g.fanPct + '%'),
+      chip('clock', nn(g.clockMHz) === 'n/d' ? 'n/d' : Math.round(g.clockMHz) + ' MHz'),
+      chip('power limit', nn(g.powerLimitW) === 'n/d' ? 'n/d' : Math.round(g.powerLimitW) + ' W'),
+      chip('utilizzo', nn(g.utilPct) === 'n/d' ? 'n/d' : g.utilPct + '%')
+    ].join('');
+    const n = $('#nvName'); if (n) n.textContent = '· ' + (g.name || 'NVIDIA');
+    const b = $('#nvBadge'); if (b) b.textContent = 'driver ' + (g.driver || '?');
+  }
+  function nvRun(logKey, fn, demoMsg, confirmMsg){
+    const log = document.querySelector(`[data-log="${logKey}"]`);
+    if (!log) return;
+    if (confirmMsg && isElectron && !window.confirm(confirmMsg)) return;
+    log.textContent = '⏳ esecuzione…';
+    if (isElectron) fn().then(r => { log.textContent = mark(r); if (r && r.gpu) nvPaint(r.gpu); refreshStats(); })
+      .catch(e => { log.textContent = '✕ ' + e.message; });
+    else log.textContent = demoMsg;
+  }
+  const _nvs = $('#nvStatusBtn'); if (_nvs) _nvs.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('status'), '🎮 Demo: RTX 4060 · 61°C · ventola 42% · power limit 90/115 W · clock 2640 MHz.'));
+  const _nva = $('#nvApplyBtn'); if (_nva) _nva.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('apply', { lockClocks: true }), '🎮 Demo: power limit al massimo + clock bloccato + persistence + PowerMizer su massime prestazioni.', 'Spremere la GPU? Alzo il power limit al massimo e blocco il clock (serve admin). Tutto reversibile con "↩ Reset NVIDIA".'));
+  const _nvg = $('#nvGuideBtn'); if (_nvg) _nvg.addEventListener('click', () => nvRun('nvguide', () => window.overclock.nvidia('guide'), '📋 Demo: 5 valori del pannello NVIDIA — prestazioni massime, low latency, VSync off, filtro 16x, DLSS qualità.'));
+  const _nvp = $('#nvPanelBtn'); if (_nvp) _nvp.addEventListener('click', () => nvRun('nvguide', () => window.overclock.nvidia('panel'), '🖥️ Demo: qui si aprirebbe il pannello NVIDIA.', 'Aprire il pannello di controllo NVIDIA?'));
+  const _nvr = $('#nvResetBtn'); if (_nvr) _nvr.addEventListener('click', () => nvRun('nvreset', () => window.overclock.nvidia('reset'), '↩ Demo: NVIDIA riportata ai valori di fabbrica.', 'Rimettere la GPU ai valori di fabbrica (power limit, clock, PowerMizer)?'));
+  $$('[data-goto]').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.goto;
+    $$('.side[data-view]').forEach(x => x.classList.toggle('active', x.dataset.view === v));
+    $$('.view').forEach(x => x.classList.remove('active'));
+    const t = $('#view-' + v); if (t) t.classList.add('active');
+  }));
+  $$('.side[data-view]').forEach(b => b.addEventListener('click', () => {
+    if (!isElectron) return;
+    if (b.dataset.view === 'fans') fanRun('fanstatus', () => window.overclock.fanStatus(), '');
+    if (b.dataset.view === 'nvidia') window.overclock.nvidia('status').then(r => nvPaint(r && r.gpu)).catch(() => {});
+  }));
+  const _av = $('#appVersion');
+  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.0') + ' · FPS BEAST+';
 
   // ---------- Ollama badge ----------
   async function ollamaPing(){
@@ -510,12 +557,46 @@
       el.textContent = `🖥️ ${cpu} · ${h.cores}C/${h.threads}T · ${h.ramGB}GB RAM · ${gpu} — fascia ${String(h.tier).toUpperCase()} → stime FPS calibrate su questo PC`;
     } catch { el.textContent = '🖥️ PC non rilevato: stime FPS generiche.'; }
   }
-  const bootEl = $('#boot');
-  const bootSteps = $('#bootSteps');
-  const steps = ['caricamento moduli…', 'rilevamento GPU e CPU…', 'ripristino boost persistente…', 'pronto ⚡'];
-  if (bootSteps) { steps.forEach((s, i) => setTimeout(() => { if (bootSteps) bootSteps.textContent = s; }, i * 450)); }
-  const hideBoot = () => { if (bootEl) bootEl.classList.add('hide'); };
-  if (bootEl) { bootEl.addEventListener('click', hideBoot); setTimeout(hideBoot, 2100); setTimeout(() => bootEl.remove(), 2900); }
+  // ---------- v1.4: avvio con vetro che si incrina e si frantuma ----------
+  (function bootShatter(){
+    const bootEl = document.getElementById('boot');
+    const bootSteps = document.getElementById('bootSteps');
+    const shardsBox = document.getElementById('shards');
+    const steps = ['caricamento moduli…', 'rilevamento GPU e CPU…', 'lettura ventole e sensori…', 'NVIDIA MAX pronto…', 'pronto ⚡'];
+    if (bootSteps) steps.forEach((s, i) => setTimeout(() => { if (bootSteps) bootSteps.textContent = s; }, 210 + i * 250));
+
+    // Pezzi di vetro: spicchi irregolari che partono dal punto d'impatto.
+    if (shardsBox) {
+      const N = 18, cx = 50, cy = 46;
+      const pt = (a, r) => `${(cx + Math.cos(a) * r).toFixed(2)}% ${(cy + Math.sin(a) * r).toFixed(2)}%`;
+      for (let i = 0; i < N; i++) {
+        const a0 = (i / N) * Math.PI * 2;
+        const a1 = ((i + 1) / N) * Math.PI * 2;
+        const mid = (a0 + a1) / 2;
+        const R = 155;
+        const s = document.createElement('i');
+        s.style.clipPath = 'polygon(' + [`${cx}% ${cy}%`, pt(a0, R), pt(mid, R * (0.52 + Math.random() * 0.3)), pt(a1, R)].join(',') + ')';
+        s.style.setProperty('--dx', (Math.cos(mid) * (55 + Math.random() * 35)).toFixed(1) + 'vw');
+        s.style.setProperty('--dy', (Math.sin(mid) * (55 + Math.random() * 35)).toFixed(1) + 'vh');
+        s.style.setProperty('--rot', ((Math.random() - 0.5) * 95).toFixed(1) + 'deg');
+        s.style.animationDelay = (Math.random() * 0.06).toFixed(2) + 's';
+        shardsBox.appendChild(s);
+      }
+    }
+
+    const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    let done = false;
+    const breakGlass = () => {
+      if (!bootEl || done) return;
+      done = true;
+      bootEl.classList.add('breaking');
+      document.body.classList.add('booted');
+      setTimeout(() => bootEl.classList.add('hide'), reduce ? 80 : 780);
+      setTimeout(() => bootEl.remove(), reduce ? 400 : 1700);
+    };
+    if (bootEl) bootEl.addEventListener('click', breakGlass);
+    setTimeout(breakGlass, reduce ? 450 : 1650);
+  })();
   initEditor(); refreshStats(); loadGames(); ollamaPing(); loadTuning(); loadLook(); syncModeChips(); freezeHeaders(); loadHw();
   setInterval(refreshStats, 5000); setInterval(ollamaPing, 10000);
 })();

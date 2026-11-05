@@ -3,34 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OVERCLOCK DESKTOP ENGINE v1.3</title>
+<title>OVERCLOCK DESKTOP ENGINE v1.4</title>
 <link rel="stylesheet" href="app.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 </head>
 <body>
-<div id="boot"><div class="boot-orbit"><i class="o1"></i><i class="o2"></i><i class="o3"></i></div><div class="boot-inner"><div class="boot-bolt">⚡</div><div class="boot-name">OVERCLOCK</div><div class="boot-tag">DESKTOP ENGINE v1.3 · FPS BEAST EDITION</div><div class="boot-bar"><i></i></div><div class="boot-steps" id="bootSteps">caricamento moduli…</div><div class="boot-sub">© 2026 REGA</div></div></div>
+
+<!-- ===== AVVIO: vetro che si incrina e va in pezzi ===== -->
+<div id="boot">
+  <div class="boot-bg"></div>
+  <div class="boot-glass"></div>
+  <svg class="cracks" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <g fill="none" stroke="rgba(190,235,255,.55)" stroke-width=".14" stroke-linecap="round">
+      <path d="M50 46 L17 11" style="--d:.30s"/>
+      <path d="M50 46 L85 7"   style="--d:.38s"/>
+      <path d="M50 46 L96 43"  style="--d:.46s"/>
+      <path d="M50 46 L90 84"  style="--d:.34s"/>
+      <path d="M50 46 L53 99"  style="--d:.5s"/>
+      <path d="M50 46 L9 79"   style="--d:.42s"/>
+      <path d="M50 46 L2 38"   style="--d:.36s"/>
+      <path d="M50 46 L33 2"   style="--d:.48s"/>
+      <path d="M33 2 L50 46 L2 38" style="--d:.56s;stroke-width:.09"/>
+      <path d="M85 7 L50 46 L96 43" style="--d:.6s;stroke-width:.09"/>
+      <path d="M17 11 L50 46 L33 2" style="--d:.64s;stroke-width:.09"/>
+      <path d="M90 84 L50 46 L53 99" style="--d:.58s;stroke-width:.09"/>
+      <path d="M9 79 L50 46 L2 38" style="--d:.62s;stroke-width:.09"/>
+    </g>
+  </svg>
+  <div class="shards" id="shards" aria-hidden="true"></div>
+  <div class="boot-inner">
+    <div class="boot-ring"><i></i><i></i></div>
+    <div class="boot-bolt">⚡</div>
+    <div class="boot-name">OVERCLOCK</div>
+    <div class="boot-tag">DESKTOP ENGINE v1.4 · FPS BEAST+</div>
+    <div class="boot-bar"><i></i></div>
+    <div class="boot-steps" id="bootSteps">caricamento moduli…</div>
+    <div class="boot-sub">© 2026 REGA</div>
+  </div>
+</div>
+
 <div class="titlebar">
-  <span>🟰 OVERCLOCK DESKTOP ENGINE v1.3</span>
+  <span class="tb-brand"><b>⚡ OVERCLOCK</b> <em>DESKTOP ENGINE v1.4</em></span>
   <span class="status" id="boostStatus">[Status: BOOSTED ⚡]</span>
   <span class="wins"><i>—</i><i>▢</i><i>✕</i></span>
 </div>
+
 <div class="layout">
   <aside class="sidebar">
-    <button class="side active" data-view="code">💻<small>Code/AI</small></button>
-    <button class="side" data-view="system">🚀<small>System Booster</small></button>
-    <button class="side" data-view="game">🎮<small>Game Boost</small></button>
-    <button class="side" data-view="fps">🚀<small>FPS MAX</small></button>
-    <button class="side" data-view="fans">🌀<small>Ventole</small></button>
-    <button class="side" data-view="look">🔤<small>Aspetto</small></button>
-    <button class="side" data-view="settings">⚙️<small>Settings</small></button>
+    <div class="side-brand"><span>⚡</span><div><b>OVERCLOCK</b><small>DESKTOP ENGINE</small></div></div>
+    <div class="side-scroll">
+      <div class="side-group">
+        <span class="side-label">Performance</span>
+        <button class="side active" data-view="fps">🚀<span>FPS MAX<small>GPU + CPU + NVIDIA</small></span></button>
+        <button class="side" data-view="nvidia">🎮<span>NVIDIA<small>spremi la scheda</small></span></button>
+        <button class="side" data-view="fans">🌀<span>Ventole<small>rumore e temperature</small></span></button>
+        <button class="side" data-view="system">🧠<span>System<small>RAM · disco · rete</small></span></button>
+        <button class="side" data-view="game">🎯<span>Game Boost<small>35 preset</small></span></button>
+      </div>
+      <div class="side-group">
+        <span class="side-label">Lavoro</span>
+        <button class="side" data-view="code">💻<span>Code / AI<small>Ollama locale</small></span></button>
+      </div>
+      <div class="side-group">
+        <span class="side-label">Sistema</span>
+        <button class="side" data-view="look">🔤<span>Aspetto<small>testo e animazioni</small></span></button>
+        <button class="side" data-view="settings">⚙️<span>Settings<small>salute e reset</small></span></button>
+      </div>
+    </div>
     <div class="side-foot" id="ollamaBadge">● OLLAMA …</div>
-    <div class="side-foot mut">© 2026 REGA</div>
   </aside>
 
   <main class="panel">
     <!-- CODE / AI -->
-    <section class="view active" id="view-code">
+    <section class="view" id="view-code">
+      <header class="view-head">
+        <span class="eyebrow">Lavoro</span>
+        <h2>💻 Code &amp; AI <small>— il tuo codice, tre volte meglio</small></h2>
+        <p class="mut">Incolla codice o un prompt: l'IA locale (Ollama) lo riscrive in tre varianti, senza mandare niente online.</p>
+      </header>
       <div class="mode-row">
         <span>MODE:</span>
         <button class="chip active" id="mCode">💻 Code</button>
@@ -64,33 +115,196 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
       <div class="quick">QUICK SYSTEM STATS: <span id="qStats">[RAM: …] [CPU Temp: …] [FPS Boost: …]</span></div>
     </section>
 
+    <!-- FPS MAX -->
+    <section class="view active" id="view-fps">
+      <header class="view-head">
+        <span class="eyebrow">Performance · il cuore dell'app</span>
+        <h2>🚀 FPS MAX <small>— un solo obiettivo: più frame al secondo</small></h2>
+        <p class="mut">GPU MAX + CPU MAX + <b>NVIDIA MAX</b> + extra in un click. Le app in background (Discord, browser, musica) <b>non vengono toccate</b>: nessun freeze. Tutto resta anche dopo aver chiuso l'app.</p>
+        <p class="mut tiny">⚠️ Onesto: nessun software fa ×100 FPS — qui spremi il massimo via software. Su PC inchiodati dal sistema il salto si sente, su una GPU già al 99% il margine è fisico.</p>
+      </header>
+
+      <div class="set-card hero-launch">
+        <div class="card-head">
+          <h3>🎮 Lancia gioco ottimizzato</h3>
+          <span class="badge">mod temporanee</span>
+        </div>
+        <p class="mut">Avvia il gioco <b>da qui</b>: applichiamo le mod FPS temporanee + argomenti di lancio + priorità High, e quando chiudi il gioco <b>ripristiniamo tutto da soli</b>. Se lo avvii da fuori, niente mod.</p>
+        <div class="row">
+          <select id="launchGameSel" title="Gioco da lanciare"></select>
+          <button class="ghost" id="launchPreviewBtn">👁 Anteprima</button>
+          <button class="apply sm" id="launchBtn">🚀 LANCIA GIOCO</button>
+          <button class="ghost" id="launchStopBtn">■ Stop / Ripristina</button>
+        </div>
+        <pre data-log="launch"></pre>
+      </div>
+
+      <div class="set-card hero-fps">
+        <div class="card-head">
+          <h3>🚀 FPS MAX <small class="mut" id="fpsVendor">rilevamento scheda…</small></h3>
+          <span class="badge ok">1 click</span>
+        </div>
+        <p class="mut">Il boost totale: scheda video al massimo, CPU che spinge solo il gioco, NVIDIA spremuta. Premi 👁 e leggi cosa fa, poi applica.</p>
+        <div class="row">
+          <input id="fpsProc" placeholder="processo gioco (es. cs2)">
+          <button class="ghost" data-lookprev="fpsmax">👁 Anteprima</button>
+          <button class="apply sm" id="fpsMaxBtn">🚀 APPLICA FPS MAX</button>
+          <button class="ghost" id="fpsMaxRestore">↩ Ripristina tutto</button>
+        </div>
+        <pre data-log="fpsmax"></pre>
+      </div>
+
+      <div class="grid-2">
+        <div class="set-card">
+          <div class="card-head"><h3>🎨 GPU MAX</h3><span class="badge" id="gpuMaxVendor">rilevamento…</span></div>
+          <p class="mut">Solo la scheda video: GameDVR off, Game Mode on, cache shader pulita, HAGS, MPO off anti-stutter, TdrDelay anti-freeze, priorità GPU ai giochi. HKLM = serve admin + riavvio; il resto è immediato.</p>
+          <div class="row">
+            <input id="gpuMaxProc" placeholder="processo gioco (es. cs2)">
+            <button class="ghost" data-lookprev="gpumax">👁 Anteprima</button>
+            <button class="apply sm" id="gpuMaxBtn">🎨 APPLICA</button>
+            <button class="ghost" id="gpuMaxRestore">↩</button>
+          </div>
+          <pre data-log="gpumax"></pre>
+        </div>
+        <div class="set-card">
+          <div class="card-head"><h3>🧠 CPU MAX</h3><span class="badge">processore</span></div>
+          <p class="mut">Piano Ultimate Performance, CPU 100%, core parking OFF, boost aggressivo, foreground boost e scheduler giochi. Admin + riavvio per le chiavi di sistema.</p>
+          <div class="row">
+            <button class="ghost" data-lookprev="cpumax">👁 Anteprima</button>
+            <button class="apply sm" id="cpuMaxBtn">🧠 APPLICA</button>
+            <button class="ghost" id="cpuMaxRestore">↩</button>
+          </div>
+          <pre data-log="cpumax"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- NVIDIA -->
+    <section class="view" id="view-nvidia">
+      <header class="view-head">
+        <span class="eyebrow">Performance · scheda video</span>
+        <h2>🎮 NVIDIA MAX <small>— spremi la GeForce, con reset sempre pronto</small></h2>
+        <p class="mut">Legge la tua scheda dal driver, alza il <b>power limit</b> al massimo consentito, attiva il <b>persistence mode</b>, blocca il <b>clock</b> e forza <b>PowerMizer</b> su massime prestazioni. Poi ti guida nei 5 valori del pannello NVIDIA che spostano davvero gli FPS.</p>
+        <p class="mut tiny">ℹ️ Onesto: le impostazioni 3D del pannello NVIDIA non hanno un'API pubblica — quelle le imposti in 2 minuti con la guida (o le apri da qui). Tutto il resto è automatico e reversibile.</p>
+      </header>
+
+      <div class="set-card hero-nv">
+        <div class="card-head">
+          <h3>🎮 Scheda video <small class="mut" id="nvName">rilevamento…</small></h3>
+          <span class="badge" id="nvBadge">—</span>
+        </div>
+        <div class="stat-row" id="nvStats"><span class="mut">Premi “Leggi stato” per i valori reali dal driver.</span></div>
+        <div class="row">
+          <button class="ghost" id="nvStatusBtn">🔎 Leggi stato</button>
+          <button class="apply sm" id="nvApplyBtn">🎮 SPREMI LA GPU</button>
+        </div>
+        <pre data-log="nvstatus"></pre>
+      </div>
+
+      <div class="grid-2">
+        <div class="set-card">
+          <div class="card-head"><h3>📋 Guida pannello NVIDIA</h3><span class="badge">2 minuti</span></div>
+          <p class="mut">I 5 valori da mettere nel pannello, spiegati semplice: cosa fanno e quanto rendono.</p>
+          <div class="row">
+            <button class="ghost" id="nvGuideBtn">📋 Mostra guida</button>
+            <button class="ghost" id="nvPanelBtn">🖥️ Apri pannello</button>
+          </div>
+          <pre data-log="nvguide"></pre>
+        </div>
+        <div class="set-card">
+          <div class="card-head"><h3>↩ Reset NVIDIA</h3><span class="badge danger">reversibile</span></div>
+          <p class="mut">Rimette power limit, persistence, clock e registro <b>esattamente come prima</b> (snapshot salvato in ~/.overclock).</p>
+          <div class="row"><button class="apply sm danger-btn" id="nvResetBtn">↩ RESET NVIDIA</button></div>
+          <pre data-log="nvreset"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- VENTOLE -->
+    <section class="view" id="view-fans">
+      <header class="view-head">
+        <span class="eyebrow">Performance · temperature</span>
+        <h2>🌀 Ventole <small>— rumore vs raffreddamento, a tua scelta</small></h2>
+        <p class="mut">Ora funziona sul serio: legge temperature e ventole reali, applica la policy Windows e <b>verifica</b> i valori rileggendoli. La % non è più un limite CPU: decide quanta potenza (e quindi calore) produci, e le ventole del BIOS seguono.</p>
+        <p class="mut tiny">ℹ️ Windows non espone i giri con un'API standard: per gli RPM esatti apri FanControl o LibreHardwareMonitor (li leggo da soli) o l'app del produttore.</p>
+      </header>
+
+      <div class="set-card">
+        <div class="card-head"><h3>🌀 Stato attuale</h3><span class="badge ok">sola lettura</span></div>
+        <p class="mut">Temperature, ventole dichiarate dal firmware, ventola GPU e valori esatti del piano energia. Non tocca niente.</p>
+        <div class="row">
+          <button class="ghost" id="fanStatusBtn">🌀 Leggi stato</button>
+          <button class="ghost" id="fanVendorBtn">🖥️ Apri app ventole</button>
+        </div>
+        <pre data-log="fanstatus"></pre>
+      </div>
+
+      <div class="set-card">
+        <div class="card-head"><h3>🔇🎮 Profili rapidi</h3><span class="badge">1 click</span></div>
+        <p class="mut">Silenziosa = meno calore e ventole basse (qualche FPS in meno) · Bilanciata = default · Gaming = CPU sveglia, ventole presenti · Massima = CPU sempre al 100%, ventole al massimo.</p>
+        <div class="row">
+          <button class="ghost" id="fanPreviewQuiet">👁 Anteprima</button>
+          <button class="ghost" id="fanQuiet">🔇 Silenziosa</button>
+          <button class="ghost" id="fanBalanced">⚖️ Bilanciata</button>
+          <button class="ghost" id="fanGaming">🎮 Gaming</button>
+          <button class="ghost" id="fanMax">🌪️ Massima</button>
+        </div>
+        <pre data-log="fanmode"></pre>
+      </div>
+
+      <div class="set-card">
+        <div class="card-head"><h3>🎚️ Velocità manuale</h3><span class="badge" id="fanPctVal">70%</span></div>
+        <p class="mut">Trascina: la % diventa una curva di calore sensata (mai 40% ventole = CPU al 40%). Sotto il 50% silenziosa, sopra l'85% spinge davvero.</p>
+        <div class="row">
+          <input id="fanPct" type="range" min="10" max="100" value="70" step="5" class="range">
+          <button class="ghost" id="fanPreviewCustom">👁 Anteprima</button>
+          <button class="apply sm" id="fanApplyCustom">🎚️ Applica</button>
+        </div>
+        <pre data-log="fancustom"></pre>
+      </div>
+
+      <div class="set-card">
+        <div class="card-head"><h3>↩ Reset automatico</h3><span class="badge danger">fabbrica</span></div>
+        <p class="mut">Rimette i valori esatti letti prima del profilo e riattiva il piano energia originale. Funziona sempre, anche senza snapshot.</p>
+        <div class="row"><button class="apply sm" id="fanResetBtn">↩ RESET AUTOMATICO 🌀</button></div>
+        <pre data-log="fanreset"></pre>
+      </div>
+    </section>
+
     <!-- SYSTEM -->
     <section class="view" id="view-system">
-      <h2>🚀 System Booster <small>— Global PC Speed Up</small></h2>
-      <p class="mut">Adattato all'OS rilevato: <b id="platLabel">…</b>. Ogni azione è reversibile.</p>
-      <div class="mode-row"><span>LIVELLO OTTIMIZZAZIONE:</span>
+      <header class="view-head">
+        <span class="eyebrow">Sistema</span>
+        <h2>🧠 System Booster <small>— più veloce adesso, non domani</small></h2>
+        <p class="mut">Adattato all'OS rilevato: <b id="platLabel">…</b>. Ogni azione è reversibile: prima l'anteprima, poi l'applicazione.</p>
+      </header>
+      <div class="mode-row"><span>LIVELLO:</span>
         <button class="chip mode-chip" data-mode="base">🟢 Base</button>
         <button class="chip mode-chip" data-mode="media">🟡 Media</button>
         <button class="chip mode-chip" data-mode="potente">🔴 Potente</button>
-        <span class="mut" id="modeHint"></span>
+        <span class="mut small" id="modeHint"></span>
       </div>
       <div class="sys-grid">
-        <div class="sys-card"><h3>🧠 RAM Flush</h3><p>Svuota cache e memoria inattiva.</p><div class="row"><button class="ghost" data-preview="ram">👁 Anteprima</button><button data-sys="ram">Purge RAM</button><button class="ghost" data-restore="ram">↩ Ripristina</button></div><pre data-log="ram"></pre></div>
-        <div class="sys-card"><h3>🧹 Disk &amp; Junk</h3><p>Temp + cache di build orfane.</p><div class="row"><button class="ghost" data-preview="disk">👁 Anteprima</button><button data-sys="disk">Clean disk</button><button class="ghost" data-restore="disk">↩ Ripristina</button></div><pre data-log="disk"></pre></div>
-        <div class="sys-card"><h3>🌐 Network Optimizer</h3><p>Flush DNS + tuning TCP/IP.</p><div class="row"><button class="ghost" data-preview="network">👁 Anteprima</button><button data-sys="network">Optimize ping</button><button class="ghost" data-restore="network">↩ Ripristina</button></div><pre data-log="network"></pre></div>
-        <div class="sys-card"><h3>🎨 GPU Driver Boost</h3><p id="gpuName">Rilevamento GPU…</p><div class="row"><button class="ghost" data-tpreview="gpu">👁 Anteprima</button><button data-sys="gpu">Boost GPU</button><button class="ghost" data-sys="gpu-panel">Pannello vendor</button><button class="ghost" data-sys="gpu-restore">↩ Ripristina</button></div><pre data-log="gpu"></pre></div>
-        <div class="sys-card"><h3>⚡ Overclock Sistema</h3><p>PC vecchi: piano Alte prestazioni, effetti off, GameDVR off. Reversibile.</p><div class="row"><button class="ghost" data-tpreview="os">👁 Anteprima</button><button data-sys="os-oc">Overclock OS</button><button class="ghost" data-sys="os-restore">↩ Ripristina</button></div><pre data-log="os"></pre></div>
+        <div class="sys-card"><h3>🧠 RAM Flush</h3><p>Svuota cache e memoria inattiva.</p><div class="row"><button class="ghost" data-preview="ram">👁 Anteprima</button><button data-sys="ram">Purge RAM</button><button class="ghost" data-restore="ram">↩</button></div><pre data-log="ram"></pre></div>
+        <div class="sys-card"><h3>🧹 Disk &amp; Junk</h3><p>Temp + cache di build orfane.</p><div class="row"><button class="ghost" data-preview="disk">👁 Anteprima</button><button data-sys="disk">Clean disk</button><button class="ghost" data-restore="disk">↩</button></div><pre data-log="disk"></pre></div>
+        <div class="sys-card"><h3>🌐 Network Optimizer</h3><p>Flush DNS + tuning TCP/IP.</p><div class="row"><button class="ghost" data-preview="network">👁 Anteprima</button><button data-sys="network">Optimize ping</button><button class="ghost" data-restore="network">↩</button></div><pre data-log="network"></pre></div>
+        <div class="sys-card"><h3>🎨 GPU Driver Boost</h3><p id="gpuName">Rilevamento GPU…</p><div class="row"><button class="ghost" data-tpreview="gpu">👁 Anteprima</button><button data-sys="gpu">Boost GPU</button><button class="ghost" data-sys="gpu-panel">Pannello vendor</button><button class="ghost" data-sys="gpu-restore">↩</button></div><pre data-log="gpu"></pre></div>
+        <div class="sys-card"><h3>⚡ Overclock Sistema</h3><p>PC vecchi: piano Alte prestazioni, effetti off, GameDVR off. Reversibile.</p><div class="row"><button class="ghost" data-tpreview="os">👁 Anteprima</button><button data-sys="os-oc">Overclock OS</button><button class="ghost" data-sys="os-restore">↩</button></div><pre data-log="os"></pre></div>
+        <div class="sys-card"><h3>🎮 Scheda video NVIDIA</h3><p>Power limit, clock e PowerMizer: la sezione dedicata.</p><div class="row"><button class="ghost" data-goto="nvidia">🎮 Apri NVIDIA MAX →</button></div></div>
       </div>
       <div class="sys-card wide"><h3>🚀 Programmi in avvio</h3><p class="mut">Disabilita ciò che rallenta l'accensione (solo HKCU, reversibile).</p><div id="startupList" class="mut">Caricamento…</div></div>
-      <div class="row"><button class="ghost" id="fullPreview">👁 Anteprima full buff (cosa cambia)</button><button class="ghost" id="fullRestore">↩ Ripristina tutto come prima</button></div>
+      <div class="row"><button class="ghost" id="fullPreview">👁 Anteprima full buff</button><button class="ghost" id="fullRestore">↩ Ripristina tutto</button></div>
       <button class="apply" id="fullBuff">⚡ 1-CLICK FULL SYSTEM BUFF ⚡</button>
       <pre id="fullLog" class="fulllog"></pre>
     </section>
 
     <!-- GAME -->
     <section class="view" id="view-game">
-      <h2>🎮 Game-Specific Ultra Boost</h2>
-      <p class="mut" id="pcBanner">🖥️ Rilevamento PC in corso…</p>
+      <header class="view-head">
+        <span class="eyebrow">Gaming</span>
+        <h2>🎯 Game-Specific Ultra Boost</h2>
+        <p class="mut" id="pcBanner">🖥️ Rilevamento PC in corso…</p>
+      </header>
       <div class="game-layout">
         <div class="game-list"><input id="gameSearch" placeholder="🔍 Cerca gioco… (es. cyberpunk)"><div id="games"></div></div>
         <div class="game-detail">
@@ -102,138 +316,91 @@ Seleziona un buff e premi APPLY FREE BUFF.</pre>
           <div class="mut" id="gHint"></div>
           <div class="mut" id="gEstimate"></div>
           <div class="mut" id="gWhy"></div>
-          <div class="row"><button class="apply sm" id="boostGame">⚡ BOOST GAME ⚡</button>
-          <button class="apply sm" id="modGame">🧪 FPS MOD 🧪</button>
+          <div class="row"><button class="apply sm" id="boostGame">⚡ BOOST GAME</button>
+          <button class="apply sm" id="modGame">🧪 FPS MOD</button>
           <button class="ghost" id="stopGame">■ Stop / Ripristina</button></div>
           <pre id="gameLog"></pre>
         </div>
       </div>
     </section>
 
-    <!-- FPS MAX (solo più FPS: GPU + CPU) -->
-    <section class="view" id="view-fps">
-      <h2>🚀 FPS MAX <small>— un solo obiettivo: più frame al secondo</small></h2>
-      <p class="mut">GPU MAX + CPU MAX + extra BEAST insieme. Le app in background (Discord, browser, musica) <b>non vengono toccate</b>: nessun freeze. Tutto resta anche dopo aver chiuso l'app.<br>⚠️ Onesto: nessun software fa ×100 FPS — qui spremi il massimo via software (su PC inchiodati il salto è grande, su GPU già al 99% il margine è fisico).</p>
-      <div class="set-card hero-launch">
-        <h3>🎮🚀 Lancia gioco ottimizzato <small class="mut">mod temporanee a ogni avvio</small></h3>
-        <p class="mut">Avvia il gioco <b>da qui</b>: applichiamo le mod FPS temporanee + argomenti di lancio + priorità High, e quando chiudi il gioco <b>ripristiniamo tutto da soli</b>. Se lo avvii da fuori, niente mod.</p>
-        <div class="row"><select id="launchGameSel" title="Gioco da lanciare"></select><button class="ghost" id="launchPreviewBtn">👁 Anteprima (leggi prima)</button><button class="apply sm" id="launchBtn">🚀 LANCIA GIOCO 🚀</button><button class="ghost" id="launchStopBtn">■ Stop / Ripristina</button></div>
-        <pre data-log="launch"></pre>
-      </div>
-      <div class="set-card hero-fps">
-        <h3>🚀 FPS MAX <small class="mut" id="fpsVendor">rilevamento scheda…</small></h3>
-        <p class="mut">Il boost totale: scheda video al massimo + CPU che spinge solo il gioco. Premi 👁 e leggi cosa fa, poi applica.</p>
-        <div class="row"><input id="fpsProc" placeholder="processo gioco (es. cs2)"><button class="ghost" data-lookprev="fpsmax">👁 Anteprima (leggi prima)</button><button class="apply sm" id="fpsMaxBtn">🚀 APPLICA FPS MAX 🚀</button><button class="ghost" id="fpsMaxRestore">↩ Ripristina tutto</button></div>
-        <pre data-log="fpsmax"></pre>
-      </div>
-      <div class="set-card">
-        <h3>🎨 GPU MAX <small class="mut" id="gpuMaxVendor">rilevamento…</small></h3>
-        <p class="mut">Solo la scheda video: GameDVR off + Game Mode on + cache shader pulita + HAGS + MPO off anti-stutter + throttling off + preferenza “alte prestazioni” per il tuo gioco. HKLM = serve admin + riavvio; il resto è immediato.</p>
-        <div class="row"><input id="gpuMaxProc" placeholder="processo gioco (es. cs2)"><button class="ghost" data-lookprev="gpumax">👁 Anteprima (leggi prima)</button><button class="apply sm" id="gpuMaxBtn">🎨 APPLICA GPU MAX 🎨</button><button class="ghost" id="gpuMaxRestore">↩ Ripristina GPU</button></div>
-        <pre data-log="gpumax"></pre>
-      </div>
-      <div class="set-card">
-        <h3>🧠 CPU MAX</h3>
-        <p class="mut">Solo il processore: piano Prestazioni elevate + foreground boost + scheduler che dà più CPU al gioco + throttling off (admin + riavvio per le chiavi di sistema).</p>
-        <div class="row"><button class="ghost" data-lookprev="cpumax">👁 Anteprima (leggi prima)</button><button class="apply sm" id="cpuMaxBtn">🧠 APPLICA CPU MAX 🧠</button><button class="ghost" id="cpuMaxRestore">↩ Ripristina CPU</button></div>
-        <pre data-log="cpumax"></pre>
-      </div>
-    </section>
-
-    <!-- VENTOLE (profili + percentuale + reset automatico) -->
-    <section class="view" id="view-fans">
-      <h2>🌀 Ventole <small>— rumore vs raffreddamento, a tua scelta</small></h2>
-      <p class="mut">Profili rapidi + percentuale manuale in base all'efficienza che vuoi. I giri esatti dipendono dal produttore del PC (Windows non ha un'API standard): la policy Windows si applica sempre, per il controllo fino all'ultimo giro usa l'app del produttore. Il <b>reset automatico</b> rimette sempre tutto come prima.</p>
-      <div class="set-card">
-        <h3>🌀 Stato attuale</h3>
-        <div class="row"><button class="ghost" id="fanStatusBtn">🌀 Leggi stato (non tocca nulla)</button></div>
-        <pre data-log="fanstatus"></pre>
-      </div>
-      <div class="set-card">
-        <h3>🔇🎮 Profili rapidi</h3>
-        <p class="mut">Silenziosa = ventole basse (qualche FPS in meno) · Bilanciata = default · Massima = CPU mai throttlata (più rumore, più FPS).</p>
-        <div class="row"><button class="ghost" id="fanPreviewQuiet">👁 Anteprima silenziosa</button><button class="ghost" id="fanQuiet">🔇 Silenziosa</button><button class="ghost" id="fanBalanced">⚖️ Bilanciata</button><button class="ghost" id="fanMax">🌪️ Massima</button></div>
-        <pre data-log="fanmode"></pre>
-      </div>
-      <div class="set-card">
-        <h3>🎚️ Velocità manuale (10–100%)</h3>
-        <p class="mut">Scegli quanto devono spingere: sotto il 70% diventano silenziose (policy passiva + CPU limitata), sopra spingono (policy attiva). Se il tuo vendor lo permette, proviamo a impostare i giri esatti.</p>
-        <div class="row"><input id="fanPct" type="range" min="10" max="100" value="70" step="5" style="flex:1"><b id="fanPctVal">70%</b><button class="ghost" id="fanPreviewCustom">👁 Anteprima</button><button class="apply sm" id="fanApplyCustom">🎚️ Applica</button></div>
-        <pre data-log="fancustom"></pre>
-      </div>
-      <div class="set-card">
-        <h3>↩ Reset automatico (modalità di fabbrica)</h3>
-        <p class="mut">Rimette policy + CPU come prima e chiede al vendor la modalità auto. Funzionante sempre, anche senza snapshot.</p>
-        <div class="row"><button class="apply sm" id="fanResetBtn">↩ RESET AUTOMATICO 🌀</button></div>
-        <pre data-log="fanreset"></pre>
-      </div>
-    </section>
-
-    <!-- ASPETTO (testo + animazioni + tema) -->
+    <!-- ASPETTO -->
     <section class="view" id="view-look">
-      <h2>🔤 Aspetto Windows <small>— testo, animazioni e tema a tua scelta</small></h2>
-      <p class="mut">Tutto reversibile: ogni scelta salva uno snapshot, resta dopo la chiusura e si ripristina.</p>
+      <header class="view-head">
+        <span class="eyebrow">Sistema</span>
+        <h2>🔤 Aspetto Windows <small>— testo, animazioni e tema</small></h2>
+        <p class="mut">Tutto reversibile: ogni scelta salva uno snapshot, resta dopo la chiusura e si ripristina.</p>
+      </header>
       <div class="set-card">
-        <h3>🔤 Testo di Windows</h3>
-        <p class="mut">Scegli come vengono disegnati i caratteri (effetto immediato, anche dopo il riavvio).</p>
-        <div class="row"><button class="ghost" data-lookprev="font">👁 Anteprima (leggi prima)</button><button class="apply sm" id="fontClear">✨ ClearType nitido</button><button class="apply sm" id="fontStd">📝 Standard classico</button><button class="ghost" id="fontOff">⬜ Smoothing OFF</button></div>
+        <div class="card-head"><h3>🔤 Testo di Windows</h3><span class="badge">immediato</span></div>
+        <p class="mut">Scegli come vengono disegnati i caratteri.</p>
+        <div class="row"><button class="ghost" data-lookprev="font">👁 Anteprima</button><button class="apply sm" id="fontClear">✨ ClearType nitido</button><button class="apply sm" id="fontStd">📝 Standard</button><button class="ghost" id="fontOff">⬜ OFF</button></div>
         <pre data-log="font"></pre>
       </div>
       <div class="set-card">
-        <h3>✨ Trasparenze e animazioni</h3>
-        <p class="mut">Accendi o spegni singolarmente: le animazioni OFF danno più FPS, ON rendono tutto più bello.</p>
+        <div class="card-head"><h3>✨ Trasparenze e animazioni</h3><span class="badge">più FPS / più bello</span></div>
+        <p class="mut">Animazioni OFF danno più FPS, ON rendono tutto più bello.</p>
         <div class="row"><button class="ghost" id="transOn">🪟 Trasparenza ON</button><button class="ghost" id="transOff">🪟 Trasparenza OFF</button><button class="ghost" id="animOn">✨ Animazioni ON</button><button class="ghost" id="animOff">✨ Animazioni OFF</button></div>
         <pre data-log="lookopts"></pre>
       </div>
       <div class="set-card">
-        <h3>⏱️ Velocità menu + tema</h3>
-        <p class="mut">Menu istantanei (0ms) per la velocità massima, normali (400ms) per il feeling standard. Tema scuro o chiaro per le app.</p>
+        <div class="card-head"><h3>⏱️ Velocità menu + tema</h3><span class="badge">rifinitura</span></div>
+        <p class="mut">Menu istantanei (0 ms) per la velocità massima, normali (400 ms) per il feeling standard.</p>
         <div class="row"><button class="ghost" id="menuFast">⚡ Menu istantanei</button><button class="ghost" id="menuNorm">🕐 Menu normali</button><button class="ghost" id="themeDark">🌙 Tema scuro</button><button class="ghost" id="themeLight">☀️ Tema chiaro</button></div>
         <pre data-log="lookopts2"></pre>
       </div>
       <div class="set-card">
-        <h3>↩ Torna tutto normale</h3>
+        <div class="card-head"><h3>↩ Torna tutto normale</h3><span class="badge danger">reset</span></div>
         <p class="mut">Rimette Windows come appena installato: effetti gestiti dal sistema, trasparenza e animazioni ON, menu normali, tema chiaro, testo nitido.</p>
-        <div class="row"><button class="ghost" data-lookprev="appearance">👁 Anteprima (leggi prima)</button><button class="apply sm" id="appearanceBtn">↩ Torna tutto normale</button></div>
+        <div class="row"><button class="ghost" data-lookprev="appearance">👁 Anteprima</button><button class="apply sm" id="appearanceBtn">↩ Torna tutto normale</button></div>
         <pre data-log="appearance"></pre>
       </div>
     </section>
 
     <!-- SETTINGS -->
     <section class="view" id="view-settings">
-      <h2>⚙️ Settings</h2>
-      <div class="set-card">
-        <h3>Ollama (offline, privacy 100%)</h3>
-        <p class="mut">Overclock parla con <code>http://localhost:11434</code>. Installa Ollama e scarica un modello:</p>
-        <pre>ollama pull llama3 && ollama pull codellama</pre>
-        <div>Stato: <b id="ollamaState">controllo…</b></div>
-      </div>
-      <div class="set-card">
-        <h3>🩺 Salute sistema</h3>
-        <p class="mut">Check rapido: admin, snapshot salvati, boost attivo, mod giochi, Ollama. Non cambia nulla, dice solo come stai messo.</p>
-        <div class="row"><button class="ghost" id="healthBtn">🩺 Esegui check</button></div>
-        <pre data-log="health"></pre>
+      <header class="view-head">
+        <span class="eyebrow">App</span>
+        <h2>⚙️ Settings</h2>
+        <p class="mut">Salute del sistema, IA locale, crediti e uscita pulita.</p>
+      </header>
+      <div class="grid-2">
+        <div class="set-card">
+          <div class="card-head"><h3>🤖 Ollama (offline, privacy 100%)</h3><span class="badge" id="ollamaState">controllo…</span></div>
+          <p class="mut">Overclock parla con <code>http://localhost:11434</code>. Installa Ollama e scarica un modello:</p>
+          <pre>ollama pull llama3 && ollama pull codellama</pre>
+        </div>
+        <div class="set-card">
+          <div class="card-head"><h3>🩺 Salute sistema</h3><span class="badge">sola lettura</span></div>
+          <p class="mut">Check rapido: admin, snapshot salvati, boost attivo, mod giochi, Ollama. Non cambia nulla.</p>
+          <div class="row"><button class="ghost" id="healthBtn">🩺 Esegui check</button></div>
+          <pre data-log="health"></pre>
+        </div>
       </div>
       <div class="set-card danger">
-        <h3>🧹 Disinstallazione e reset totale</h3>
-        <p class="mut">Vuoi togliere tutto? Prima <b>ripristina</b> (rimette PC e giochi come prima e pulisce i dati), poi <b>disinstalla</b> l'app. Niente resta sporco: né registro, né file.</p>
-        <div class="row"><button class="ghost" id="uninstallPreview">👁 Anteprima (leggi prima)</button><button class="apply sm danger-btn" id="fullResetBtn">🧹 RIPRISTINA TUTTO + PULISCI DATI</button></div>
+        <div class="card-head"><h3>🧹 Disinstallazione e reset totale</h3><span class="badge danger">attenzione</span></div>
+        <p class="mut">Prima <b>ripristina</b> (rimette PC, GPU, NVIDIA, giochi e aspetti come prima e pulisce i dati), poi <b>disinstalla</b> l'app. Niente resta sporco.</p>
+        <div class="row"><button class="ghost" id="uninstallPreview">👁 Anteprima</button><button class="apply sm danger-btn" id="fullResetBtn">🧹 RIPRISTINA TUTTO + PULISCI DATI</button></div>
         <pre data-log="uninstall"></pre>
         <div class="row"><button class="ghost" id="uninstallInfoBtn">🔍 Trova disinstallatore</button><button class="ghost" id="uninstallLaunchBtn">❌ Disinstalla l'app</button></div>
         <pre data-log="uninstallApp"></pre>
       </div>
-      <div class="set-card">
-        <h3>© Crediti</h3>
-        <p class="mut">OVERCLOCK Desktop Engine v1.3 — creato da <b>REGA</b> © 2026, tutti i diritti riservati.</p>
-      </div>
-      <div class="set-card">
-        <h3>Provider cloud (opzionale)</h3>
-        <div class="row"><input id="openaiKey" type="password" placeholder="OpenAI API key (opzionale)"><input id="anthropicKey" type="password" placeholder="Anthropic API key (opzionale)"></div>
-        <p class="mut">Le chiavi restano in memoria locale, mai inviate altrove dalla demo.</p>
+      <div class="grid-2">
+        <div class="set-card">
+          <div class="card-head"><h3>© Crediti</h3><span class="badge">v1.4.0</span></div>
+          <p class="mut">OVERCLOCK Desktop Engine <b>v1.4.0 · FPS BEAST+</b> — creato da <b>REGA</b> © 2026. Interfaccia vetrata, avvio a frantumazione, NVIDIA MAX e ventole verificate.</p>
+        </div>
+        <div class="set-card">
+          <div class="card-head"><h3>Provider cloud (opzionale)</h3><span class="badge">opzionale</span></div>
+          <div class="row"><input id="openaiKey" type="password" placeholder="OpenAI API key"><input id="anthropicKey" type="password" placeholder="Anthropic API key"></div>
+          <p class="mut">Le chiavi restano in memoria locale, mai inviate altrove dalla demo.</p>
+        </div>
       </div>
     </section>
   </main>
 </div>
+
+<div class="app-version" id="appVersion">v1.4.0 · FPS BEAST+</div>
 <script src="renderer.js"></script>
 </body>
 </html>

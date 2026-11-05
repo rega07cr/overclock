@@ -8,7 +8,7 @@ function createWindow() {
   // v1.1: splash animata + finestra mostrata subito.
   win = new BrowserWindow({
     width: 1240, height: 800, minWidth: 1024, minHeight: 680,
-    title: 'OVERCLOCK DESKTOP ENGINE v1.3',
+    title: 'OVERCLOCK DESKTOP ENGINE v1.4',
     backgroundColor: '#07070f',
     autoHideMenuBar: true,
     show: true,
@@ -110,6 +110,19 @@ ipcMain.handle('fan:status', async () => require('./modules/fans').fanStatus());
 ipcMain.handle('fan:preview', async (_e, mode, pct) => require('./modules/fans').previewFans(mode, pct));
 ipcMain.handle('fan:set', async (_e, mode, pct) => require('./modules/fans').setFanMode(mode, pct));
 ipcMain.handle('fan:reset', async () => require('./modules/fans').resetFans());
+ipcMain.handle('fan:open-vendor', async () => require('./modules/fans').launchVendorApp());
+ipcMain.handle('nvidia:run', async (_e, action, arg) => {
+  const nv = require('./modules/nvidia');
+  const map = {
+    status: () => nv.status(),
+    guide: () => nv.guide(),
+    panel: () => nv.openPanel(),
+    apply: () => nv.applyMax(arg || {}),
+    reset: () => nv.restore()
+  };
+  if (!map[action]) throw new Error('unknown nvidia action');
+  return map[action]();
+});
 ipcMain.handle('hw:profile', async () => require('./modules/hardware').hardwareProfile());
 ipcMain.handle('game:estimate', async (_e, gameId) => {
   const h = require('./modules/hardware');

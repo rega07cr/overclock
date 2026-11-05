@@ -18,8 +18,12 @@ contextBridge.exposeInMainWorld('overclock', {
   fanPreview: (mode, pct) => ipcRenderer.invoke('fan:preview', mode, pct),
   fanSet: (mode, pct) => ipcRenderer.invoke('fan:set', mode, pct),
   fanReset: () => ipcRenderer.invoke('fan:reset'),
+  fanVendor: () => ipcRenderer.invoke('fan:open-vendor'),
+  nvidia: (action, arg) => ipcRenderer.invoke('nvidia:run', action, arg),
+  version: '1.4.0',
   hwProfile: () => ipcRenderer.invoke('hw:profile'),
   gameEstimate: (id) => ipcRenderer.invoke('game:estimate', id),
   tune: (action, arg) => ipcRenderer.invoke('tuning:run', action, arg),
+  appVersion: '1.4.0',
   platform: process.platform
 });

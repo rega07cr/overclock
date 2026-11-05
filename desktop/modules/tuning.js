@@ -119,13 +119,13 @@ async function gpuRestore(snapArg) {
   const log = [];
   for (const { path, name, prev, prevKind } of (snap && snap.regs) || []) {
     if (prev === null) {
-      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue; 'ok'`));
       log.push(`↩ ${name} rimosso (default)`);
     } else {
       // BUGFIX v1.1: prima il tipo registro veniva ignorato e il ripristino falliva
       // su String vs DWord. Ora riusa il tipo originale salvato.
       const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
-      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${prev} -Type ${type}; 'ok'`));
       log.push(`↩ ${name} → ${prev}`);
     }
   }
@@ -265,11 +265,11 @@ async function osRestore(snapArg) {
       const cur = await readReg(path, name);
       if (cur.prev === null) log.push(`↩ ${name} già assente`);
       else if (val !== undefined && String(cur.prev) !== String(val)) log.push(`↩ ${name} mantenuto (modificato dopo il buff)`);
-      else { await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`)); log.push(`↩ ${name} rimosso (default ripristinato)`); }
+      else { await sh(ps(`Remove-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue; 'ok'`)); log.push(`↩ ${name} rimosso (default ripristinato)`); }
     }
     else {
       const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
-      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${prev} -Type ${type}; 'ok'`));
       log.push(`↩ ${name} ripristinato`);
     }
   }
@@ -457,7 +457,7 @@ async function previewCpuMax() {
 async function previewFpsMax(arg) {
   const g = await previewGpuMax(arg);
   const c = await previewCpuMax();
-  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX v1.3 BEAST = GPU MAX + CPU MAX + extra (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n⚠️ ONESTO: nessun software al mondo moltiplica gli FPS ×100 — i colli veri sono GPU/CPU fisiche. Qui spremiamo TUTTO il spremibile via software: su un PC inchiodato dal sistema il salto si sente eccome (+20–45% tipico su CPU-bound), su una GPU già al 99% il margine è piccolo.\n\n🚀 EXTRA v1.3 oltre a GPU+CPU: trasparenza/animazioni OFF (la UI non ruba più frame) + RAM standby liberata subito.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX v1.4 = GPU MAX + CPU MAX + NVIDIA + extra (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n⚠️ ONESTO: nessun software al mondo moltiplica gli FPS ×100 — i colli veri sono GPU/CPU fisiche. Qui spremiamo TUTTO il spremibile via software: su un PC inchiodato dal sistema il salto si sente eccome (+20–45% tipico su CPU-bound), su una GPU già al 99% il margine è piccolo.\n\n🚀 EXTRA v1.4 oltre a GPU+CPU: NVIDIA MAX (power limit, clock, PowerMizer), fullscreen optimizations OFF sul processo del gioco, trasparenza/animazioni OFF (la UI non ruba più frame) + RAM standby liberata subito.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
 }
 async function cleanShaderCache(info, log) {
   // Pulizia cache shader: via gli stutter, i file si rigenerano al prossimo avvio gioco.
@@ -586,11 +586,11 @@ async function restoreRegs(key, fallbackMsg) {
   }
   for (const { path, name, prev, prevKind } of ((snap && snap.regs) || [])) {
     if (prev === null) {
-      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue; 'ok'`));
       log.push(`↩ ${name} rimosso (default)`);
     } else {
       const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
-      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${prev} -Type ${type}; 'ok'`));
       log.push(`↩ ${name} → ${prev}`);
     }
   }
@@ -615,6 +615,7 @@ async function listStartupBackup() {
 // ---------- 🚀 FPS MAX v1.3 BEAST: GPU MAX + CPU MAX + extra in un click (solo più FPS) ----------
 async function fpsMax(arg) {
   if (os.platform() !== 'win32') return { ok: false, out: 'FPS MAX supportato solo su Windows in questa versione.' };
+  const proc = arg && (arg.process || (typeof arg === 'string' ? arg : null));
   const g = await gpuMax(arg);
   const c = await cpuMax();
   // EXTRA v1.3: la UI di Windows non deve rubare frame — trasparenza + animazioni OFF (snapshot dedicato).
@@ -623,6 +624,27 @@ async function fpsMax(arg) {
   await snapWrite(ui, uiLog, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 0, 'DWord');
   await snapWrite(ui, uiLog, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 0, 'DWord');
   await snapWrite(ui, uiLog, 'HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '0', 'String');
+  // EXTRA v1.4: fullscreen optimizations OFF per il gioco + NVIDIA MAX (solo se c'è una GeForce).
+  if (proc) {
+    const exeFso = await resolveExePath(proc);
+    if (exeFso) {
+      const P = 'HKCU:\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers';
+      const FLAGS = '~ DISABLEDXMAXIMIZEDWINDOWEDMODE';
+      const prev = await readReg(P, exeFso);
+      ui.regs.push({ path: P, name: exeFso, prev: prev.prev, prevKind: prev.kind, val: FLAGS });
+      const r = await sh(ps(`if (-not (Test-Path '${P}')) { New-Item -Path '${P}' -Force | Out-Null }; New-ItemProperty -Path '${P}' -Name '${exeFso}' -Value '${FLAGS}' -PropertyType String -Force | Out-Null; 'ok'`));
+      uiLog.push(r.ok ? '✓ Fullscreen optimizations OFF per ' + exeFso.split('\\').pop() + ' (meno latenza e stutter)' : '✕ Fullscreen optimizations non applicate');
+    } else uiLog.push('ℹ Fullscreen optimizations saltate: avvia il gioco e ripremi FPS MAX.');
+  }
+  let nvLine = '';
+  try {
+    const nv = require('./nvidia');
+    const gi = await nv.read(true);
+    if (gi && gi.available) {
+      const r = await nv.applyMax({ lockClocks: false });
+      nvLine = r.ok ? '✓ NVIDIA MAX: power limit + persistence + PowerMizer spremuti (reset dedicato nella sezione NVIDIA)' : 'ℹ NVIDIA MAX: ' + String(r.out || '').split('\n')[0];
+    } else nvLine = 'ℹ NVIDIA MAX saltato: ' + (gi.reason || 'nvidia-smi non trovato');
+  } catch (e) { nvLine = 'ℹ NVIDIA MAX saltato: ' + e.message; }
   putSnap('fpsmax-ui', ui);
   // EXTRA v1.3: RAM standby liberata subito (sicuro: è solo cache, si ricrea da sola).
   let ramLine = '';
@@ -632,24 +654,26 @@ async function fpsMax(arg) {
   } catch (e) { ramLine = 'ℹ RAM flush saltata: ' + e.message; }
   const ok = g.ok && c.ok;
   try { require('./persist').markActive('fps-max'); } catch {}
-  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n⚠️ ONESTO: nessun software fa ×100 — qui hai il massimo spremibile via software.`, snap: { gpu: g.snap, cpu: c.snap } };
+  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n${uiLog.join('\n')}\n${nvLine}\n⚠️ ONESTO: nessun software fa ×100 — qui hai il massimo spremibile via software.`, snap: { gpu: g.snap, cpu: c.snap } };
 }
 async function fpsMaxRestore() {
   const g = await restoreRegs('gpumax', 'GPU: niente da ripristinare.');
   const c = await restoreRegs('cpumax', 'CPU: niente da ripristinare.');
   const u = await restoreRegs('fpsmax-ui', 'UI: niente da ripristinare.');
-  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}\n\n── UI ──\n${u.out}` };
+  let nv = { out: 'Nessuno snapshot NVIDIA (mai applicato).' };
+  try { nv = await require('./nvidia').restore(); } catch {}
+  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}\n\n── UI ──\n${u.out}\n\n── NVIDIA ──\n${nv.out}` };
 }
 async function gpuMaxRestore(snapArg) {
   const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpumax') || snapArg);
   const log = [];
   for (const { path, name, prev, prevKind } of (snap && snap.regs) || []) {
     if (prev === null) {
-      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name ${name} -ErrorAction SilentlyContinue; 'ok'`));
+      await sh(ps(`Remove-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue; 'ok'`));
       log.push(`↩ ${name} rimosso (default)`);
     } else {
       const type = ({String:'String',ExpandString:'ExpandString',DWord:'DWord',QWord:'QWord'})[prevKind] || (/^[0-9]+$/.test(prev || '') ? 'DWord' : 'String');
-      await sh(ps(`Set-ItemProperty -Path '${path}' -Name ${name} -Value ${prev} -Type ${type}; 'ok'`));
+      await sh(ps(`Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${prev} -Type ${type}; 'ok'`));
       log.push(`↩ ${name} → ${prev}`);
     }
   }
