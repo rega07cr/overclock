@@ -310,7 +310,9 @@ async function toggleStartup(name, enable) {
 async function snapWrite(snap, log, p, name, val, kind) {
   const prev = await readReg(p, name);
   snap.regs.push({ path: p, name, prev: prev.prev, prevKind: prev.kind, val });
-  const r = await sh(ps(`if (-not (Test-Path '${p}')) { New-Item -Path '${p}' -Force | Out-Null }; Set-ItemProperty -Path '${p}' -Name ${name} -Value ${val} -Type ${kind}; 'ok'`));
+  // v1.4.3: nome e valore tra apici — i nomi che sono percorsi (UserGpuPreferences)
+  // senza apici rompono il parser PowerShell e la scrittura falliva in silenzio.
+  const r = await sh(ps(`if (-not (Test-Path '${p}')) { New-Item -Path '${p}' -Force | Out-Null }; Set-ItemProperty -Path '${p}' -Name '${name}' -Value '${val}' -Type ${kind}; 'ok'`));
   const verify = await readReg(p, name);
   const ok = r.ok && verify.prev !== null && String(verify.prev) === String(val);
   log.push(`${ok ? '✓' : '✕'} ${name} → ${val}${ok ? '' : ' (verifica fallita)'}`);
@@ -623,11 +625,16 @@ async function fpsMax(arg) {
   // v1.4.1: oltre a NVIDIA MAX applichiamo il profilo 3D globale (NVAPI DRS).
   let profLine = '';
   try {
-    const pr = await require('./nvprofile').apply();
+    const pr = await require('./nvprofile').apply({ maxPerf: true });
     profLine = pr.ok
       ? `✓ Profilo 3D globale: ${pr.applied} impostazioni scritte nel driver${pr.failed ? ' (' + pr.failed + ' non supportate)' : ''}`
       : 'ℹ Profilo 3D: ' + String(pr.out || '').split('\n')[0];
   } catch (e) { profLine = 'ℹ Profilo 3D: ' + e.message; }
+  // v1.4.3: i due guadagni misurati/verificabili su un portatile.
+  let pwrLine = '';
+  try { pwrLine = (await powerOverlayBest()).out; } catch (e) { pwrLine = 'ℹ Modalità alimentazione: ' + e.message; }
+  let dgpuLine = '';
+  try { dgpuLine = (await dgpuPin(proc)).out; } catch (e) { dgpuLine = 'ℹ GPU dedicata: ' + e.message; }
   putSnap('fpsmax-ui', ui);
   // EXTRA v1.3: RAM standby liberata subito (sicuro: è solo cache, si ricrea da sola).
   let ramLine = '';
@@ -637,15 +644,68 @@ async function fpsMax(arg) {
   } catch (e) { ramLine = 'ℹ RAM flush saltata: ' + e.message; }
   const ok = g.ok && c.ok;
   try { require('./persist').markActive('fps-max'); } catch {}
-  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n${uiLog.join('\n')}\n${nvLine}\n${profLine}\n⚠️ ONESTO: nessuno regala FPS. Se misuri MENO FPS, premi “↩ Ripristina tutto”: clock e power limit alti su un PC con poco margine termico possono causare throttling.`, snap: { gpu: g.snap, cpu: c.snap } };
+  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n${uiLog.join('\n')}\n${nvLine}\n${profLine}\n${pwrLine}\n${dgpuLine}\n⚠️ ONESTO: nessuno regala FPS. Se misuri MENO FPS, premi “↩ Ripristina tutto”: clock e power limit alti su un PC con poco margine termico possono causare throttling.`, snap: { gpu: g.snap, cpu: c.snap } };
 }
+// ---------- v1.4.3: GPU dedicata per gioco (Optimus) + modalità alimentazione ----------
+// Sulle laptop Intel+NVIDIA il gioco può girare sulla GPU integrata: qui lo
+// assegniamo alla dedicata con l'impostazione ufficiale di Windows (per-app).
+// È il singolo intervento che sposta di più gli FPS su un portatile.
+async function dgpuPin(arg) {
+  if (os.platform() !== 'win32') return { ok: false, out: 'Solo Windows.' };
+  const proc = arg && (arg.process || (typeof arg === 'string' ? arg : null));
+  let exe = (arg && arg.exe) || null;
+  if (!exe && proc) exe = await resolveExePath(proc);
+  if (!exe) {
+    return { ok: false, out: `ℹ Preferenza GPU: avvia il gioco${proc ? ' (' + proc + ')' : ''} e ripremi il pulsante (Windows assegna la GPU per file .exe, serve il processo attivo).` };
+  }
+  const P = 'HKCU:\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences';
+  const prev = await readReg(P, exe);
+  const snap = { regs: [{ path: P, name: exe, prev: prev.prev, prevKind: prev.kind, val: 'GpuPreference=2;' }] };
+  const wrote = await snapWrite(snap, [], P, exe, 'GpuPreference=2;', 'String');
+  const after = await readReg(P, exe);
+  const ok = wrote && /GpuPreference=2/.test(String(after.prev || ''));
+  putSnap('dgpu', snap);
+  return {
+    ok,
+    out: ok
+      ? `🎯 ${exe.split(/[\\/]/).pop()} → GPU DEDICATA (alte prestazioni), verificato nel registro.\n   Effetto al prossimo avvio del gioco: se prima girava sulla Intel, il guadagno è grosso.`
+      : '✕ Preferenza GPU non confermata dal registro.'
+  };
+}
+async function dgpuRestore() { return restoreRegs('dgpu', 'Nessuna preferenza GPU da ripristinare.'); }
+
+const OVERLAY_BEST = 'ded574b5-45a0-4f42-8737-46345c09c238'; // Windows 11: "Prestazioni massime"
+async function powerOverlayBest() {
+  if (os.platform() !== 'win32') return { ok: false, out: 'Solo Windows.' };
+  const readOv = async () => {
+    const r = await sh(ps(`$k='HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes'; (Get-ItemProperty $k -ErrorAction SilentlyContinue).ActiveOverlayAcPowerScheme`));
+    return (r.out.split('\n')[0] || '').trim() || null;
+  };
+  const prev = await readOv();
+  const r = await sh(`powercfg /overlaysetactive ${OVERLAY_BEST}`);
+  const now = await readOv();
+  const ok = r.ok && (!now || now.toLowerCase() === OVERLAY_BEST);
+  putSnap('poweroverlay', { prev });
+  return { ok, out: ok ? '✓ Modalità alimentazione Windows → PRESTAZIONI MASSIME (verificata)' : 'ℹ Modalità alimentazione non modificabile su questo PC.' };
+}
+async function powerOverlayRestore() {
+  const s = getSnap('poweroverlay');
+  if (!s || !s.prev) return { ok: true, out: 'Modalità alimentazione: niente da ripristinare.' };
+  await sh(`powercfg /overlaysetactive ${s.prev}`);
+  putSnap('poweroverlay', null);
+  return { ok: true, out: '↩ Modalità alimentazione ripristinata' };
+}
+
 async function fpsMaxRestore() {
   const g = await restoreRegs('gpumax', 'GPU: niente da ripristinare.');
   const c = await restoreRegs('cpumax', 'CPU: niente da ripristinare.');
   const u = await restoreRegs('fpsmax-ui', 'UI: niente da ripristinare.');
+  const d = await restoreRegs('dgpu', 'GPU dedicata: niente da ripristinare.');
+  let ov = { out: 'Modalità alimentazione: niente da ripristinare.' };
+  try { ov = await powerOverlayRestore(); } catch {}
   let nv = { out: 'Nessuno snapshot NVIDIA (mai applicato).' };
   try { nv = await require('./nvidia').restore(); } catch {}
-  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}\n\n── UI ──\n${u.out}\n\n── NVIDIA ──\n${nv.out}` };
+  return { ok: true, out: `↩ FPS MAX ripristinato:\n\n── GPU ──\n${g.out}\n\n── CPU ──\n${c.out}\n\n── UI ──\n${u.out}\n\n── NVIDIA ──\n${nv.out}\n\n── GPU dedicata ──\n${d.out}\n${ov.out}` };
 }
 async function gpuMaxRestore(snapArg) {
   const snap = (snapArg && snapArg.regs) ? snapArg : (getSnap('gpumax') || snapArg);
@@ -663,4 +723,4 @@ async function gpuMaxRestore(snapArg) {
   return { ok: true, out: log.join('\n') || 'Niente da ripristinare (GPU MAX mai applicato).' };
 }
 
-module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, listStartupBackup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewFont, setLookOption, previewGpuMax, previewCpuMax, previewFpsMax, gpuMax, gpuMaxRestore, cpuMax, cpuMaxRestore, fpsMax, fpsMaxRestore, restoreSnapKey };
+module.exports = { gpuInfo, gpuBoost, gpuRestore, openVendorPanel, osOverclock, osRestore, listStartup, listStartupBackup, toggleStartup, previewGpu, previewOs, applyFontSmoothingLive, setFontMode, restoreAppearance, previewAppearance, previewFont, setLookOption, previewGpuMax, previewCpuMax, previewFpsMax, gpuMax, gpuMaxRestore, cpuMax, cpuMaxRestore, fpsMax, fpsMaxRestore, restoreSnapKey, dgpuPin, dgpuRestore, powerOverlayBest, powerOverlayRestore };

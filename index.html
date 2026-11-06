@@ -73,7 +73,7 @@
             <div class="mock-quick">VERIFICATO ✓ policy attiva · CPU 100% · clock lock</div>
           </div>
         </div>
-        <div class="mock-ver">v1.4.2 · SAFE</div>
+        <div class="mock-ver">v1.4.3 · SAFE</div>
       </div>
       <p class="mock-hint">🖱️ muovi il mouse — mockup 3D · <a href="desktop/renderer/index.html">apri la demo live →</a></p>
     </div>
@@ -199,7 +199,7 @@
     <article class="card">
       <div class="card-icon">🎨</div>
       <h3>GPU MAX</h3>
-      <p>GameDVR/capture OFF, Game Mode ON, <b>TdrDelay=8</b> anti-freeze, priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati. Dalla v1.4.2 <b>non</b> tocca più HAGS, MPO e cache shader: erano proprio loro a togliere FPS.</p>
+      <p>GameDVR/capture OFF, Game Mode ON, <b>TdrDelay=8</b> anti-freeze, priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati. Dalla v1.4.3 <b>non</b> tocca più HAGS, MPO e cache shader: erano proprio loro a togliere FPS.</p>
     </article>
     <article class="card">
       <div class="card-icon">🧠</div>
@@ -262,29 +262,29 @@
   <div class="dl-grid">
     <article class="dl-card" id="dl-win">
       <div class="dl-os">🪟 Windows <span>10 / 11 · x64 / ARM64</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.4.2-win-setup.exe" download>Direct Download Installer ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.3-win-setup.exe" download>Direct Download Installer ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.4.2-win-setup.exe" download>Overclock-Setup installer <span>⭐ avvio veloce</span></a></li>
-        <li><a href="releases/overclock-1.4.2-win-x64.exe" download>Overclock portable <span>no install</span></a></li>
-        <li><a href="releases/overclock-1.4.2-win-x64.msi" download>MSI <span>per flotte / GPO</span></a></li>
+        <li><a href="releases/overclock-1.4.3-win-setup.exe" download>Overclock-Setup installer <span>⭐ avvio veloce</span></a></li>
+        <li><a href="releases/overclock-1.4.3-win-x64.exe" download>Overclock portable <span>no install</span></a></li>
+        <li><a href="releases/overclock-1.4.3-win-x64.msi" download>MSI <span>per flotte / GPO</span></a></li>
       </ul>
       <div class="req">Requisiti: Windows 10 21H2+, 4 GB RAM, WebView2. NVIDIA MAX richiede il driver NVIDIA (nvidia-smi).</div>
     </article>
     <article class="dl-card" id="dl-mac">
       <div class="dl-os">🍎 macOS <span>M1/M2/M3/M4 + Intel</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.4.2-mac-universal.dmg" download>Direct Download .dmg ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.3-mac-universal.dmg" download>Direct Download .dmg ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.4.2-mac-universal.dmg" download>Overclock universal <span>Apple Silicon + Intel</span></a></li>
+        <li><a href="releases/overclock-1.4.3-mac-universal.dmg" download>Overclock universal <span>Apple Silicon + Intel</span></a></li>
       </ul>
       <div class="req">Requisiti: macOS 13+, Game Mode supportato su Apple Silicon.</div>
     </article>
     <article class="dl-card" id="dl-linux">
       <div class="dl-os">🐧 Linux <span>Ubuntu · Fedora · Arch</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.4.2-linux.AppImage" download>Direct Download .AppImage ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.3-linux.AppImage" download>Direct Download .AppImage ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.4.2-linux.AppImage" download>AppImage <span>portable</span></a></li>
-        <li><a href="releases/overclock-1.4.2-linux.deb" download>.deb <span>Debian/Ubuntu</span></a></li>
-        <li><a href="releases/overclock-1.4.2-linux.tar.gz" download>.tar.gz <span>qualsiasi distro</span></a></li>
+        <li><a href="releases/overclock-1.4.3-linux.AppImage" download>AppImage <span>portable</span></a></li>
+        <li><a href="releases/overclock-1.4.3-linux.deb" download>.deb <span>Debian/Ubuntu</span></a></li>
+        <li><a href="releases/overclock-1.4.3-linux.tar.gz" download>.tar.gz <span>qualsiasi distro</span></a></li>
       </ul>
       <div class="req">Requisiti: glibc 2.35+, gamemode opzionale. NVIDIA: nvidia-smi + nvidia-settings.</div>
     </article>
@@ -292,10 +292,10 @@
 
   <div class="changelog">
     <div class="ch-box">
-      <h3>Changelog — v1.4.2 <span class="tag">nuova</span> <small>· cosa cambia dalla v1.4.0</small></h3>
+      <h3>Changelog — v1.4.3 <span class="tag">nuova</span> <small>· cosa cambia dalla v1.4.0</small></h3>
       <p class="sec-sub inset">La patch che toglie i tweak che facevano perdere FPS e applica il profilo NVIDIA completo.</p>
       <ul>
-        <li>🛠 <b>v1.4.2 — Perché perdevi FPS, e cosa è cambiato.</b><br>
+        <li>🛠 <b>v1.4.3 — Perché perdevi FPS, e cosa è cambiato.</b><br>
           <i>Causa:</i> la v1.4 teneva la <b>CPU minima al 100%</b> (calore → throttling), forzava <b>MPO off e HAGS</b>, <b>cancellava la cache shader</b> (stutter finché non si rigenera), forzava le <b>fullscreen optimizations</b> e poteva alzare <b>power limit e clock</b> su schede laptop con poco margine termico. Su una MX450 è il calo esatto che hai visto.<br>
           <i>Ora:</i> CPU minima 5% con massimo 100%, niente MPO/HAGS/cache/fullscreen, clock lock solo se lo chiedi e mai sopra 78 °C, power limit non alzato sopra 80 °C, e le <b>ventole non tagliano più la CPU massima</b> (era rimasto il vecchio bug: 40% ventole = CPU al 70%).<br>
           <i>In più:</i> <b>profilo 3D globale NVIDIA applicato via NVAPI</b> (19 impostazioni lette e riscritte nel driver, con verifica e reset).<br>
@@ -342,7 +342,7 @@ Verifica (PowerShell): Get-FileHash .\Overclock* -Algorithm SHA256</pre>
     <h2>FAQ <span class="neon-pink">&amp;</span> Privacy</h2>
   </div>
   <div class="faq-grid">
-    <details open><summary>NVIDIA MAX cambia davvero gli FPS?</summary><p>Sì, e dalla v1.4.2 il profilo 3D globale viene <b>scritto davvero nel driver</b> via NVAPI (API ufficiale NVIDIA usata anche dal pannello): anti-aliasing su “controllo applicazione”, FXAA off, qualità texture “Qualità”, power management su “prestazioni massime preferite”, VSync su impostazione applicazione. Ogni valore viene riletto per verificare che sia applicato, e si annulla con ↩ Ripristina profilo. Restano fuori solo le voci che il driver non espone via API (GPU OpenGL, CUDA, ridimensionamento immagine, VR).</p></details>
+    <details open><summary>NVIDIA MAX cambia davvero gli FPS?</summary><p>Sì, e dalla v1.4.3 il profilo 3D globale viene <b>scritto davvero nel driver</b> via NVAPI (API ufficiale NVIDIA usata anche dal pannello): anti-aliasing su “controllo applicazione”, FXAA off, qualità texture “Qualità”, power management su “prestazioni massime preferite”, VSync su impostazione applicazione. Ogni valore viene riletto per verificare che sia applicato, e si annulla con ↩ Ripristina profilo. Restano fuori solo le voci che il driver non espone via API (GPU OpenGL, CUDA, ridimensionamento immagine, VR).</p></details>
     <details><summary>Perché le ventole non hanno una percentuale esatta?</summary><p>Windows non espone un'API standard per i giri: dipende dal chip di controllo della scheda madre. Overclock agisce su ciò che è universale (calore prodotto + policy di raffreddamento) e <b>verifica</b> i valori; per i giri esatti legge gli RPM da LibreHardwareMonitor/FanControl o apre l'app del produttore.</p></details>
     <details><summary>Funziona davvero 100% offline?</summary><p>Sì. Il modulo AI usa <b>Ollama</b> (<code>http://localhost:11434</code>) con Llama 3 / CodeLlama / Mistral. Nessun byte di codice lascia il PC in modalità offline.</p></details>
     <details><summary>Quali dati raccogliete?</summary><p>Nessuno. Niente telemetria, niente account. Le statistiche di sistema restano in locale e gli snapshot stanno in <code>~/.overclock</code>.</p></details>
@@ -353,7 +353,7 @@ Verifica (PowerShell): Get-FileHash .\Overclock* -Algorithm SHA256</pre>
 <footer class="footer">
   <div class="foot-inner">
     <div><b>⚡ OVERCLOCK</b> — One App, Total Power.<br><small>Creato da <b>REGA</b> · © 2026 REGA — Tutti i diritti riservati.</small></div>
-    <div class="foot-links"><a href="#top">Top ↑</a><a href="desktop/renderer/index.html">Demo app</a><a href="README.md">README</a><span class="foot-ver">v1.4.2</span></div>
+    <div class="foot-links"><a href="#top">Top ↑</a><a href="desktop/renderer/index.html">Demo app</a><a href="README.md">README</a><span class="foot-ver">v1.4.3</span></div>
   </div>
 </footer>
 

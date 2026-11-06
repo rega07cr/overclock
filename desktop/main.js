@@ -73,6 +73,10 @@ ipcMain.handle('tuning:run', async (_e, action, arg) => {
     'fps-max': () => tuning.fpsMax(arg),
     'fps-max-restore': () => tuning.fpsMaxRestore(),
     'fpsmax-preview': () => tuning.previewFpsMax(arg),
+    'dgpu-pin': () => tuning.dgpuPin(arg),
+    'dgpu-restore': () => tuning.dgpuRestore(),
+    'power-overlay': () => tuning.powerOverlayBest(),
+    'power-overlay-restore': () => tuning.powerOverlayRestore(),
     'startup-list': () => tuning.listStartup(),
     'startup-toggle': () => tuning.toggleStartup(arg.name, arg.enable),
     'is-admin': () => require('./modules/system-booster').isAdmin().then(v => ({ admin: v }))
@@ -120,7 +124,7 @@ ipcMain.handle('nvidia:run', async (_e, action, arg) => {
     apply: () => nv.applyMax(arg || {}),
     reset: () => nv.restore(),
     'profile-status': () => require('./modules/nvprofile').status(),
-    'profile-apply': () => require('./modules/nvprofile').apply(),
+    'profile-apply': () => require('./modules/nvprofile').apply(arg || {}),
     'profile-reset': () => require('./modules/nvprofile').reset(),
     checklist: () => require('./modules/nvprofile').checklist()
   };

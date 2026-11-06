@@ -317,7 +317,12 @@ async function status() {
   };
 }
 
-async function apply() {
+// maxPerf: la qualità texture passa da "Qualità" (0) a "Prestazioni elevate" (20).
+// Su schede piccole è l'unica voce della lista che sposta davvero gli FPS.
+async function apply(opts = {}) {
+  const maxPerf = !!opts.maxPerf;
+  const target = (s) => (maxPerf && s.key === 'quality') ? 20 : s.value;
+  const want = (s) => (maxPerf && s.key === 'quality') ? 'Prestazioni elevate (più FPS)' : s.want;
   if (os.platform() !== 'win32') return { ok: false, out: 'Profilo NVIDIA: solo Windows.' };
   const ids = await resolveIds();
   if (!ids.ok) return { ok: false, out: `⚠️ NVAPI non disponibile: ${ids.out}` };
@@ -331,7 +336,7 @@ async function apply() {
   const prevSnap = active.map(s => ({ key: s.key, name: s.name, id: ids.map[s.name], prev: before[ids.map[s.name]] }));
 
   // 2) scrittura
-  const setRes = await runCmd(active.map(s => `SET|${ids.map[s.name]}|${s.value}`));
+  const setRes = await runCmd(active.map(s => `SET|${ids.map[s.name]}|${target(s)}`));
   const setStatus = {};
   setRes.lines.forEach(l => { const p = l.split('|'); if (p[0] === 'SET') setStatus[p[1]] = parseInt(p[2], 10); });
   const saved = setRes.lines.find(l => l.startsWith('SAVE|'));
@@ -344,8 +349,8 @@ async function apply() {
   active.forEach(s => {
     const id = ids.map[s.name];
     const got = after[id];
-    const bad = setStatus[id] !== 0 || got === null || got === undefined || got !== s.value;
-    const row = `${bad ? '✕' : '✓'} ${s.human} → ${s.want}${bad ? (setStatus[id] !== 0 ? ` (driver: codice ${setStatus[id]})` : ` (riletto: ${fmtValue(s, got)})`) : ''}`;
+    const bad = setStatus[id] !== 0 || got === null || got === undefined || got !== target(s);
+    const row = `${bad ? '✕' : '✓'} ${s.human} → ${want(s)}${bad ? (setStatus[id] !== 0 ? ` (driver: codice ${setStatus[id]})` : ` (riletto: ${fmtValue(s, got)})`) : ''}`;
     (bad ? badRows : okRows).push(row);
   });
 

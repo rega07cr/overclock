@@ -317,6 +317,7 @@
     lookRun('fpsmax', () => window.overclock.tune('fps-max', { process: $('#fpsProc').value.trim() }), '🚀 Demo: FPS MAX simulato.');
   });
   $('#fpsMaxRestore').addEventListener('click', () => lookRun('fpsmax', () => window.overclock.tune('fps-max-restore', null), '↩ Demo: FPS MAX ripristinato.'));
+  const _dgpuBtn = $('#dgpuBtn'); if (_dgpuBtn) _dgpuBtn.addEventListener('click', () => lookRun('fpsmax', () => window.overclock.tune('dgpu-pin', { process: $('#fpsProc').value.trim() }), '🎯 Demo: gioco assegnato alla GPU dedicata.'));
   async function loadLook(){
     if (!isElectron) { const f = $('#fpsVendor'); if (f) f.textContent = 'demo browser'; return; }
     try {
@@ -498,7 +499,7 @@
   const _nvg = $('#nvGuideBtn'); if (_nvg) _nvg.addEventListener('click', () => nvRun('nvguide', () => window.overclock.nvidia('guide'), '📋 Demo: 5 valori del pannello NVIDIA — prestazioni massime, low latency, VSync off, filtro 16x, DLSS qualità.'));
   const _nvp = $('#nvPanelBtn'); if (_nvp) _nvp.addEventListener('click', () => nvRun('nvguide', () => window.overclock.nvidia('panel'), '🖥️ Demo: qui si aprirebbe il pannello NVIDIA.', 'Aprire il pannello di controllo NVIDIA?'));
   const _nvr = $('#nvResetBtn'); if (_nvr) _nvr.addEventListener('click', () => nvRun('nvreset', () => window.overclock.nvidia('reset'), '↩ Demo: NVIDIA riportata ai valori di fabbrica.', 'Rimettere la GPU ai valori di fabbrica (power limit, clock, PowerMizer)?'));
-  const _nvPa = $('#nvProfileBtn'); if (_nvPa) _nvPa.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('profile-apply'), '⚡ Demo: profilo 3D globale applicato (AA, FXAA, texture, power management, VSync).', 'Applicare il profilo FPS alle impostazioni 3D GLOBALI del pannello NVIDIA? Ogni valore viene riletto e si annulla con “↩ Ripristina profilo”.'));
+  const _nvPa = $('#nvProfileBtn'); if (_nvPa) _nvPa.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('profile-apply', { maxPerf: !$('#nvMaxPerf') || $('#nvMaxPerf').checked }), '⚡ Demo: profilo 3D globale applicato (AA, FXAA, texture, power management, VSync).', 'Applicare il profilo FPS alle impostazioni 3D GLOBALI del pannello NVIDIA? Ogni valore viene riletto e si annulla con “↩ Ripristina profilo”.'));
   const _nvPr = $('#nvProfileReset'); if (_nvPr) _nvPr.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('profile-reset'), '↩ Demo: profilo NVIDIA ripristinato ai valori di prima.'));
   $$('[data-goto]').forEach(b => b.addEventListener('click', () => {
     const v = b.dataset.goto;
@@ -512,7 +513,7 @@
     if (b.dataset.view === 'nvidia') window.overclock.nvidia('status').then(r => nvPaint(r && r.gpu)).catch(() => {});
   }));
   const _av = $('#appVersion');
-  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.2') + ' · SAFE';
+  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.3') + ' · SAFE';
 
   // ---------- Ollama badge ----------
   async function ollamaPing(){
