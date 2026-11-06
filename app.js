@@ -11,9 +11,10 @@
   const releasePage = GITHUB_REPO && !/TUO-NOME|USERNAME|ESEMPIO/i.test(GITHUB_REPO)
     ? 'https://github.com/' + GITHUB_REPO + '/releases/latest' : null;
   // Asset reali pubblicati dalla CI (nomi esatti della Release v1.4.3)
-  const ASSET = { win: 'Overclock.Setup.1.4.3.exe', mac: 'Overclock-1.4.3-arm64.dmg', linux: 'Overclock-1.4.3.AppImage' };
+  const ASSET = { win: 'Overclock.Setup.1.4.3.exe', mac: 'Overclock-1.4.3-arm64.dmg', linux: '' };
   if (releasePage) {
-    file = releasePage + '/download/' + ASSET[os]; // download diretto dell'installer giusto
+    // se l'asset non esiste (es. build Linux assente) si apre la pagina Releases
+    file = ASSET[os] ? releasePage + '/download/' + ASSET[os] : releasePage; // download diretto dell'installer giusto
     document.querySelectorAll('a[href^="releases/"]').forEach(a => { a.href = releasePage; a.removeAttribute('download'); });
   }
   const names = { win: 'Windows 🪟', mac: 'macOS 🍎', linux: 'Linux 🐧' };
