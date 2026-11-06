@@ -494,10 +494,12 @@
     else log.textContent = demoMsg;
   }
   const _nvs = $('#nvStatusBtn'); if (_nvs) _nvs.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('status'), '🎮 Demo: RTX 4060 · 61°C · ventola 42% · power limit 90/115 W · clock 2640 MHz.'));
-  const _nva = $('#nvApplyBtn'); if (_nva) _nva.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('apply', { lockClocks: true }), '🎮 Demo: power limit al massimo + clock bloccato + persistence + PowerMizer su massime prestazioni.', 'Spremere la GPU? Alzo il power limit al massimo e blocco il clock (serve admin). Tutto reversibile con "↩ Reset NVIDIA".'));
+  const _nva = $('#nvApplyBtn'); if (_nva) _nva.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('apply', {}), '🎮 Demo: power limit al massimo + clock bloccato + persistence + PowerMizer su massime prestazioni.', 'Spremere la GPU? Alzo il power limit al massimo e blocco il clock (serve admin). Tutto reversibile con "↩ Reset NVIDIA".'));
   const _nvg = $('#nvGuideBtn'); if (_nvg) _nvg.addEventListener('click', () => nvRun('nvguide', () => window.overclock.nvidia('guide'), '📋 Demo: 5 valori del pannello NVIDIA — prestazioni massime, low latency, VSync off, filtro 16x, DLSS qualità.'));
   const _nvp = $('#nvPanelBtn'); if (_nvp) _nvp.addEventListener('click', () => nvRun('nvguide', () => window.overclock.nvidia('panel'), '🖥️ Demo: qui si aprirebbe il pannello NVIDIA.', 'Aprire il pannello di controllo NVIDIA?'));
   const _nvr = $('#nvResetBtn'); if (_nvr) _nvr.addEventListener('click', () => nvRun('nvreset', () => window.overclock.nvidia('reset'), '↩ Demo: NVIDIA riportata ai valori di fabbrica.', 'Rimettere la GPU ai valori di fabbrica (power limit, clock, PowerMizer)?'));
+  const _nvPa = $('#nvProfileBtn'); if (_nvPa) _nvPa.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('profile-apply'), '⚡ Demo: profilo 3D globale applicato (AA, FXAA, texture, power management, VSync).', 'Applicare il profilo FPS alle impostazioni 3D GLOBALI del pannello NVIDIA? Ogni valore viene riletto e si annulla con “↩ Ripristina profilo”.'));
+  const _nvPr = $('#nvProfileReset'); if (_nvPr) _nvPr.addEventListener('click', () => nvRun('nvstatus', () => window.overclock.nvidia('profile-reset'), '↩ Demo: profilo NVIDIA ripristinato ai valori di prima.'));
   $$('[data-goto]').forEach(b => b.addEventListener('click', () => {
     const v = b.dataset.goto;
     $$('.side[data-view]').forEach(x => x.classList.toggle('active', x.dataset.view === v));
@@ -510,7 +512,7 @@
     if (b.dataset.view === 'nvidia') window.overclock.nvidia('status').then(r => nvPaint(r && r.gpu)).catch(() => {});
   }));
   const _av = $('#appVersion');
-  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.0') + ' · FPS BEAST+';
+  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.1') + ' · SAFE';
 
   // ---------- Ollama badge ----------
   async function ollamaPing(){

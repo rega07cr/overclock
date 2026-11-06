@@ -48,31 +48,33 @@ const GUID_MIN = '893dee8e-2bef-41e0-89c6-b55d0929964c';     // CPU minima %
 
 const MODES = {
   quiet: {
-    label: '🔇 Silenziosa', cooling: 0, cpuMin: 5, cpuMax: 70,
-    desc: 'meno calore: CPU max 70% + raffreddamento PASSIVO (prima rallenta, poi accende). Rumore minimo, qualche FPS in meno.'
+    label: '🔇 Silenziosa', cooling: 0, cpuMin: 5, cpuMax: 100,
+    desc: 'Windows preferisce rallentare prima di accelerare le ventole: più silenzio. La CPU resta libera di arrivare al 100%, quindi nessun tetto agli FPS.'
   },
   balanced: {
     label: '⚖️ Bilanciata', cooling: 1, cpuMin: 5, cpuMax: 100,
-    desc: 'il default Windows: CPU piena potenza, raffreddamento ATTIVO (ventole prima del throttling).'
+    desc: 'default Windows: raffreddamento ATTIVO (ventole prima del throttling), CPU libera al 100%.'
   },
   gaming: {
-    label: '🎮 Gaming', cooling: 1, cpuMin: 50, cpuMax: 100,
-    desc: 'CPU sempre sveglia (min 50%) + raffreddamento ATTIVO: più calore, ventole più presenti, zero throttling.'
+    label: '🎮 Gaming', cooling: 1, cpuMin: 30, cpuMax: 100,
+    desc: 'CPU più sveglia (min 30%) + raffreddamento ATTIVO: il BIOS gira le ventole prima di tagliare la frequenza. Nessun tetto agli FPS.'
   },
   max: {
-    label: '🌪️ Massima (più FPS)', cooling: 1, cpuMin: 100, cpuMax: 100,
-    desc: 'CPU sempre al 100% + raffreddamento ATTIVO: il massimo calore possibile → il BIOS manda le ventole al massimo. Più rumore, zero throttling.'
+    label: '🌪️ Massima (più rumore)', cooling: 1, cpuMin: 100, cpuMax: 100,
+    desc: 'CPU mai in risparmio: massimo calore → ventole al massimo. Su un PC con poco margine termico può costare FPS: se li perdi, torna a Bilanciata.'
   }
 };
 
-// % → stato reale. Non è un limite CPU: è "quanto calore produco".
+// % → stato reale. La % regola SOLO quanto calore produco (quanto la CPU resta
+// sveglia + policy di raffreddamento). Il massimo della CPU resta 100% SEMPRE:
+// prima la % tagliava il limite CPU (40% ventole = CPU al 40%) e toglieva FPS.
 function mapPct(pct) {
   const p = Math.max(10, Math.min(100, parseInt(pct, 10) || 70));
-  if (p < 30) return { pct: p, cooling: 0, cpuMin: 5, cpuMax: 55, label: 'Eco silenziosa' };
-  if (p < 50) return { pct: p, cooling: 0, cpuMin: 5, cpuMax: 70, label: 'Quasi silenziosa' };
-  if (p < 70) return { pct: p, cooling: 0, cpuMin: 10, cpuMax: 85, label: 'Bilanciata' };
+  if (p < 30) return { pct: p, cooling: 0, cpuMin: 5, cpuMax: 100, label: 'Eco silenziosa' };
+  if (p < 50) return { pct: p, cooling: 0, cpuMin: 10, cpuMax: 100, label: 'Quasi silenziosa' };
+  if (p < 70) return { pct: p, cooling: 1, cpuMin: 20, cpuMax: 100, label: 'Bilanciata' };
   if (p < 85) return { pct: p, cooling: 1, cpuMin: 30, cpuMax: 100, label: 'Sostenuta' };
-  return { pct: p, cooling: 1, cpuMin: 100, cpuMax: 100, label: 'Massima' };
+  return { pct: p, cooling: 1, cpuMin: 50, cpuMax: 100, label: 'Massima' };
 }
 
 // ---------- powercfg: piano attivo + valori reali ----------
@@ -268,7 +270,7 @@ async function previewFans(mode, pct) {
     out: `👁 ANTEPRIMA — Ventole → ${label} (non ho toccato nulla)\n\n` +
       `✅ COSA FARÀ (funziona su QUALSIASI PC Windows):\n` +
       `• Raffreddamento → ${m.cooling ? 'ATTIVO: Windows preferisce far girare le ventole invece di rallentare la CPU' : 'PASSIVO: Windows prima abbassa la potenza, poi accende le ventole (silenzioso)'}\n` +
-      `• CPU massima → ${m.cpuMax}%${custom ? ' (dedotto dal ' + m.pct + '% richiesto)' : ''}\n` +
+      `• CPU massima → 100% SEMPRE (i profili ventole non mettono un tetto agli FPS)\n` +
       `• CPU minima → ${m.cpuMin}% (quanto la CPU resta sveglia: più è alta, più calore = ventole più alte)\n` +
       `• Applicato sia a rete elettrica sia a batteria, poi VERIFICATO leggendo indietro i valori\n` +
       (custom ? `• Con ${m.pct}% provo anche ad aprire l'app del produttore se è installata (i giri esatti li gestisce lei)\n` : '') +
@@ -311,6 +313,7 @@ async function setFanMode(mode, pct) {
   } else if (custom) {
     log.push('\nℹ Per i giri esatti non c\'è un\'app di controllo ventole installata: FanControl (gratis) o l\'app del produttore.');
   }
+  if (m.cpuMax === 100) log.push('   ✓ CPU massima 100%: nessun taglio agli FPS (la % regola solo calore e ventole).');
   log.push('💾 Snapshot salvato: "↩ Reset automatico" rimette ESATTAMENTE i valori di prima.');
   try { markActive('fans:' + (custom ? m.pct + 'pct' : mode)); } catch {}
   return { ok: v.ok, out: log.join('\n'), verified: v.rows, state: v.now };

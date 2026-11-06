@@ -118,7 +118,11 @@ ipcMain.handle('nvidia:run', async (_e, action, arg) => {
     guide: () => nv.guide(),
     panel: () => nv.openPanel(),
     apply: () => nv.applyMax(arg || {}),
-    reset: () => nv.restore()
+    reset: () => nv.restore(),
+    'profile-status': () => require('./modules/nvprofile').status(),
+    'profile-apply': () => require('./modules/nvprofile').apply(),
+    'profile-reset': () => require('./modules/nvprofile').reset(),
+    checklist: () => require('./modules/nvprofile').checklist()
   };
   if (!map[action]) throw new Error('unknown nvidia action');
   return map[action]();

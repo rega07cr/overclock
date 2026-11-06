@@ -429,11 +429,10 @@ async function previewGpuMax(arg) {
   const proc = arg && (arg.process || arg);
   const hk = (txt) => admin ? `VERRÀ applicato (sei admin, serve riavvio) — ${txt}` : `SALTATO (serve avvio come amministratore) — ${txt}`;
   return { ok: true, preview: true, out:
-    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] v1.3 BEAST (non ho toccato nulla)\n\n✅ COSA FA (solo più FPS, niente freeze alle altre app):\n` +
-    `• GameDVR OFF + Game Mode ON + capture GameDVR off (HKCU, immediato): Windows smette di registrare in background\n` +
-    `• Cache shader pulita (${info.vendor === 'nvidia' ? 'NVIDIA GLCache+DxCache' : info.vendor === 'amd' ? 'AMD DxCache' : 'generica'} + DirectX D3DSCache + cache Steam): micro-stutter via, si rigenerano da sole\n` +
-    `• HAGS (HwSchMode=2, HKLM): ${hk('la GPU gestisce la memoria da sola = più FPS stabili')}\n` +
-    `• MPO off anti-stutter (OverlayTestMode=5, HKLM): ${hk('via gli scattini su 144Hz+/multi-monitor')}\n` +
+    `👁 ANTEPRIMA — GPU MAX [${info.vendor.toUpperCase()}] v1.4.1 SAFE (non ho toccato nulla)\n\n✅ COSA FA (tweak reversibili, niente che possa togliere FPS):\n` +
+    `• GameDVR OFF + Game Mode ON (HKCU, immediato): Windows smette di registrare in background\n` +
+    `• Cache shader: NON toccata (svuotarla fa stutter e meno FPS finché non si rigenera)\n` +
+    `• HAGS e MPO: NON toccati (su molti PC abbassano gli FPS: restano come li hai impostati tu)\n` +
     `• TdrDelay=8 (HKLM): ${hk('il driver non resetta più la GPU nei picchi di carico = niente freeze di 2 secondi')}\n` +
     `• Priorità GPU ai giochi via Multimedia Scheduler (HKLM): ${hk('Windows dà la GPU al gioco prima che a tutto il resto')}\n` +
     `• Power Throttling off (HKLM): ${hk('la GPU non viene più rallentata in background')}\n` +
@@ -457,7 +456,7 @@ async function previewCpuMax() {
 async function previewFpsMax(arg) {
   const g = await previewGpuMax(arg);
   const c = await previewCpuMax();
-  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX v1.4 = GPU MAX + CPU MAX + NVIDIA + extra (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n⚠️ ONESTO: nessun software al mondo moltiplica gli FPS ×100 — i colli veri sono GPU/CPU fisiche. Qui spremiamo TUTTO il spremibile via software: su un PC inchiodato dal sistema il salto si sente eccome (+20–45% tipico su CPU-bound), su una GPU già al 99% il margine è piccolo.\n\n🚀 EXTRA v1.4 oltre a GPU+CPU: NVIDIA MAX (power limit, clock, PowerMizer), fullscreen optimizations OFF sul processo del gioco, trasparenza/animazioni OFF (la UI non ruba più frame) + RAM standby liberata subito.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
+  return { ok: true, preview: true, out: `👁 ANTEPRIMA — 🚀 FPS MAX v1.4 = GPU MAX + CPU MAX + NVIDIA + extra (non ho toccato nulla)\n\nL\u2019unico obiettivo è alzare gli FPS. Le app in background restano intatte.\n⚠️ ONESTO: se il collo è la GPU al 99%, il margine software è quasi zero. Se invece il PC era frenato dal sistema (risparmi energetici, GameDVR, priorità), il guadagno si vede. Tutto è reversibile: se misuri meno FPS, “↩ Ripristina tutto”.\n\n🚀 EXTRA v1.4.1: NVIDIA MAX (power limit + PowerMizer, con controllo della temperatura), trasparenza/animazioni OFF, RAM standby liberata. NON tocchiamo più HAGS, MPO, cache shader e fullscreen optimizations: sono proprio le modifiche che più spesso fanno PERDERE FPS.\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}` };
 }
 async function cleanShaderCache(info, log) {
   // Pulizia cache shader: via gli stutter, i file si rigenerano al prossimo avvio gioco.
@@ -495,14 +494,9 @@ async function gpuMax(arg) {
   await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AllowAutoGameMode', 1, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AutoGameModeEnabled', 1, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_FSEBehaviorMode', 2, 'DWord');
-  await cleanShaderCache(info, log);
-  // Cache DirectX generica + shader Steam (sicure: si rigenerano da sole).
-  try {
-    const extra = await sh(ps(`$d=Join-Path $env:LOCALAPPDATA 'D3DSCache';` +
-      `$n=(Get-ChildItem $d -Recurse -Force -ErrorAction SilentlyContinue|Measure-Object).Count;` +
-      `Get-ChildItem $d -Recurse -Force -ErrorAction SilentlyContinue|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;'Cache DirectX: '+$n+' file rimossi'`));
-    if (extra.ok) log.push('✓ ' + extra.out.split('\n')[0]);
-  } catch {}
+  // v1.4.1: cache shader NON cancellata. Svuotarla fa perdere FPS e crea stutter
+  // finché gioco e driver non la rigenerano (a volte decine di minuti di gioco).
+  log.push('ℹ Cache shader lasciata intatta (cancellarla = stutter e meno FPS)');
   // Alimentazione GPU sempre al massimo via powercfg (immediato, ripristinato col piano energia).
   const pc1 = await sh('powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a9d5d5a6c061 ee12f906-d277-404b-b6da-e5fa1a576f3e 0');
   if (pc1.ok) log.push('✓ Risparmio energia PCI Express → OFF (GPU sempre alimentata)');
@@ -510,14 +504,14 @@ async function gpuMax(arg) {
   if (pc2.ok) log.push('✓ Sospensione selettiva USB → OFF (niente lag a mouse/tastiera/gamepad)');
   await sh('powercfg /setactive SCHEME_CURRENT');
   if (admin) {
-    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'HwSchMode', 2, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm', 'OverlayTestMode', 5, 'DWord');
+    // v1.4.1: HAGS (HwSchMode) e MPO (OverlayTestMode) NON vengono più forzati:
+    // su gran parte dei PC abbassano gli FPS o creano stutter nel fullscreen.
     await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'TdrDelay', 8, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'GPU Priority', 8, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Priority', 6, 'DWord');
     await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Scheduling Category', 'High', 'String');
-    log.push('🔄 MPO off + HAGS + TdrDelay + priorità GPU ai giochi + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
+    log.push('🔄 TdrDelay + priorità GPU ai giochi + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
   } else log.push('ℹ HKLM saltato (HAGS/MPO/TdrDelay/scheduler richiedono avvio come amministratore) — il resto è già attivo.');
   const exe = await resolveExePath(proc);
   if (exe) {
@@ -550,12 +544,14 @@ async function cpuMax() {
   log.push(`${p.ok ? '✓' : '✕'} Piano energia → massime prestazioni (niente più risparmi mentre giochi)`);
   // CPU sempre al 100%, raffreddamento attivo, core parking OFF, boost aggressivo (immediato).
   const SUB_CPU = '54533251-82be-4824-96c1-47b60b740d00';
+  // v1.4.1: la CPU minima resta BASSA. Forzarla al 100% (v1.4) teneva il processore
+  // sempre a piena frequenza: più calore → throttling → MENO FPS. Il massimo resta
+  // 100%: la CPU è libera di spingere quando il gioco la chiama.
   const tweaks = [
-    ['893dee8e-2bef-41e0-89c6-b55d0929964c', '100', 'CPU minima al 100% (mai in risparmio)'],
-    ['bc5038f7-23e0-4960-96da-33abaf5935ec', '100', 'CPU massima al 100% (tutta la potenza)'],
+    ['893dee8e-2bef-41e0-89c6-b55d0929964c', '5', 'CPU minima al 5% (sale da sola sotto carico)'],
+    ['bc5038f7-23e0-4960-96da-33abaf5935ec', '100', 'CPU massima al 100% (nessun tetto agli FPS)'],
     ['94d3a615-a899-4ac5-ae2b-e4d8f634367f', '1', 'Raffreddamento ATTIVO (prima le ventole, poi il rallentamento)'],
-    ['0cc5b647-c1df-4637-891a-dec35c318583', '100', 'Core parking OFF (tutti i core sempre svegli)'],
-    ['be337238-0d82-4146-a960-4f3749d470c7', '2', 'Boost processore AGGRESSIVO in gioco']
+    ['be337238-0d82-4146-a960-4f3749d470c7', '1', 'Boost processore attivo (spinta quando serve)']
   ];
   for (const [guid, val, label] of tweaks) {
     const r = await sh(`powercfg /setacvalueindex SCHEME_CURRENT ${SUB_CPU} ${guid} ${val}`);
@@ -624,18 +620,8 @@ async function fpsMax(arg) {
   await snapWrite(ui, uiLog, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize', 'EnableTransparency', 0, 'DWord');
   await snapWrite(ui, uiLog, 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'TaskbarAnimations', 0, 'DWord');
   await snapWrite(ui, uiLog, 'HKCU:\\Control Panel\\Desktop', 'MenuShowDelay', '0', 'String');
-  // EXTRA v1.4: fullscreen optimizations OFF per il gioco + NVIDIA MAX (solo se c'è una GeForce).
-  if (proc) {
-    const exeFso = await resolveExePath(proc);
-    if (exeFso) {
-      const P = 'HKCU:\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers';
-      const FLAGS = '~ DISABLEDXMAXIMIZEDWINDOWEDMODE';
-      const prev = await readReg(P, exeFso);
-      ui.regs.push({ path: P, name: exeFso, prev: prev.prev, prevKind: prev.kind, val: FLAGS });
-      const r = await sh(ps(`if (-not (Test-Path '${P}')) { New-Item -Path '${P}' -Force | Out-Null }; New-ItemProperty -Path '${P}' -Name '${exeFso}' -Value '${FLAGS}' -PropertyType String -Force | Out-Null; 'ok'`));
-      uiLog.push(r.ok ? '✓ Fullscreen optimizations OFF per ' + exeFso.split('\\').pop() + ' (meno latenza e stutter)' : '✕ Fullscreen optimizations non applicate');
-    } else uiLog.push('ℹ Fullscreen optimizations saltate: avvia il gioco e ripremi FPS MAX.');
-  }
+  // v1.4.1: fullscreen optimizations NON più forzate. DISABLEDXMAXIMIZEDWINDOWEDMODE
+  // toglie il flip model a molti giochi borderless: è una delle cause di calo FPS.
   let nvLine = '';
   try {
     const nv = require('./nvidia');
@@ -645,6 +631,14 @@ async function fpsMax(arg) {
       nvLine = r.ok ? '✓ NVIDIA MAX: power limit + persistence + PowerMizer spremuti (reset dedicato nella sezione NVIDIA)' : 'ℹ NVIDIA MAX: ' + String(r.out || '').split('\n')[0];
     } else nvLine = 'ℹ NVIDIA MAX saltato: ' + (gi.reason || 'nvidia-smi non trovato');
   } catch (e) { nvLine = 'ℹ NVIDIA MAX saltato: ' + e.message; }
+  // v1.4.1: oltre a NVIDIA MAX applichiamo il profilo 3D globale (NVAPI DRS).
+  let profLine = '';
+  try {
+    const pr = await require('./nvprofile').apply();
+    profLine = pr.ok
+      ? `✓ Profilo 3D globale: ${pr.applied} impostazioni scritte nel driver${pr.failed ? ' (' + pr.failed + ' non supportate)' : ''}`
+      : 'ℹ Profilo 3D: ' + String(pr.out || '').split('\n')[0];
+  } catch (e) { profLine = 'ℹ Profilo 3D: ' + e.message; }
   putSnap('fpsmax-ui', ui);
   // EXTRA v1.3: RAM standby liberata subito (sicuro: è solo cache, si ricrea da sola).
   let ramLine = '';
@@ -654,7 +648,7 @@ async function fpsMax(arg) {
   } catch (e) { ramLine = 'ℹ RAM flush saltata: ' + e.message; }
   const ok = g.ok && c.ok;
   try { require('./persist').markActive('fps-max'); } catch {}
-  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n${uiLog.join('\n')}\n${nvLine}\n⚠️ ONESTO: nessun software fa ×100 — qui hai il massimo spremibile via software.`, snap: { gpu: g.snap, cpu: c.snap } };
+  return { ok, out: `🚀 FPS MAX BEAST ${ok ? 'ATTIVO' : 'PARZIALE'} — unico obiettivo: più FPS (app in background intatte)\n\n────────── GPU ──────────\n${g.out}\n\n────────── CPU ──────────\n${c.out}\n\n────────── EXTRA ──────────\n✓ Trasparenza + animazioni + ritardo menu OFF (la UI non ruba più frame — “↩ Ripristina tutto” li rimette)\n${ramLine}\n${uiLog.join('\n')}\n${nvLine}\n${profLine}\n⚠️ ONESTO: nessuno regala FPS. Se misuri MENO FPS, premi “↩ Ripristina tutto”: clock e power limit alti su un PC con poco margine termico possono causare throttling.`, snap: { gpu: g.snap, cpu: c.snap } };
 }
 async function fpsMaxRestore() {
   const g = await restoreRegs('gpumax', 'GPU: niente da ripristinare.');

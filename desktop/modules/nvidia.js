@@ -162,7 +162,9 @@ async function applyMax(opts = {}) {
   log.push(`${pm.ok ? '✓' : '✕'} Persistence mode ON${pm.ok ? ' (meno stutter quando il gioco parte)' : ' (serve avvio come amministratore)'}`);
 
   // 2) power limit al massimo consentito (reale aumento di margine sulle GPU che lo permettono)
-  if (g.powerMaxW !== null && g.powerLimitW !== null && g.powerMaxW > g.powerLimitW + 0.5) {
+  if (g.tempC !== null && g.tempC >= 80) {
+    log.push(`ℹ Power limit NON alzato: GPU a ${g.tempC}°C — alzarlo ora aggiunge calore e quindi throttling (meno FPS).`);
+  } else if (g.powerMaxW !== null && g.powerLimitW !== null && g.powerMaxW > g.powerLimitW + 0.5) {
     const target = Math.floor(g.powerMaxW);
     const pl = await smi(`-pl ${target}`);
     log.push(pl.ok
@@ -173,8 +175,10 @@ async function applyMax(opts = {}) {
   }
 
   // 3) clock bloccato al massimo: niente cali di frequenza nei picchi
-  if (opts.lockClocks !== false && g.clockMaxMHz) {
-    if (g.tempC !== null && g.tempC >= 82) {
+  // v1.4.1: il blocco del clock è OPT-IN (solo se richiesto esplicitamente).
+  // Su laptop tipo MX450 tenere il clock fisso al massimo scalda e fa perdere FPS.
+  if (opts.lockClocks === true && g.clockMaxMHz) {
+    if (g.tempC !== null && g.tempC >= 78) {
       log.push(`ℹ Clock lock saltato: GPU a ${g.tempC}°C — raffreddala un attimo e riprova.`);
     } else {
       const lc = await smi(`-lgc ${Math.round(g.clockMaxMHz)}`);
@@ -260,19 +264,7 @@ async function guide() {
     : '⚠️ nvidia-smi non trovato: la guida vale comunque, ma non posso leggere i valori.';
   return {
     ok: true,
-    out: `${head}\n\n📋 PANNELLO NVIDIA — i 5 valori che spostano davvero gli FPS\n` +
-      `(pannello NVIDIA → Gestisci impostazioni 3D → Impostazioni programma → scegli il gioco)\n\n` +
-      `1) Modalità risparmio energia → "Prestazioni massime preferite"\n` +
-      `   → la GPU non scende di clock mentre giochi (il singolo tweak più efficace).\n` +
-      `2) Latenza a bassa latenza → "Ultra" (solo se il gioco non hai già 200+ FPS)\n` +
-      `   → meno input lag, non più FPS.\n` +
-      `3) Sincronizzazione verticale → OFF (o G-Sync/FreeSync ON se il monitor lo ha)\n` +
-      `4) Filtro anisotropico → 16x (costo quasi zero, texture più nitide lontano)\n` +
-      `5) Ridimensionamento / DLSS → "Qualità" o "Bilanciato" nei giochi pesanti\n` +
-      `   → +30/60% FPS dove è supportato, è la vera leva sulle GPU moderne.\n\n` +
-      `🚫 NON toccare: overclock manuale del core, voltage, "Modalità debug".\n` +
-      `↩ Per tornare indietro: nel pannello premi "Ripristina" in fondo alla pagina.\n` +
-      `💡 NVIDIA MAX qui sopra fa la parte automatizzabile (power limit, clock, PowerMizer): questi 5 punti li completi in 2 minuti.`
+    out: `${head}\n\n` + require('./nvprofile').checklist()
   };
 }
 

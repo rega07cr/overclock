@@ -73,7 +73,7 @@
             <div class="mock-quick">VERIFICATO ✓ policy attiva · CPU 100% · clock lock</div>
           </div>
         </div>
-        <div class="mock-ver">v1.4.0 · FPS BEAST+</div>
+        <div class="mock-ver">v1.4.1 · SAFE</div>
       </div>
       <p class="mock-hint">🖱️ muovi il mouse — mockup 3D · <a href="desktop/renderer/index.html">apri la demo live →</a></p>
     </div>
@@ -163,7 +163,7 @@
         <li><b>power limit</b> al massimo consentito dal driver;</li>
         <li><b>persistence mode</b> e <b>clock GPU</b> bloccato (niente cali);</li>
         <li><b>PowerMizer</b> forzato su massime prestazioni nel registro;</li>
-        <li><b>guida ai 5 valori del pannello NVIDIA</b> che spostano gli FPS + apertura del pannello;</li>
+        <li><b>profilo 3D globale applicato via NVAPI</b>: AA, FXAA, texture, power management, VSync (19 voci, verificate una per una) + guida e apertura pannello;</li>
         <li><b>↩ Reset NVIDIA</b> che rimette tutto come prima.</li>
       </ul>
       <div class="mini-code">nvidia-smi · PowerMizer · snapshot in ~/.overclock</div>
@@ -199,12 +199,12 @@
     <article class="card">
       <div class="card-icon">🎨</div>
       <h3>GPU MAX</h3>
-      <p>GameDVR/capture OFF, Game Mode ON, cache shader + DirectX + Steam pulite, HAGS, MPO off anti-stutter, <b>TdrDelay=8</b> anti-freeze, priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati.</p>
+      <p>GameDVR/capture OFF, Game Mode ON, <b>TdrDelay=8</b> anti-freeze, priorità GPU ai giochi, throttling off, PCIe/USB sempre alimentati. Dalla v1.4.1 <b>non</b> tocca più HAGS, MPO e cache shader: erano proprio loro a togliere FPS.</p>
     </article>
     <article class="card">
       <div class="card-icon">🧠</div>
       <h3>CPU MAX</h3>
-      <p>Piano <b>Ultimate Performance</b>, CPU 100%, core parking OFF, boost aggressivo, foreground boost, scheduler giochi. Le altre app restano aperte e fluide.</p>
+      <p>Piano <b>Ultimate Performance</b>, CPU massima 100% con minima al 5% (così non scalda da ferma), raffreddamento attivo, foreground boost, scheduler giochi. Le altre app restano aperte e fluide.</p>
     </article>
     <article class="card">
       <div class="card-icon">✅</div>
@@ -262,29 +262,29 @@
   <div class="dl-grid">
     <article class="dl-card" id="dl-win">
       <div class="dl-os">🪟 Windows <span>10 / 11 · x64 / ARM64</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.4.0-win-setup.exe" download>Direct Download Installer ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.1-win-setup.exe" download>Direct Download Installer ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.4.0-win-setup.exe" download>Overclock-Setup installer <span>⭐ avvio veloce</span></a></li>
-        <li><a href="releases/overclock-1.4.0-win-x64.exe" download>Overclock portable <span>no install</span></a></li>
-        <li><a href="releases/overclock-1.4.0-win-x64.msi" download>MSI <span>per flotte / GPO</span></a></li>
+        <li><a href="releases/overclock-1.4.1-win-setup.exe" download>Overclock-Setup installer <span>⭐ avvio veloce</span></a></li>
+        <li><a href="releases/overclock-1.4.1-win-x64.exe" download>Overclock portable <span>no install</span></a></li>
+        <li><a href="releases/overclock-1.4.1-win-x64.msi" download>MSI <span>per flotte / GPO</span></a></li>
       </ul>
       <div class="req">Requisiti: Windows 10 21H2+, 4 GB RAM, WebView2. NVIDIA MAX richiede il driver NVIDIA (nvidia-smi).</div>
     </article>
     <article class="dl-card" id="dl-mac">
       <div class="dl-os">🍎 macOS <span>M1/M2/M3/M4 + Intel</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.4.0-mac-universal.dmg" download>Direct Download .dmg ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.1-mac-universal.dmg" download>Direct Download .dmg ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.4.0-mac-universal.dmg" download>Overclock universal <span>Apple Silicon + Intel</span></a></li>
+        <li><a href="releases/overclock-1.4.1-mac-universal.dmg" download>Overclock universal <span>Apple Silicon + Intel</span></a></li>
       </ul>
       <div class="req">Requisiti: macOS 13+, Game Mode supportato su Apple Silicon.</div>
     </article>
     <article class="dl-card" id="dl-linux">
       <div class="dl-os">🐧 Linux <span>Ubuntu · Fedora · Arch</span></div>
-      <a class="btn-neon sm" href="releases/overclock-1.4.0-linux.AppImage" download>Direct Download .AppImage ⬇</a>
+      <a class="btn-neon sm" href="releases/overclock-1.4.1-linux.AppImage" download>Direct Download .AppImage ⬇</a>
       <ul class="dl-list">
-        <li><a href="releases/overclock-1.4.0-linux.AppImage" download>AppImage <span>portable</span></a></li>
-        <li><a href="releases/overclock-1.4.0-linux.deb" download>.deb <span>Debian/Ubuntu</span></a></li>
-        <li><a href="releases/overclock-1.4.0-linux.tar.gz" download>.tar.gz <span>qualsiasi distro</span></a></li>
+        <li><a href="releases/overclock-1.4.1-linux.AppImage" download>AppImage <span>portable</span></a></li>
+        <li><a href="releases/overclock-1.4.1-linux.deb" download>.deb <span>Debian/Ubuntu</span></a></li>
+        <li><a href="releases/overclock-1.4.1-linux.tar.gz" download>.tar.gz <span>qualsiasi distro</span></a></li>
       </ul>
       <div class="req">Requisiti: glibc 2.35+, gamemode opzionale. NVIDIA: nvidia-smi + nvidia-settings.</div>
     </article>
@@ -292,9 +292,14 @@
 
   <div class="changelog">
     <div class="ch-box">
-      <h3>Changelog — v1.4.0 <span class="tag">nuova</span> <small>· cosa cambia dalla v1.3</small></h3>
-      <p class="sec-sub inset">Le 4 novità, spiegate semplice: cosa fa / cosa non tocca / come si annulla.</p>
+      <h3>Changelog — v1.4.1 <span class="tag">nuova</span> <small>· cosa cambia dalla v1.4.0</small></h3>
+      <p class="sec-sub inset">La patch che toglie i tweak che facevano perdere FPS e applica il profilo NVIDIA completo.</p>
       <ul>
+        <li>🛠 <b>v1.4.1 — Perché perdevi FPS, e cosa è cambiato.</b><br>
+          <i>Causa:</i> la v1.4 teneva la <b>CPU minima al 100%</b> (calore → throttling), forzava <b>MPO off e HAGS</b>, <b>cancellava la cache shader</b> (stutter finché non si rigenera), forzava le <b>fullscreen optimizations</b> e poteva alzare <b>power limit e clock</b> su schede laptop con poco margine termico. Su una MX450 è il calo esatto che hai visto.<br>
+          <i>Ora:</i> CPU minima 5% con massimo 100%, niente MPO/HAGS/cache/fullscreen, clock lock solo se lo chiedi e mai sopra 78 °C, power limit non alzato sopra 80 °C, e le <b>ventole non tagliano più la CPU massima</b> (era rimasto il vecchio bug: 40% ventole = CPU al 70%).<br>
+          <i>In più:</i> <b>profilo 3D globale NVIDIA applicato via NVAPI</b> (19 impostazioni lette e riscritte nel driver, con verifica e reset).<br>
+          <i>Come si annulla:</i> ↩ Ripristina tutto + ↩ Ripristina profilo NVIDIA.</li>
         <li>🌀 <b>Ventole riscritte: ora funzionano e lo dimostrano.</b><br>
           <i>Cosa fa:</i> legge temperature ACPI, ventole dichiarate dal firmware e ventola GPU; applica policy + CPU min/max su <b>AC e DC</b> con il piano attivo; <b>rilegge i valori e li verifica</b> (se non tornano te lo dice). La % richiesta diventa una curva di calore sensata (sotto 50% silenziosa, sopra 85% spinge), non più un limite CPU. Se LibreHardwareMonitor/FanControl sono aperti, mostra gli <b>RPM reali</b>. Nuovo profilo <b>Gaming</b> e tasto per aprire l'app delle ventole.<br>
           <i>Cosa NON tocca:</i> curve custom esistenti, BIOS, app aperte. <i>Come si annulla:</i> ↩ Reset automatico rimette i <b>valori esatti</b> letti prima (AC e DC) e il piano energia originale.</li>
@@ -337,7 +342,7 @@ Verifica (PowerShell): Get-FileHash .\Overclock* -Algorithm SHA256</pre>
     <h2>FAQ <span class="neon-pink">&amp;</span> Privacy</h2>
   </div>
   <div class="faq-grid">
-    <details open><summary>NVIDIA MAX cambia davvero gli FPS?</summary><p>Sì, nella misura in cui il driver lo permette: power limit più alto e clock bloccato danno <b>frame più stabili</b> e meno cali nei picchi. Le impostazioni 3D del pannello NVIDIA (prestazioni massime, low latency, DLSS) non hanno un'API pubblica: per quelle c'è la guida + il pulsante che apre il pannello. È tutto reversibile con ↩ Reset NVIDIA.</p></details>
+    <details open><summary>NVIDIA MAX cambia davvero gli FPS?</summary><p>Sì, e dalla v1.4.1 il profilo 3D globale viene <b>scritto davvero nel driver</b> via NVAPI (API ufficiale NVIDIA usata anche dal pannello): anti-aliasing su “controllo applicazione”, FXAA off, qualità texture “Qualità”, power management su “prestazioni massime preferite”, VSync su impostazione applicazione. Ogni valore viene riletto per verificare che sia applicato, e si annulla con ↩ Ripristina profilo. Restano fuori solo le voci che il driver non espone via API (GPU OpenGL, CUDA, ridimensionamento immagine, VR).</p></details>
     <details><summary>Perché le ventole non hanno una percentuale esatta?</summary><p>Windows non espone un'API standard per i giri: dipende dal chip di controllo della scheda madre. Overclock agisce su ciò che è universale (calore prodotto + policy di raffreddamento) e <b>verifica</b> i valori; per i giri esatti legge gli RPM da LibreHardwareMonitor/FanControl o apre l'app del produttore.</p></details>
     <details><summary>Funziona davvero 100% offline?</summary><p>Sì. Il modulo AI usa <b>Ollama</b> (<code>http://localhost:11434</code>) con Llama 3 / CodeLlama / Mistral. Nessun byte di codice lascia il PC in modalità offline.</p></details>
     <details><summary>Quali dati raccogliete?</summary><p>Nessuno. Niente telemetria, niente account. Le statistiche di sistema restano in locale e gli snapshot stanno in <code>~/.overclock</code>.</p></details>
@@ -348,7 +353,7 @@ Verifica (PowerShell): Get-FileHash .\Overclock* -Algorithm SHA256</pre>
 <footer class="footer">
   <div class="foot-inner">
     <div><b>⚡ OVERCLOCK</b> — One App, Total Power.<br><small>Creato da <b>REGA</b> · © 2026 REGA — Tutti i diritti riservati.</small></div>
-    <div class="foot-links"><a href="#top">Top ↑</a><a href="desktop/renderer/index.html">Demo app</a><a href="README.md">README</a><span class="foot-ver">v1.4.0</span></div>
+    <div class="foot-links"><a href="#top">Top ↑</a><a href="desktop/renderer/index.html">Demo app</a><a href="README.md">README</a><span class="foot-ver">v1.4.1</span></div>
   </div>
 </footer>
 
