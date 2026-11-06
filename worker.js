@@ -3,7 +3,7 @@ export default {
     const url = new URL(request.url);
     // API salute per il deploy
     if (url.pathname === '/api/health') {
-      return Response.json({ ok: true, app: 'overclock', version: '1.4.1' });
+      return Response.json({ ok: true, app: 'overclock', version: '1.4.2' });
     }
     // Tutto il resto: asset statici (landing + desktop demo)
     return env.ASSETS.fetch(request);

@@ -512,7 +512,7 @@
     if (b.dataset.view === 'nvidia') window.overclock.nvidia('status').then(r => nvPaint(r && r.gpu)).catch(() => {});
   }));
   const _av = $('#appVersion');
-  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.1') + ' · SAFE';
+  if (_av) _av.textContent = 'v' + ((isElectron && window.overclock.version) || '1.4.2') + ' · SAFE';
 
   // ---------- Ollama badge ----------
   async function ollamaPing(){

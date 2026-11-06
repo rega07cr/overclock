@@ -486,14 +486,14 @@ async function gpuMax(arg) {
   const admin = await require('./system-booster').isAdmin();
   const snap = { vendor: info.vendor, regs: [] };
   const log = [`🎨 GPU MAX ATTIVO [${info.vendor.toUpperCase()}]${admin ? '' : ' (senza admin: solo tweak HKCU — riavvia come admin per il massimo)'}`];
-  // Parte immediata HKCU: GameDVR off (smette di registrare) + Game Mode on + FSE.
+  // Parte immediata HKCU: GameDVR off (smette di registrare) + Game Mode on.
   await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_Enabled', 0, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_AppCaptureEnabled', 0, 'DWord');
-  await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_HonorUserFSEBehaviorMode', 1, 'DWord');
+  // v1.4.2: forzare il fullscreen esclusivo (FSE) è rimosso: nei giochi borderless
+  // cambia il percorso di presentazione e toglie FPS invece di darne.
   await snapWrite(snap, log, 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\GameDVR', 'AppCaptureEnabled', 0, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AllowAutoGameMode', 1, 'DWord');
   await snapWrite(snap, log, 'HKCU:\\Software\\Microsoft\\GameBar', 'AutoGameModeEnabled', 1, 'DWord');
-  await snapWrite(snap, log, 'HKCU:\\System\\GameConfigStore', 'GameDVR_FSEBehaviorMode', 2, 'DWord');
   // v1.4.1: cache shader NON cancellata. Svuotarla fa perdere FPS e crea stutter
   // finché gioco e driver non la rigenerano (a volte decine di minuti di gioco).
   log.push('ℹ Cache shader lasciata intatta (cancellarla = stutter e meno FPS)');
@@ -503,16 +503,9 @@ async function gpuMax(arg) {
   const pc2 = await sh('powercfg /setacvalueindex SCHEME_CURRENT 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 d4e98f31-5ffe-4ce1-be31-1b38b384c009 0');
   if (pc2.ok) log.push('✓ Sospensione selettiva USB → OFF (niente lag a mouse/tastiera/gamepad)');
   await sh('powercfg /setactive SCHEME_CURRENT');
-  if (admin) {
-    // v1.4.1: HAGS (HwSchMode) e MPO (OverlayTestMode) NON vengono più forzati:
-    // su gran parte dei PC abbassano gli FPS o creano stutter nel fullscreen.
-    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers', 'TdrDelay', 8, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'GPU Priority', 8, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Priority', 6, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Scheduling Category', 'High', 'String');
-    log.push('🔄 TdrDelay + priorità GPU ai giochi + throttling off: RIAVVIA il PC per l\u2019effetto pieno.');
-  } else log.push('ℹ HKLM saltato (HAGS/MPO/TdrDelay/scheduler richiedono avvio come amministratore) — il resto è già attivo.');
+  // v1.4.2: nessuna scrittura HKLM. TdrDelay, priorità multimedia e power throttling
+  // restano quelli di Windows: non davano FPS misurabili e toccavano il sistema.
+  log.push('ℹ Solo HKCU: nessuna chiave HKLM toccata (non serve admin).');
   const exe = await resolveExePath(proc);
   if (exe) {
     await snapWrite(snap, log, 'HKCU:\\SOFTWARE\\Microsoft\\DirectX\\UserGpuPreferences', exe, 'GpuPreference=2;', 'String');
@@ -558,15 +551,11 @@ async function cpuMax() {
     if (r.ok) log.push(`✓ ${label}`);
   }
   await sh('powercfg /setactive SCHEME_CURRENT');
-  await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'ForegroundLockTimeout', 0, 'DWord');
-  await snapWrite(snap, log, 'HKCU:\\Control Panel\\Desktop', 'Win32PrioritySeparation', 38, 'DWord');
+  // v1.4.2: rimossi Win32PrioritySeparation e ForegroundLockTimeout: cambiavano lo
+  // scheduler di Windows (quantum corto) senza un guadagno misurabile.
   if (admin) {
-    await snapWrite(snap, log, 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling', 'PowerThrottlingOff', 1, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile', 'SystemResponsiveness', 10, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'GPU Priority', 8, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Priority', 6, 'DWord');
-    await snapWrite(snap, log, 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games', 'Scheduling Category', 'High', 'String');
-    log.push('🔄 Throttling off + scheduler giochi: RIAVVIA il PC per l\u2019effetto pieno.');
+    // v1.4.2: rimosse le scritture HKLM (power throttling, scheduler multimedia).
+    log.push('ℹ Piano energia e basta: nessun tweak HKLM in v1.4.2.');
   } else log.push('ℹ Scheduler giochi saltato (serve admin) — piano energia + foreground boost già attivi.');
   log.push('✅ App in background: intatte, nessun freeze. 💾 Resta dopo la chiusura dell\u2019app.');
   try { require('./persist').markActive('cpu-max'); } catch { global.__fpsBoost = true; }
